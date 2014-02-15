@@ -2,6 +2,11 @@
 
 THISFILE="$BASH_SOURCE"
 XDIR=`dirname $THISFILE`
+if [ -L ${THISFILE} ];
+then
+    target=`readlink $THISFILE`
+    XDIR=`dirname $target`
+fi
 
 if [ -z "$PATH" ];
 then
