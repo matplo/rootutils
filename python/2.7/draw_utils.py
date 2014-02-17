@@ -85,11 +85,13 @@ def split_gPad(split_ratio=0.5, orient=0):
     if orient == 0:
         savepad.Divide(1,2)
         tp1 = savepad.cd(1)
-        tp1.SetPad( 0.0, 1.0, 1. - split_ratio, 0.0)
+        #tp1.SetPad( 0.0, 1.0, 1. - split_ratio, 0.0)
+        tp1.SetPad( 0.0, 1.0, split_ratio, 0.0)        
         adjust_pad_margins()
         tp2 = savepad.cd(2)
-        tp2.SetPad(1.-split_ratio, 1.0, 1.0, 0.0)
+        tp2.SetPad(split_ratio, 1.0, 1.0, 0.0)
         adjust_pad_margins()
+        tp1.cd()        
     else:
         savepad.Divide(2,1)
         tp1 = savepad.cd(1)
@@ -99,6 +101,7 @@ def split_gPad(split_ratio=0.5, orient=0):
         tp2 = savepad.cd(2)
         tp2.SetPad(0.0, split_ratio, 1., 0)
         adjust_pad_margins()
+        tp1.cd()
     return savepad
 
 def draw_comment(comment = '', font_size=None, x1 = 0.0, y1 = 0.9, x2 = 0.99, y2 = 0.99):
