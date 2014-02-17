@@ -10,7 +10,7 @@ class ol:
         self.name = name
         self.l = []
         self.lopts = []
-        self.marker_size = 1.1
+        self.marker_size = 0.9#1.1
         self.good_colors  = [ -1,  2,  1,  9,  6,  8, 40, 43, 46, 49, 32, 39, 28, 38]
         self.good_markers = [ -1, 20, 24, 21, 25, 27, 28, 33, 34, 29, 30]
         self.good_lines   = [ -1,  1,  7,  3,  5,  8,  6,  2,  4,  9, 10]
