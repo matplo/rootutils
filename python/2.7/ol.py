@@ -453,7 +453,8 @@ class ol:
         self.legend.SetFillStyle(0)            
         #self.legend.SetTextSize(0.032)
         if tx_size==None:
-            tx_size=self.axis_title_size[0]
+            #tx_size=self.axis_title_size[0]
+            tx_size = 0.03
         self.legend.SetTextSize(tx_size)
         
         return self.legend
@@ -461,10 +462,18 @@ class ol:
     def update(self):
         ROOT.gPad.Update()        
 
-    def make_canvas(self, w=600, h=400):                
+    def make_canvas(self, w=600, h=400, 
+                    split=0, orientation=0, 
+                    name=None, title=None):                
         if self.tcanvas==None:
-            self.tcanvas = ROOT.TCanvas(self.name + '-canvas', self.name + '-canvas', w, h)
-        self.tcanvas.cd()
+            if name == None:
+                name = self.name + '-canvas'
+            if title == None:
+                title = self.name + '-canvas'
+            self.tcanvas = ROOT.TCanvas(name, title, w, h)
+            self.tcanvas.cd()
+            if split > 0:
+                du.split_gPad(split, orientation)
         return self.tcanvas
         
     def normalize_self(self, scale_by_binwidth = True, modTitle = False):
@@ -570,7 +579,8 @@ def show_file(fname='', logy=False, pattern=None, draw_opt='lpf', names_not_titl
     exs = ' '.join(sys.argv)
     exs = exs.replace(sys.argv[0], 'show_file:')
     fnsize = float(1.5/len(exs))
-    hl.draw_comment(exs, fnsize, 0, 0.9, 1., 1.)
+    du.draw_comment(exs, fnsize, 0, 0.9, 1., 1.) 
+    # ::draw_comment was ol method at some point
 
     hl.tcanvas.cd(2)
     #hl.draw_legend(1,fname+'[{0}]'.format(pattern))
