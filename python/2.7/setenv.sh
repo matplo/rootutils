@@ -39,7 +39,8 @@ fi
 
 function exec_carver()
 {
-    echo "[i] loading modules for carver"
+    #echo "[i] loading modules for carver"
+    export LOAD_MODULE_SYSTEM="carver"
     module unload pgi/12.9
     module load gcc
     module load cmake
@@ -49,8 +50,8 @@ function exec_carver()
 
 function exec_pdsf()
 {
-    echo "[i] loading modules for pdsf"
-
+    #echo "[i] loading modules for pdsf"
+    export LOAD_MODULE_SYSTEM="pdsf"
     #this is needed - relying that your account has the defaults
     . $HOME/.profile
     . $HOME/.bash_profile
@@ -65,18 +66,19 @@ function exec_pdsf()
 function exec_default()
 {
     # nothing
-    echo "[i] loading modules for default"
+    #echo "[i] loading modules for default"
+    export LOAD_MODULE_SYSTEM="default"
     module load root
 }
 
 function exec_darwin()
 {
     # nothing
-    echo "[i] loading modules for darwin"
+    #echo "[i] loading modules for darwin"
+    export LOAD_MODULE_SYSTEM="darwin"
     module load alice/root
 }
 
-date
 hostid=`uname -a`
 case $hostid in
     *.nersc*)
@@ -96,5 +98,3 @@ case $hostid in
         exec_default
         ;;
 esac
-
-module list 2>&1
