@@ -504,7 +504,7 @@ class ol:
         except:
             print >> sys.stderr,'[e] writing to file {0} failed'.format(fname)
         
-def load_file(fname='', pattern=None, names_not_titles=True):
+def load_file(fname='', pattern=None, names_not_titles=True, draw_opt='HIST'):
     if not fname:
         return None
 
@@ -535,11 +535,11 @@ def load_file(fname='', pattern=None, names_not_titles=True):
         if to_load:
             obj = key.ReadObj()
             if names_not_titles:
-                hl.addh(obj, obj.GetName())
+                hl.addh(obj, obj.GetName(), draw_opt)
                 hl.addgr(obj, obj.GetName())
                 hl.addf(obj, obj.GetName(), 'L')                
             else:
-                hl.addh(obj)
+                hl.addh(obj, draw_opt)
                 hl.addgr(obj)
                 hl.addf(obj, None, 'L')                
             #print '[i] add   :',key.GetName()

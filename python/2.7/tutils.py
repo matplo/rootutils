@@ -171,6 +171,7 @@ def get_object_from_file(hname = '', fname = '', new_title = ''):
     import ROOT
     if fname == None:
         return None
+    cobj = None
     f = ROOT.TFile(fname)
     if f:
         h = f.Get(hname)
