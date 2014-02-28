@@ -503,7 +503,37 @@ class ol:
             print '[i] written to file',fname
         except:
             print >> sys.stderr,'[e] writing to file {0} failed'.format(fname)
-        
+            
+def load_tlist(tlist, pattern=None, names_not_titles=True, draw_opt='HIST', hl = None):
+    listname = tlist.GetName()
+    if hl == None:
+        hl = ol(listname)
+    for obj in tlist:
+        to_load=False
+        if pattern:
+            if pattern in obj.GetName():
+                to_load=True
+            else:
+                to_load=False
+        else:
+            to_load=True
+
+        if to_load:
+            if names_not_titles:
+                newname = "{}:{}".format(tlist.GetName(), obj.GetName())
+                hl.addh (obj, newname, draw_opt)
+                hl.addgr(obj, newname)
+                hl.addf (obj, newname, 'L')                
+            else:
+                hl.addh(obj, draw_opt)
+                hl.addgr(obj)
+                hl.addf(obj, None, 'L')                
+            #print '[i] add   :',obj.GetName()
+        else:
+            #print '[i] ignore:',obj.GetName()
+            pass
+    return ol
+
 def load_file(fname='', pattern=None, names_not_titles=True, draw_opt='HIST'):
     if not fname:
         return None
@@ -523,6 +553,8 @@ def load_file(fname='', pattern=None, names_not_titles=True, draw_opt='HIST'):
 
     lkeys = fin.GetListOfKeys()
     for key in lkeys:
+        if key.GetClassName() == "TList":
+            load_tlist(key.ReadObj(), pattern, names_not_titles, draw_opt, hl)                
         to_load=False
         if pattern:
             if pattern in key.GetName():
