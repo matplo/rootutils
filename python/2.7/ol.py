@@ -1,6 +1,7 @@
 import ROOT
 import sys
 import draw_utils as du
+import tutils as tu
 
 gDebug = False
 
@@ -676,3 +677,37 @@ def yats(olin):
             h.SetBinContent(ib, yat)
             #oret.lopts[idx] = olin.lopts[idx] # not needed - within copy
     return oret
+
+def get_projectionY(hname, h2d, ixmin=0, ixmax=105):
+    ixminb = h2d.GetXaxis().FindBin(ixmin)
+    ixmaxb = h2d.GetXaxis().FindBin(ixmax)
+    hproj = h2d.ProjectionY(hname, ixminb, ixmaxb);
+    return hproj
+
+def filter_single_entries(hl, hlref, thr=10):
+    for ih in range(len(hl.l)):
+        h    = hl.l[ih]
+        href = hlref.l[ih]
+        for ib in range(h.GetNbinsX()+1):
+            if href.GetBinContent(ib) < thr:
+                h.SetBinContent(ib, 0)
+                h.SetBinError(ib, 0)
+
+def get_projections(hname, fname, htitle, pTmin, pTmax, step, opt='P L HIST', pTs=None):
+    h2d = tu.get_object_from_file(hname, fname, htitle + '2d')
+    if h2d == None:
+        print '[i] unable to get:',hname,'from:',fname
+        return
+    hlname = 'projections-{}-{}-{}-{}-{}-{}'.format(hname, fname, htitle, pTmin, pTmax, step)
+    hl = ol(hname+htitle)
+    pT = pTmin
+    while pT + step < pTmax:
+        if pTs != None:
+            pTs.append(pT)
+        hn     = '{}-py-{}-{}'.format(hname, pT, pT + step)
+        htitlepy = '{} [{}-{}]'.format(htitle, pT, pT + step)
+        hp = get_projectionY(hn, h2d, pT, pT + step)
+        hp.Sumw2()
+        hl.append(hp, htitlepy, 'P L HIST')
+        pT = pT + step
+    return hl
