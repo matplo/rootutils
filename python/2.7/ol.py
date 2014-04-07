@@ -2,7 +2,7 @@ import ROOT
 import sys
 import draw_utils as du
 import tutils as tu
-
+from array import array
 gDebug = False
 
 class ol:
@@ -716,3 +716,51 @@ def get_projections(hname, fname, htitle, pTmin, pTmax, step, opt='P L HIST', pT
         hl.append(hp, htitlepy, 'P L HIST')
         pT = pT + step
     return hl
+
+def make_graph_xy(name, x, y, xe = [], ye = []):
+    xf = []
+    yf = []
+    xef = []
+    yef = []
+    for v in x:
+        xf.append(float(v))
+    for v in y:
+        yf.append(float(v))                  
+    xa = array('f', xf)
+    ya = array('f', yf)
+    if len(xe) == 0:
+        for ix in x:
+            xef.append(0)
+    else:
+        for v in xe:
+            xef.append(float(v))
+    xae = array('f', xef)
+    if len(ye) == 0:
+        for iy in y:
+            yef.append(0)
+    else:
+        for v in ye:
+            yef.append(float(v))
+    yae = array('f', yef)
+    gr = ROOT.TGraphErrors(len(xf), xa, ya, xae, yae)
+    gr.SetName(name)
+    return gr
+        
+def make_graph(name, data):
+    x = []
+    y = []
+    xe = []
+    ye = []
+    for ix in data:
+        x.append(ix[0])
+        y.append(ix[1])
+        try:
+            xe.append(ix[2])
+        except:
+            pass
+        try:
+            ye.append(ix[3])
+        except:
+            pass
+        
+    return make_graph_xy(name, x, y, xe, ye)
