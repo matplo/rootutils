@@ -15,6 +15,7 @@ class ol:
         self.good_colors  = [ -1,  2,  1,  9,  6,  8, 40, 43, 46, 49, 32, 39, 28, 38]
         self.good_markers = [ -1, 20, 24, 21, 25, 27, 28, 33, 34, 29, 30]
         self.good_lines   = [ -1,  1,  7,  3,  5,  8,  6,  2,  4,  9, 10]
+        self.line_width   = 2
         self.maxy = 1e6 # was 1
         self.miny = -1e6 # was 0
         self.max_adjusted = False
@@ -386,6 +387,7 @@ class ol:
                 imark = self.next_line()
             o.SetLineStyle(imark)
             o.SetLineColor(1)
+            o.SetLineWidth(self.line_width)
             
     def markerize(self, force_marker=None):
         self.marker_idx = 0
@@ -438,7 +440,7 @@ class ol:
         
     def empty_legend(self, ncols, title='', x1=None, y1=None, x2=None, y2=None, tx_size=None):
         if x1==None:
-            x1 = 0.5
+            x1 = 0.3 # was 0.5
         if y1==None:
             y1 = 0.67
         if x2==None:
@@ -455,7 +457,7 @@ class ol:
         #self.legend.SetTextSize(0.032)
         if tx_size==None:
             #tx_size=self.axis_title_size[0]
-            tx_size = 0.03
+            tx_size = 0.045
         self.legend.SetTextSize(tx_size)
         
         return self.legend
