@@ -1,5 +1,6 @@
 import ROOT
 import tutils as tu
+import math
 
 def draw_line(x1, y1, x2, y2, col=2, style=7, width=2):
     l = ROOT.TLine(x1, y1, x2, y2)
@@ -122,3 +123,18 @@ def draw_comment(comment = '', font_size=None, x1 = 0.0, y1 = 0.9, x2 = 0.99, y2
     tx.Draw()
     tu.gList.append(tx)
     return tx
+
+def make_canvas_grid(n, tc = None, name = 'tmp_tc', title = 'tmp_tc'):
+    if tc == None:        
+        tc = ROOT.TCanvas(name, title)
+    nv = float(n)
+    ir = int(math.sqrt(nv))
+    ic = int(math.sqrt(nv))
+    while (ir * ic) < n:
+        ir = ir + 1
+        if (ir * ic) < n:        
+            ic = ic + 1
+    tc.Divide(ir, ic)    
+    return tc
+
+        

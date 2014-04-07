@@ -481,20 +481,23 @@ class ol:
         
     def normalize_self(self, scale_by_binwidth = True, modTitle = False):
         for h in self.l:
-            if h.GetSumw2() == None:
-                h.Sumw2()
-            intg = h.Integral(1, h.GetNbinsX())
-            bw   = h.GetBinWidth(1)
-            if intg > 0:
-                if scale_by_binwidth:
-                    h.Scale(1./intg/bw)
-                else:
-                    h.Scale(1./intg)
-                    if modTitle == True:
-                        ytitle = h.GetYaxis().GetTitle()
-                        ytitle += ' ({0})'.format(bw)
-                        h.GetYaxis().SetTitle(ytitle)
-
+            if h.InheritsFrom('TH1'):
+                if h.GetSumw2() == None:
+                    h.Sumw2()
+                intg = h.Integral(1, h.GetNbinsX())
+                bw   = h.GetBinWidth(1)
+                if intg > 0:
+                    if scale_by_binwidth:
+                        h.Scale(1./intg/bw)
+                    else:
+                        h.Scale(1./intg)
+                        if modTitle == True:
+                            ytitle = h.GetYaxis().GetTitle()
+                            ytitle += ' ({0})'.format(bw)
+                            h.GetYaxis().SetTitle(ytitle)
+            else:
+                print '[w] normalize not defined for non histogram...'
+                
     def write_to_file(self, fname, opt='RECREATE', name_mod=''):
         try:
             f = ROOT.TFile(fname, opt)
