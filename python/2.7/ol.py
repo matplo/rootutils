@@ -491,10 +491,10 @@ class ol:
                         h.Scale(1./intg/bw)
                     else:
                         h.Scale(1./intg)
-                        if modTitle == True:
-                            ytitle = h.GetYaxis().GetTitle()
-                            ytitle += ' ({0})'.format(bw)
-                            h.GetYaxis().SetTitle(ytitle)
+                    if modTitle == True:
+                        ytitle = h.GetYaxis().GetTitle()
+                        ytitle += ' ({0})'.format(bw)
+                        h.GetYaxis().SetTitle(ytitle)
             else:
                 print '[w] normalize not defined for non histogram...'
                 
