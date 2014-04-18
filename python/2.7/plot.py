@@ -195,7 +195,6 @@ class plot:
         
 def process_fig(intext):
     pl = plot(intext)
-    pl.draw()
     return pl
 
 def process_text(intext):
@@ -204,6 +203,7 @@ def process_text(intext):
     for l in intext:
         if '#endfig' in l:
             pl = process_fig(newfig)
+            plots.append(pl)
             newfig = []
         else:
             is_comment = False
@@ -212,7 +212,6 @@ def process_text(intext):
                     is_comment = True
             if is_comment == False:
                 newfig.append(l)
-    plots.append(pl)
     return plots
 
 def process_file(fname):
@@ -225,7 +224,10 @@ def process_file(fname):
 if __name__=="__main__":
     tutils.setup_basic_root()
     fin = sys.argv[1]
-    plots = process_file(fin)    
+    plots = process_file(fin)
+    for p in plots:
+        p.draw()
+        tutils.gList.append(p)
     tutils.wait()            
 
 #    except:
