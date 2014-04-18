@@ -35,6 +35,11 @@ def run():
     pattern = tutils.get_arg_with('--pattern')
         
     f = tutils.get_arg_with('-f')
+    if not f:
+        try:
+            f = sys.argv[1]
+        except:
+            f = None
     if f:
         l = ol.load_file(f, pattern)
         print "[i] File:",f
