@@ -14,11 +14,12 @@ def find_files(rootdir='.', pattern='*'):
             if fnmatch.fnmatch(filename, pattern)]
 
 def is_number(s):
+    ss = str(s)
     try:
-        float(s) # for int, long and float
+        float(ss) # for int, long and float
     except ValueError:
         try:
-            complex(s) # for complex
+            complex(ss) # for complex
         except ValueError:
             return False
     return True
