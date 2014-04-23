@@ -440,9 +440,9 @@ class ol:
         
     def empty_legend(self, ncols, title='', x1=None, y1=None, x2=None, y2=None, tx_size=None):
         if x1==None:
-            x1 = 0.3 # was 0.5
+            x1 = 0.2 # was 0.3 # was 0.5
         if y1==None:
-            y1 = 0.67
+            y1 = 0.6 #was 0.67
         if x2==None:
             x2 = 0.88
         if y2==None:
@@ -457,7 +457,7 @@ class ol:
         #self.legend.SetTextSize(0.032)
         if tx_size==None:
             #tx_size=self.axis_title_size[0]
-            tx_size = 0.045
+            tx_size = 0.035 #0.045
         self.legend.SetTextSize(tx_size)
         
         return self.legend
@@ -520,7 +520,13 @@ class ol:
             hlr = make_ratio(h, hdenom)
             hret.addh(hlr.last(), hlr.last().GetTitle(), 'HIST')
         return hret
-                        
+
+    def reset_titles(self, stitles):
+        for h in self.l:
+            i = self.l.index(h)
+            if i < len(stitles):
+                h.SetTitle(stitles[i])
+    
 def load_tlist(tlist, pattern=None, names_not_titles=True, draw_opt='HIST', hl = None):
     listname = tlist.GetName()
     if hl == None:
