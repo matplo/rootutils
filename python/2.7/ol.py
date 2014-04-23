@@ -509,7 +509,18 @@ class ol:
             print '[i] written to file',fname
         except:
             print >> sys.stderr,'[e] writing to file {0} failed'.format(fname)
-            
+
+    def ratio_to(self, ito = 0):
+        hdenom = self.l[ito]
+        hret = ol('{}-ratio-to-index-{}'.format(self.name, ito))
+        for i in range(len(self.l)):
+            if i == ito:
+                continue
+            h = self.l[i]
+            hlr = make_ratio(h, hdenom)
+            hret.addh(hlr.last(), hlr.last().GetTitle(), 'HIST')
+        return hret
+                        
 def load_tlist(tlist, pattern=None, names_not_titles=True, draw_opt='HIST', hl = None):
     listname = tlist.GetName()
     if hl == None:
@@ -683,12 +694,6 @@ def yats(olin):
             #oret.lopts[idx] = olin.lopts[idx] # not needed - within copy
     return oret
 
-def get_projectionY(hname, h2d, ixmin=0, ixmax=105):
-    ixminb = h2d.GetXaxis().FindBin(ixmin)
-    ixmaxb = h2d.GetXaxis().FindBin(ixmax)
-    hproj = h2d.ProjectionY(hname, ixminb, ixmaxb);
-    return hproj
-
 def filter_single_entries(hl, hlref, thr=10):
     for ih in range(len(hl.l)):
         h    = hl.l[ih]
@@ -698,24 +703,72 @@ def filter_single_entries(hl, hlref, thr=10):
                 h.SetBinContent(ib, 0)
                 h.SetBinError(ib, 0)
 
-def get_projections(hname, fname, htitle, pTmin, pTmax, step, opt='P L HIST', pTs=None):
+def get_projection_axis(hname, h2d, axis, ixmin=0, ixmax=105):
+    if axis == 1:
+        ixminb = h2d.GetXaxis().FindBin(ixmin)
+        ixmaxb = h2d.GetXaxis().FindBin(ixmax)
+        hproj = h2d.ProjectionY(hname, ixminb, ixmaxb)
+    else:
+        ixminb = h2d.GetYaxis().FindBin(ixmin)
+        ixmaxb = h2d.GetYaxis().FindBin(ixmax)
+        hproj = h2d.ProjectionX(hname, ixminb, ixmaxb)        
+    return hproj
+
+def get_projectionY(hname, h2d, ixmin=0, ixmax=105):
+    return get_projection_axis(hname, h2d, 1, ixmin=0, ixmax=105)
+
+def get_projections_axis_bins(hname, fname, htitle, opt, axis, pTs):
     h2d = tu.get_object_from_file(hname, fname, htitle + '2d')
     if h2d == None:
         print '[i] unable to get:',hname,'from:',fname
-        return
+        return None
+    pTmin = pTs[0][0]
+    pTmax = pTs[len(pTs)-1][1]
+    hlname = 'projections-{}-{}-{}-{}-{}'.format(hname, fname, htitle, pTmin, pTmax)
+    hl = ol(hname+htitle)
+    for i in range(len(pTs)):
+        pTmin = pTs[i][0]
+        pTmax = pTs[i][1]
+        htitlepy = '{} [{}-{}]'.format(htitle, pTmin, pTmax)
+        if axis == 1:
+            hn     = '{}-py-{}-{}'.format(hname, pTmin, pTmax)
+        else:
+            hn     = '{}-px-{}-{}'.format(hname, pTmin, pTmax)            
+        hp = get_projection_axis(hn, h2d, axis, pTmin, pTmax)            
+        hp.Sumw2()
+        hl.append(hp, htitlepy, 'P L HIST')
+    return hl
+
+def get_projections_axis(hname, fname, htitle, pTmin, pTmax, step, opt='P L HIST', axis = 1, pTs=None):
+    h2d = tu.get_object_from_file(hname, fname, htitle + '2d')
+    if h2d == None:
+        print '[i] unable to get:',hname,'from:',fname
+        return None
     hlname = 'projections-{}-{}-{}-{}-{}-{}'.format(hname, fname, htitle, pTmin, pTmax, step)
     hl = ol(hname+htitle)
     pT = pTmin
     while pT + step < pTmax:
         if pTs != None:
             pTs.append(pT)
-        hn     = '{}-py-{}-{}'.format(hname, pT, pT + step)
         htitlepy = '{} [{}-{}]'.format(htitle, pT, pT + step)
-        hp = get_projectionY(hn, h2d, pT, pT + step)
+        if axis == 1:
+            hn     = '{}-py-{}-{}'.format(hname, pT, pT + step)
+        else:
+            hn     = '{}-px-{}-{}'.format(hname, pT, pT + step)            
+        hp = get_projection_axis(hn, h2d, axis, pT, pT + step)            
         hp.Sumw2()
         hl.append(hp, htitlepy, 'P L HIST')
-        pT = pT + step
+        pT = pT + step            
     return hl
+
+def get_projections(hname, fname, htitle, pTmin, pTmax, step, opt='P L HIST', pTs=None):
+    return get_projections_axis(hname, fname, htitle, pTmin, pTmax, step, opt, 1, pTs)
+
+def get_projectionsY(hname, fname, htitle, pTmin, pTmax, step, opt='P L HIST', pTs=None):
+    return get_projections_axis(hname, fname, htitle, pTmin, pTmax, step, opt, 1, pTs)
+
+def get_projectionsX(hname, fname, htitle, pTmin, pTmax, step, opt='P L HIST', pTs=None):
+    return get_projections_axis(hname, fname, htitle, pTmin, pTmax, step, opt, 0, pTs)
 
 def make_graph_xy(name, x, y, xe = [], ye = []):
     xf = []
