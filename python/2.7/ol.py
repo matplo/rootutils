@@ -700,6 +700,20 @@ def yats(olin):
             #oret.lopts[idx] = olin.lopts[idx] # not needed - within copy
     return oret
 
+def rejs(olin):
+    oret = ol(olin.name + '_rej')
+    oret.copy(olin)
+    for h in oret.l:
+        h.Reset()
+        idx = oret.l.index(h)
+        hin = olin.l[idx]
+        for ib in range(1, hin.GetNbinsX()):
+            maxbin = hin.GetNbinsX()
+            yat    = hin.Integral(ib  , maxbin)
+            yatp1  = hin.Integral(1   , maxbin)
+            h.SetBinContent(ib, yat/yatp1)
+    return oret
+
 def filter_single_entries(hl, hlref, thr=10):
     for ih in range(len(hl.l)):
         h    = hl.l[ih]
