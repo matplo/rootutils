@@ -4,6 +4,9 @@ import shlex
 import signal
 import time
 import pyutils as ut
+import datetime
+import array
+import ROOT
 
 sub_p = None
 exit_signal = False
@@ -49,7 +52,6 @@ def wait():
         pass
 
 def setup_basic_root():
-    import ROOT
     ROOT.gROOT.Reset()
     ROOT.gStyle.SetScreenFactor(1)
 
@@ -100,7 +102,6 @@ def signal_handler(signum, frame):
         sys.exit(0)
 
 def draw_h1d_from_ntuple(fname, ntname, var, cuts, bwidth, xlow, xhigh, title=None):
-    import ROOT
     nbins = int((xhigh-xlow)/bwidth*1.)
     if nbins < 1:
         return None
@@ -135,7 +136,6 @@ def draw_h2d_from_ntuple(fname, ntname, var, cuts,
                          xbwidth, xlow, xhigh, 
                          ybwidth, ylow, yhigh,                          
                          title=None):
-    import ROOT
     xnbins = int((xhigh-xlow)/xbwidth*1.)
     if xnbins < 1:
         return None
@@ -168,7 +168,6 @@ def draw_h2d_from_ntuple(fname, ntname, var, cuts,
     return hret
 
 def get_object_from_file(hname = '', fname = '', new_title = ''):
-    import ROOT
     if fname == None:
         return None
     cobj = None
@@ -183,3 +182,137 @@ def get_object_from_file(hname = '', fname = '', new_title = ''):
                 cobj.SetTitle(new_title)
         f.Close()
     return cobj
+
+def next_weekday(d, weekday):
+    # note: next is ok if this is the same day
+    days_ahead = weekday - d.weekday()
+    if days_ahead < 0: # Target day already happened this week
+        days_ahead += 7
+    return d + datetime.timedelta(days_ahead)
+
+def prev_weekday(d, weekday):
+    # note: prev is ok if this is the same day
+    days_ahead = weekday - d.weekday()
+    return d + datetime.timedelta(days_ahead)
+
+#d = datetime.date(2011, 7, 2)
+#next_monday = next_weekday(d, 0) # 0 = Monday, 1=Tuesday, 2=Wednesday...
+#print(next_monday)
+
+class DateHistogramRoot(object):
+    def __init__(self, name, title):
+        self.name     = name
+        self.title    = title
+        self.dates    = []
+        self.datenums = []
+        self.ticks    = []
+        self.labels   = []
+        self.values   = []
+        self.cumuls   = []
+
+        self.histogram = None
+        self.hcumulant = None        
+        
+    def date2num(self, d):
+        dt =  ROOT.TDatime(d.year, d.month, d.day, 0, 0, 0)
+        try:
+            dt = ROOT.TDatime(d.year, d.month, d.day,
+                            d.hour, d.minute, d.second)
+        except:
+            pass
+        return dt.Convert()
+    
+    def fill(self, date, val):
+        idx = None
+        try:
+            idx = self.dates.index(date)
+            self.values[idx] += val
+        except:
+            self.values.append(val)
+            self.dates.append(date)            
+            self.datenums.append(self.date2num(date))            
+
+    def cumulate(self):
+        c = 0
+        self.cumuls = []
+        for v in self.values:
+            c += v
+            self.cumuls.append(c)
+            
+    def makeGraph(self, cumulant = False):
+        npoints = len(self.values)
+        x = array.array('f', self.datenums)
+        if cumulant == False:
+            y = array.array('f', self.values)
+        else:
+            self.cumulate()
+            y = array.array('f', self.cumuls)            
+            
+        gr = ROOT.TGraph(npoints, x, y)
+        gr.SetMarkerStyle(20)
+        
+        gr.GetXaxis().SetTimeDisplay(1)
+        gr.GetXaxis().SetNdivisions(-503)
+        #gr.GetXaxis().SetTimeFormat("%Y-%m-%d %H:%M")
+        gr.GetXaxis().SetTimeFormat("%Y-%m-%d")
+        gr.GetXaxis().SetTimeOffset(0,"gmt")
+        
+        #gr.GetYaxis().SetTitle(what)
+        gr_name = 'gr-{0}-cumul:{1}'.format(self.name, str(cumulant))
+        gr.SetName(gr_name)
+        gr_title = '{0} cumul:{1}'.format(self.title, str(cumulant))
+        gr.SetTitle(gr_title)
+        return gr
+
+    def _fix_h(self, h):
+        if h == None:
+            return
+        #h.GetXaxis().SetLabelSize(0.06);
+        h.GetXaxis().SetTimeDisplay(1);
+        h.GetXaxis().SetTimeFormat("%Y-%m-%d")
+        h.GetXaxis().SetTimeOffset(0,"gmt")
+        #h->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2000-02-28 13:00:01");
+        
+    
+    def get_histogram(self, cumulant = False, binned = 1):
+        #npoints = len(self.values)
+        #xmin    = self.values[0]
+        #xmax    = self.values[len(self.values)-1]
+        
+        d1           = self.dates[0] + datetime.timedelta(days=-7)
+        firstMonday  = prev_weekday(d1, 0) # 0 is Monday
+        xmin         = self.date2num(firstMonday)
+        d2           = self.dates[len(self.dates)-1]
+        lastSunday   = next_weekday(d2, 6) # 6 is Sunday
+        xmax         = self.date2num(lastSunday)
+        interval     = self.date2num(firstMonday + datetime.timedelta(binned)) - self.date2num(firstMonday)
+        npoints      = (xmax - xmin) / interval # daily/weekly? n-days
+        #print npoints
+
+        if self.histogram == None:
+            hname = 'h_{}'.format(self.name)
+            htitle = 'h_{}'.format(self.title)
+            self.histogram = ROOT.TH1F(hname, htitle, npoints, xmin, xmax)
+            self.histogram.SetDirectory(0)
+            for x in self.datenums:
+                i = self.datenums.index(x)
+                v = self.values[i]
+                self.histogram.Fill(x, v)
+
+        if cumulant == True:
+            hname = 'hcumul_{}'.format(self.name)
+            htitle = 'hcumul_{}'.format(self.title)
+            self.hcumulant = ROOT.TH1F(hname, htitle, npoints, xmin, xmax)
+            self.hcumulant.SetDirectory(0)
+            for ib in range(1, npoints+1):
+                newval = htmp.Integral(1, ib)
+                hcumulant.SetBinContent(ib, newval)
+                hcumulant.SetBinError(ib, ROOT.TMath.Sqrt(newval))
+
+        self._fix_h(self.hcumulant)
+        self._fix_h(self.histogram)
+        
+        if cumulant == True:
+            return self.hcumulant
+
+        return self.histogram
