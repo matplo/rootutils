@@ -30,6 +30,8 @@ class ol:
             return self.l[i]
         else:
             return None
+    def __len__(self):
+        return len(self.l)
         
     def copy_list(self, l=[]):
         for h in l:
@@ -74,12 +76,16 @@ class ol:
     def find_miny(self, low=None):
         miny = 1e12
         for h in self.l:
-            if not h.InheritsFrom('TH1'):
-                continue
-            for nb in range(1, h.GetNbinsX()):
-                c = h.GetBinContent(nb)
-                if c!=0 and c <= miny:
-                    miny = c
+            if h.InheritsFrom('TH1'):
+                for nb in range(1, h.GetNbinsX()):
+                    c = h.GetBinContent(nb)
+                    if c!=0 and c <= miny:
+                        miny = c 
+            if h.InheritsFrom('TGraph'):
+                for idx in range(h.GetN()):
+                    v = h.GetY()[idx]
+                    if v < miny:
+                        miny = v                                               
         if low!=None:
             if miny < low:
                 miny == low
@@ -88,12 +94,16 @@ class ol:
     def find_maxy(self):
         maxy = -1e12
         for h in self.l:
-            if not h.InheritsFrom('TH1'):
-                continue
-            for nb in range(1, h.GetNbinsX()):
-                c = h.GetBinContent(nb)
-                if c!=0 and c > maxy:
-                    maxy = c
+            if h.InheritsFrom('TH1'):
+                for nb in range(1, h.GetNbinsX()):
+                    c = h.GetBinContent(nb)
+                    if c!=0 and c > maxy:
+                        maxy = c                
+            if h.InheritsFrom('TGraph'):
+                for idx in range(h.GetN()):
+                    v = h.GetY()[idx]
+                    if v > maxy:
+                        maxy = v                        
         return maxy
     
     def adjust_maxima(self, miny=None, maxy=None, logy=False):
@@ -308,15 +318,15 @@ class ol:
             tt = t.split(' ')[0]
             if len(tt) <= 0:
                 continue
-            if tt[0]==what:
+            if what in tt[0]:
                 try:
                     nt = tt[1:]
                     val = int(nt)
                 except:
                     pass
         self.debug('::get_style_from_opt on {} returning {}'.format(what, val))
-        return val
-
+        return int(val)
+    
     def all_options(self):
         ret = []
         for h in self.l:
