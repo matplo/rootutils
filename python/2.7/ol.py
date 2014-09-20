@@ -447,7 +447,11 @@ class ol:
             self.legend.AddEntry(o, o.GetTitle(), opt)
         self.legend.Draw()
         self.update()
-        
+
+    def draw_legend(self, ncols = 1, title='', x1=None, y1=None, x2=None, y2=None, tx_size=None):
+        print '[w] obsolete call to draw_legend use self_legend instead...'
+        self.self_legend(ncols, title, x1, y1, x2, y2, tx_size)
+                    
     def empty_legend(self, ncols, title='', x1=None, y1=None, x2=None, y2=None, tx_size=None):
         if x1==None:
             x1 = 0.2 # was 0.3 # was 0.5
