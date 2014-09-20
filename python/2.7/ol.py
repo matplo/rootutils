@@ -473,7 +473,8 @@ class ol:
         return self.legend
 
     def update(self):
-        ROOT.gPad.Update()        
+        if ROOT.gPad:
+            ROOT.gPad.Update()        
 
     def make_canvas(self, w=600, h=400, 
                     split=0, orientation=0, 
