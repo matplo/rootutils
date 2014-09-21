@@ -372,12 +372,15 @@ class ol:
                 h.SetFillColor(kolor)
                 h.SetLineColor(kolor)
                 h.SetMarkerColor(kolor)                                
-            
+
+            optd = opt
             if drawn == True:
-                opt = opt + ' same'
+                optd = opt + ' same'
             else:
-                drawn = True                
-            h.Draw(opt)                
+                drawn = True
+                if h.InheritsFrom('TGraph'):
+                    optd = opt + 'a'
+            h.Draw(optd)                
         self.adjust_pad_margins()            
         self.update()
         
