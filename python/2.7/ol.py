@@ -20,11 +20,13 @@ class ol:
         self.miny = -1e6 # was 0
         self.max_adjusted = False
         self.axis_title_offset = [1.4, 1.4, 1.4]
-        self.axis_title_size   = [0.06, 0.06, 0.06]
-        self.axis_label_size   = [0.06, 0.06, 0.06]
+        self.axis_title_size   = [0.05, 0.05, 0.05]
+        self.axis_label_size   = [0.05, 0.05, 0.05]
         self.pattern = None
         self.tcanvas = None
-
+        self.minx = None
+        self.maxx = None
+        
     def __getitem__(self, i):
         if i < len(self.l) and i >= 0:
             return self.l[i]
@@ -246,7 +248,17 @@ class ol:
                 if o.InheritsFrom('TH1'):
                     ax = o.GetZaxis()
             if ax:
-                ax.SetRange(ax.FindBin(xmin), ax.FindBin(xmax))
+                ibmin = ax.FindBin(xmin)
+                ibmax = ax.FindBin(xmax)
+                try:
+                    #print 'ibmin, ibmax, nbins:',ibmin, ibmax, o.GetNbinsX()
+                    if ibmax > o.GetNbinsX():
+                        ibmax = o.GetNbinsX()
+                        #print 'reset axis max to:',ibmax
+                except:
+                    #print ibmin, ibmax
+                    pass
+                ax.SetRange(ibmin, ibmax)
                 
     def scale_errors(self, val = 1.):
         for o in self.l:
@@ -367,6 +379,9 @@ class ol:
             fstyle = self.get_style_from_opt(opt.lower(), 'f')
             if fstyle > 0:
                 h.SetFillStyle(fstyle)
+            else:
+                h.SetFillStyle(0000)                
+                h.SetFillColor(0)
             kolor = self.get_style_from_opt(opt.lower(), 'k')
             if kolor > 0:
                 h.SetFillColor(kolor)
@@ -380,6 +395,8 @@ class ol:
                 drawn = True
                 if h.InheritsFrom('TGraph'):
                     optd = opt + 'a'
+                self.minx = h.GetXaxis().GetXmin()
+                self.maxx = h.GetXaxis().GetXmax()
             h.Draw(optd)                
         self.adjust_pad_margins()            
         self.update()
@@ -544,6 +561,9 @@ class ol:
             i = self.l.index(h)
             if i < len(stitles):
                 h.SetTitle(stitles[i])
+
+    def draw_comment(self, comment = '', font_size=None, x1 = 0.0, y1 = 0.9, x2 = 0.99, y2 = 0.99):
+        du.draw_comment(comment, font_size, x1, y1, x2, y2)
     
 def load_tlist(tlist, pattern=None, names_not_titles=True, draw_opt='HIST', hl = None):
     listname = tlist.GetName()

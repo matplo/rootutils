@@ -56,6 +56,7 @@ def run():
         
     f = tutils.get_arg_with('-f')
     if f:
+        #ol.gDebug = True
         l = ol.show_file(f, tutils.is_arg_set('--logy'), pattern, draw_opt, names_not_titles, xmin, xmax)
         tutils.wait()
     else:

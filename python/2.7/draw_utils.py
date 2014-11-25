@@ -105,8 +105,8 @@ def split_gPad(split_ratio=0.5, orient=0):
         tp1.cd()
     return savepad
 
-def draw_comment(comment = '', font_size=None, x1 = 0.0, y1 = 0.9, x2 = 0.99, y2 = 0.99):
-    if font_size==None:
+def draw_comment(comment, font_size = None, x1 = 0.0, y1 = 0.9, x2 = 0.99, y2 = 0.99):
+    if font_size == None:
         font_size = 0.04
     p = ROOT.gPad
     if p and x1==0.0:
@@ -115,7 +115,7 @@ def draw_comment(comment = '', font_size=None, x1 = 0.0, y1 = 0.9, x2 = 0.99, y2
     tx = ROOT.TPaveText(x1, y1, x2, y2, 'brNDC')
     tx.SetBorderSize(0)
     tx.SetTextAlign(22)
-    tx.SetTextSize(font_size)
+    tx.SetTextSize( font_size )
     #print 'setting text font to',42
     tx.SetTextFont(42)
     tx.AddText(comment)
