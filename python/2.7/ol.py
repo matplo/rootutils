@@ -389,7 +389,7 @@ class ol:
                 h.SetMarkerColor(kolor)                                
 
             optd = opt
-            if drawn == True:
+            if drawn == True or 'same' in option.lower():
                 optd = opt + ' same'
             else:
                 drawn = True
@@ -580,13 +580,13 @@ def load_tlist(tlist, pattern=None, names_not_titles=True, draw_opt='HIST', hl =
             to_load=True
 
         if to_load:
-            if names_not_titles:
+            if names_not_titles == True:
                 newname = "{}:{}".format(tlist.GetName(), obj.GetName())
                 hl.addh (obj, newname, draw_opt)
                 hl.addgr(obj, newname)
                 hl.addf (obj, newname, 'L')                
             else:
-                hl.addh(obj, draw_opt)
+                hl.addh(obj, draw_opt=draw_opt)
                 hl.addgr(obj)
                 hl.addf(obj, None, 'L')                
             #print '[i] add   :',obj.GetName()
@@ -632,7 +632,7 @@ def load_file(fname='', pattern=None, names_not_titles=True, draw_opt='HIST'):
                 hl.addgr(obj, obj.GetName())
                 hl.addf(obj, obj.GetName(), 'L')                
             else:
-                hl.addh(obj, draw_opt)
+                hl.addh(obj, draw_opt=draw_opt)                
                 hl.addgr(obj)
                 hl.addf(obj, None, 'L')                
             #print '[i] add   :',key.GetName()
