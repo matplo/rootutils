@@ -45,11 +45,21 @@ def call_cmnd(cmnd='', verbose=False):
     return out,err
 
 def wait():
-    print '[i] press twice CRTL+C (fast consequtive) to exit.'
-    signal.signal(signal.SIGINT, signal_handler)
-    while 1:
-        time.sleep(10) # this actually does not matter as long as large
-        pass
+    import sys
+    interpreter = False
+    try:
+        if sys.ps1: interpreter = True
+    except AttributeError:
+        interpreter = False
+        if sys.flags.interactive: interpreter = True
+    if interpreter == True:
+        print '[i]', __name__,'::wait() has no effect. This is interactive mode.'
+    else:
+        print '[i] press twice CRTL+C (fast consequtive) to exit.'
+        signal.signal(signal.SIGINT, signal_handler)
+        while 1:
+            time.sleep(10) # this actually does not matter as long as large
+            pass
 
 def setup_basic_root():
     ROOT.gROOT.Reset()

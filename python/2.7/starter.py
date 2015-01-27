@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python -i
 
 import tutils
 
