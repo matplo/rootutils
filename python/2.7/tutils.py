@@ -14,6 +14,7 @@ print_first = False
 timer = time.time()
 
 gList = []
+app = None
 
 def is_arg_set(arg=''):
     for a in sys.argv:
@@ -78,6 +79,9 @@ def setup_basic_root():
     #print ROOT.gStyle.GetErrorX()
     ROOT.gStyle.SetErrorX(0)
 
+    global app
+    app = ROOT.PyROOT.TPyROOTApplication.CreateApplication()
+    
 exit_signal = False
 print_first = False
 timer = time.time()
