@@ -11,8 +11,8 @@ def main():
     h.Fill(.5)
     h.Fill(.4,3.145)        
     h.Draw()
+    r.gPad.Update()    
     tutils.gList.append(h)
-    
     tutils.wait()
     
 if __name__=="__main__":

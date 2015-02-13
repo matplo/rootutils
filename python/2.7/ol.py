@@ -21,7 +21,7 @@ class ol:
         self.max_adjusted = False
         self.axis_title_offset = [1.4, 1.4, 1.4]
         self.axis_title_size   = [0.05, 0.05, 0.05]
-        self.axis_label_size   = [0.05, 0.05, 0.05]
+        self.axis_label_size   = [0.04, 0.04, 0.04]
         self.pattern = None
         self.tcanvas = None
         self.minx = None
@@ -272,8 +272,8 @@ class ol:
         for o in self.l:
             if o.InheritsFrom('TH1') == False:
                 continue
-            if o.GetSumw2() == None:
-                o.Sumw2()
+            #if o.GetSumw2() == None:
+            o.Sumw2()
             o.Scale(val)
             #for i in range(1, o.GetNbinsX()):
             #    err = o.GetBinError(i)
@@ -333,11 +333,14 @@ class ol:
             if what in tt[0]:
                 try:
                     nt = tt[1:]
-                    val = int(nt)
+                    if what=='a':
+                        val = float(nt)
+                    else:
+                        val = int(nt)
                 except:
                     pass
         self.debug('::get_style_from_opt on {} returning {}'.format(what, val))
-        return int(val)
+        return val
     
     def all_options(self):
         ret = []
@@ -371,22 +374,41 @@ class ol:
             opt = self.lopts[i]
             self.debug('::draw ' + h.GetName() + ' ' + opt)
             lstyle = self.get_style_from_opt(opt.lower(), 'l')
-            if lstyle > 0:
-                h.SetLineStyle(lstyle)
             pstyle = self.get_style_from_opt(opt.lower(), 'p')
-            if pstyle > 0:
-                h.SetMarkerStyle(pstyle)
             fstyle = self.get_style_from_opt(opt.lower(), 'f')
-            if fstyle > 0:
-                h.SetFillStyle(fstyle)
-            else:
-                h.SetFillStyle(0000)                
-                h.SetFillColor(0)
             kolor = self.get_style_from_opt(opt.lower(), 'k')
-            if kolor > 0:
+            alpha = self.get_style_from_opt(opt.lower(), 'a') #alpha for fill
+
+            if 'sError' in opt:
+                h.SetLineWidth(0)
+                h.SetLineStyle(0)                
+                h.SetMarkerSize(0)
+                h.SetMarkerStyle(0)
+                if fstyle > 0:
+                    h.SetFillStyle(fstyle)
+                else:
+                    h.SetFillStyle(1001)
+                if kolor <= 0:
+                    kolor = h.GetLineColor()
                 h.SetFillColor(kolor)
                 h.SetLineColor(kolor)
-                h.SetMarkerColor(kolor)                                
+                h.SetMarkerColor(kolor)
+                if alpha > 0 and alpha <= 1:
+                    h.SetFillColorAlpha(kolor, alpha);                    
+            else:
+                if lstyle > 0:
+                    h.SetLineStyle(lstyle)
+                if pstyle > 0:
+                    h.SetMarkerStyle(pstyle)
+                if fstyle > 0:
+                    h.SetFillStyle(fstyle)
+                else:
+                    h.SetFillStyle(0000)                
+                    h.SetFillColor(0)
+                if kolor > 0:
+                    h.SetFillColor(kolor)
+                    h.SetLineColor(kolor)
+                    h.SetMarkerColor(kolor)                                
 
             optd = opt
             if drawn == True or 'same' in option.lower():
@@ -397,7 +419,16 @@ class ol:
                     optd = opt + 'a'
                 self.minx = h.GetXaxis().GetXmin()
                 self.maxx = h.GetXaxis().GetXmax()
-            h.Draw(optd)                
+            if 'sError' in opt:
+                #errx = ROOT.gStyle.GetErrorX()
+                #ROOT.gStyle.SetErrorX(0.5)
+                h.Draw(optd + 'E2')
+                #ROOT.gStyle.SetErrorX(errx)                
+            else:
+                if 'X1' in opt:
+                    h.Draw(optd)
+                else:
+                    h.Draw(optd + ' X0')                    
         self.adjust_pad_margins()            
         self.update()
         
@@ -453,12 +484,18 @@ class ol:
             if not self.is_selected(o):
                 continue
             opts = self.lopts[self.l.index(o)].split(' ')
+            if 'sError' in opts:
+                continue
             opt = ''
             for op in opts:
                 if 'p' in op.lower():
                     opt = opt + 'p'
-                if 'l' in op.lower() or 'c' in op.lower():
-                    opt = opt + 'l'
+                if 'nlil' in opts: #no line in legend
+                    self.debug('::self_legend will not add line to the legend - as per nlil option')
+                    pass
+                else:
+                    if 'l' in op.lower() or 'c' in op.lower():
+                        opt = opt + 'l'
                 if 'hist' in op.lower():
                     opt = opt + 'l'
                 if 'f' in op.lower():
@@ -517,8 +554,8 @@ class ol:
     def normalize_self(self, scale_by_binwidth = True, modTitle = False):
         for h in self.l:
             if h.InheritsFrom('TH1'):
-                if h.GetSumw2() == None:
-                    h.Sumw2()
+                #if h.GetSumw2() == None:
+                h.Sumw2()
                 intg = h.Integral(1, h.GetNbinsX())
                 bw   = h.GetBinWidth(1)
                 if intg > 0:

@@ -54,7 +54,7 @@ def wait():
         interpreter = False
         if sys.flags.interactive: interpreter = True
     if interpreter == True:
-        print '[i]', __name__,'::wait() has no effect. This is interactive mode.'
+        print '[i]', __name__,'::wait() has no effect. This is interactive mode => CTRL-D to exit.'
     else:
         print '[i] press twice CRTL+C (fast consequtive) to exit.'
         signal.signal(signal.SIGINT, signal_handler)
@@ -77,7 +77,7 @@ def setup_basic_root():
         ROOT.gStyle.SetPadTickX(1)
 
     #print ROOT.gStyle.GetErrorX()
-    ROOT.gStyle.SetErrorX(0)
+    #ROOT.gStyle.SetErrorX(0) #not by default; use X1 to show the x-error with ol
 
     global app
     app = ROOT.PyROOT.TPyROOTApplication.CreateApplication()
