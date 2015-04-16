@@ -7,6 +7,9 @@ import shlex
 import signal
 import time
 
+import string
+import random
+
 def find_files(rootdir='.', pattern='*'):
     return [os.path.join(rootdir, filename)
             for rootdir, dirnames, filenames in os.walk(rootdir)
@@ -134,3 +137,7 @@ def wait():
     while 1:
         time.sleep(10) # this actually does not matter as long as large
         pass
+
+def random_string(prefix='', ns = 30):
+    lst = [random.choice(string.ascii_letters + string.digits) for n in xrange(ns)]
+    return str(prefix)+''.join(lst) 
