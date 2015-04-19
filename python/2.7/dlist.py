@@ -329,12 +329,12 @@ class dlist(debugable):
     def reset_axis_titles(self, xt=None, yt=None, zt=None):
         for o in self.l:
             if xt:
-                o.GetXaxis().SetTitle(xt)
+                o.obj.GetXaxis().SetTitle(xt)
             if yt:
-                o.GetYaxis().SetTitle(yt)
+                o.obj.GetYaxis().SetTitle(yt)
             if zt:
-                if o.InheritsFrom('TH1'):
-                    o.GetZaxis().SetTitle(zt)
+                if o.obj.InheritsFrom('TH1'):
+                    o.obj.GetZaxis().SetTitle(zt)
 
     def zoom_axis(self, which, xmin, xmax):
         ax = None
@@ -498,7 +498,8 @@ class dlist(debugable):
                     extra_opt.append(' X0')
 
             o.draw(' '.join(extra_opt))
-            dbgu.debug_obj(o.dopt)
+            if gDebug:
+                dbgu.debug_obj(o.dopt)
             
         self.adjust_pad_margins()            
         self.update()
@@ -586,8 +587,8 @@ class dlist(debugable):
             f = ROOT.TFile(fname, opt)
             f.cd()
             for h in self.l:
-                newname = h.GetName() + name_mod
-                h.Write(newname)
+                newname = h.obj.GetName() + name_mod
+                h.obj.Write(newname)
             f.Close()
             print '[i] written to file',fname
         except:
@@ -612,6 +613,20 @@ class dlist(debugable):
 
     def draw_comment(self, comment = '', font_size=None, x1 = 0.0, y1 = 0.9, x2 = 0.99, y2 = 0.99):
         du.draw_comment(comment, font_size, x1, y1, x2, y2)
+        
+    def sum(self, scales=None):
+        reth = None
+        for i,h in enumerate(self.l):
+            if i == 0:
+                reth = draw_object(h.obj,self.name + '-sum', h.name + '-sum')
+                if scales != None:
+                    reth.Scale(scales[i])
+                continue
+            scale = 1.
+            if scales != None:
+                scale = scales[i]
+            reth.obj.Add(h.obj, scale)
+        return reth
     
 def load_tlist(tlist, pattern=None, names_not_titles=True, draw_opt='HIST', hl = None):
     listname = tlist.GetName()
@@ -800,6 +815,14 @@ def rejs(olin):
             h.SetBinContent(ib, yat/yatp1)
     return oret
 
+def filter_single_entries_h(h, href=None, thr=10):
+    if href == None:
+        href = h
+    for ib in range(1, h.GetNbinsX()+1):
+        if href.GetBinContent(ib) < thr:
+            h.SetBinContent(ib, 0)
+            h.SetBinError(ib, 0)
+    
 def filter_single_entries(hl, hlref, thr=10):
     for ih in range(len(hl.l)):
         h    = hl.l[ih]
