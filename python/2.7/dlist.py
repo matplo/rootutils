@@ -5,7 +5,8 @@ import tutils as tu
 from array import array
 gDebug = False
 #needs a fix: the import below depends on where the module is...
-from debug_utils import debug_utils as dbgu
+#from debug_utils
+import debug_utils as dbgu
 
 class debugable(object):
     def __init__(self):
