@@ -19,7 +19,7 @@ class debugable(object):
 class style_iterator(debugable):
     good_colors  = [ -1,  2,  1,  9,  6,  8, 40, 43, 46, 49, 32, 39, 28, 38]
     good_markers = [ -1, 20, 24, 21, 25, 27, 28, 33, 34, 29, 30]
-    good_lines   = [ -1,  1,  7,  3,  5,  8,  6,  2,  4,  9, 10]
+    good_lines   = [ -1,  1,  2,  3,  5,  8,  6,  7,  4,  9, 10]
     
     def __init__(self):
         self.reset()
@@ -316,15 +316,19 @@ class dlist(debugable):
     def add(self, obj=ROOT.TObject, new_title = '', draw_opt = ''):
         if obj == None: return
         cobj = None
-        if obj.IsA().InheritsFrom("TH1") \
-            or obj.IsA().InheritsFrom("TGraph") \
-            or obj.IsA().InheritsFrom("TF1"):
+        try:
+            robj = obj.obj
+        except:
+            robj = obj
+        if robj.InheritsFrom("TH1") \
+            or robj.InheritsFrom("TGraph") \
+            or robj.InheritsFrom("TF1"):
             #h = ROOT.TH1(obj)
-            cobj = self.append(obj, new_title, draw_opt)
-            if self.maxy < obj.GetMaximum():
-                self.maxy = obj.GetMaximum()
-            if self.miny < obj.GetMinimum():
-                self.miny = obj.GetMinimum()
+            cobj = self.append(robj, new_title, draw_opt)
+            if self.maxy < robj.GetMaximum():
+                self.maxy = robj.GetMaximum()
+            if self.miny < robj.GetMinimum():
+                self.miny = robj.GetMinimum()
         return cobj    
         
     def reset_axis_titles(self, xt=None, yt=None, zt=None):
@@ -746,7 +750,7 @@ def show_file(fname='', logy=False, pattern=None, draw_opt='lpf', names_not_titl
     return hl
 
 def make_ratio(h1, h2):
-    hl = ol('ratio {} div {}'.format(h1.GetName(), h2.GetName()).replace(' ', '_'))
+    hl = dlist('ratio {} div {}'.format(h1.GetName(), h2.GetName()).replace(' ', '_'))
     newname = '{}_div_{}'.format(h1.GetName(), h2.GetName())
     newtitle = '{} / {}'.format(h1.GetTitle(), h2.GetTitle())
     hr = h1.Clone(newname)
@@ -754,7 +758,7 @@ def make_ratio(h1, h2):
 
     hr.SetDirectory(0)
     hr.Divide(h2)
-    hl.addh(hr)
+    hl.add(hr)
 
     hl.reset_axis_titles(None, newtitle)
 
