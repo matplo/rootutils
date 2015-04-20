@@ -169,7 +169,8 @@ class draw_object(debugable):
             sdopt = extra_opt
         if self.is_first==True:
             if self.obj.InheritsFrom('TGraph'):
-                sdopt = sdopt + ' a'            
+                sdopt = sdopt + ' A'
+            self.debug('doption=' + sdopt)
             self.obj.Draw(sdopt)
         else:
             self.obj.Draw(sdopt + ' same')
@@ -340,19 +341,19 @@ class dlist(debugable):
         ax = None
         for o in self.l:
             if which == 0:
-                ax = o.GetXaxis()
+                ax = o.obj.GetXaxis()
             if which == 1:
-                ax = o.GetYaxis()
+                ax = o.obj.GetYaxis()
             if which == 2:
-                if o.InheritsFrom('TH1'):
-                    ax = o.GetZaxis()
+                if o.obj.InheritsFrom('TH1'):
+                    ax = o.obj.GetZaxis()
             if ax:
                 ibmin = ax.FindBin(xmin)
                 ibmax = ax.FindBin(xmax)
                 try:
-                    #print 'ibmin, ibmax, nbins:',ibmin, ibmax, o.GetNbinsX()
-                    if ibmax > o.GetNbinsX():
-                        ibmax = o.GetNbinsX()
+                    #print 'ibmin, ibmax, nbins:',ibmin, ibmax, o.obj.GetNbinsX()
+                    if ibmax > o.obj.GetNbinsX():
+                        ibmax = o.obj.GetNbinsX()
                         #print 'reset axis max to:',ibmax
                 except:
                     #print ibmin, ibmax
@@ -361,19 +362,19 @@ class dlist(debugable):
                 
     def scale_errors(self, val = 1.):
         for o in self.l:
-            if o.InheritsFrom('TH1') == False:
+            if o.obj.InheritsFrom('TH1') == False:
                 continue
-            for i in range(1, o.GetNbinsX()):
-                err = o.GetBinError(i)
-                o.SetBinError(i, err * val)
+            for i in range(1, o.obj.GetNbinsX()):
+                err = o.obj.GetBinError(i)
+                o.obj.SetBinError(i, err * val)
     
     def scale(self, val = 1.):
         for o in self.l:
-            if o.InheritsFrom('TH1') == False:
+            if o.obj.InheritsFrom('TH1') == False:
                 continue
             #if o.GetSumw2() == None:
-            o.Sumw2()
-            o.Scale(val)
+            o.obj.Sumw2()
+            o.obj.Scale(val)
             #for i in range(1, o.GetNbinsX()):
             #    err = o.GetBinError(i)
             #    o.SetBinError(i, err * val)
@@ -491,12 +492,11 @@ class dlist(debugable):
                 #ROOT.gStyle.SetErrorX(0.5)
                 extra_opt.append('E2')
                 #ROOT.gStyle.SetErrorX(errx)
-            else:
-                if o.dopt.has(['X1']):
-                    pass
-                else:
-                    extra_opt.append(' X0')
-
+            #else:
+            #    if o.dopt.has(['X1']):
+            #        pass
+            #    else:
+            #        extra_opt.append(' X0')
             o.draw(' '.join(extra_opt))
             if gDebug:
                 dbgu.debug_obj(o.dopt)
@@ -673,7 +673,7 @@ def load_file(fname='', pattern=None, names_not_titles=True, draw_opt='HIST'):
     if pattern:
         listname = fname.replace('/','_')+'-'+pattern.replace(' ','-')+'-hlist'
 
-    hl = ol(listname)
+    hl = dlist(listname)
 
     lkeys = fin.GetListOfKeys()
     for key in lkeys:
@@ -690,14 +690,12 @@ def load_file(fname='', pattern=None, names_not_titles=True, draw_opt='HIST'):
 
         if to_load:
             obj = key.ReadObj()
+            if obj.InheritsFrom('TF1'):
+                draw_opt = draw_opt + 'l'
             if names_not_titles:
-                hl.addh(obj, obj.GetName(), draw_opt)
-                hl.addgr(obj, obj.GetName())
-                hl.addf(obj, obj.GetName(), 'L')                
+                hl.add(obj, obj.GetName(), draw_opt)
             else:
-                hl.addh(obj, draw_opt=draw_opt)                
-                hl.addgr(obj)
-                hl.addf(obj, None, 'L')                
+                hl.add(obj, draw_opt=draw_opt)                    
             #print '[i] add   :',key.GetName()
         else:
             #print '[i] ignore:',key.GetName()
@@ -854,7 +852,7 @@ def get_projections_axis_bins(hname, fname, htitle, opt, axis, pTs):
     pTmin = pTs[0][0]
     pTmax = pTs[len(pTs)-1][1]
     hlname = 'projections-{}-{}-{}-{}-{}'.format(hname, fname, htitle, pTmin, pTmax)
-    hl = ol(hname+htitle)
+    hl = dlist(hname+htitle)
     for i in range(len(pTs)):
         pTmin = pTs[i][0]
         pTmax = pTs[i][1]
@@ -874,7 +872,7 @@ def get_projections_axis(hname, fname, htitle, pTmin, pTmax, step, opt='P L HIST
         print '[i] unable to get:',hname,'from:',fname
         return None
     hlname = 'projections-{}-{}-{}-{}-{}-{}'.format(hname, fname, htitle, pTmin, pTmax, step)
-    hl = ol(hname+htitle)
+    hl = dlist(hname+htitle)
     pT = pTmin
     while pT + step < pTmax:
         if pTs != None:
