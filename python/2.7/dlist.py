@@ -98,8 +98,8 @@ class draw_option(debugable):
         self.use_line    = self.check_use_line()
         self.bw          = self.check_black_white()
         self.use_marker  = self.check_use_marker()
-        self.is_error    = self.has(['serror'])
-        self.no_legend   = self.has(['noleg'])
+        self.is_error    = self.has(['serror'],strip=True)
+        self.no_legend   = self.has(['noleg'],strip=True)
         self.last_kolor  = self.has(['-k'])
         
     def stripped(self):
@@ -116,12 +116,15 @@ class draw_option(debugable):
         marks = ['p']
         return self.has(marks)
     
-    def has(self, lst):
+    def has(self, lst, strip=False):
+        ret = False
         for e in lst:
             for s in self.s.split(' '):
                 if e == s[:len(e)]:
-                    return True
-        return False
+                    ret = True
+                    if strip == True:
+                        self.strip = self.strip.replace(e, '')
+        return ret
                 
     def get_style_from_opt(self, what): #what can be l or p or f
         ts = self.s.split('+')
@@ -496,6 +499,9 @@ class dlist(debugable):
                 #ROOT.gStyle.SetErrorX(0.5)
                 extra_opt.append('E2')
                 #ROOT.gStyle.SetErrorX(errx)
+                o.obj.SetMarkerColor(0)
+                o.obj.SetMarkerSize(0)
+                o.obj.SetMarkerStyle(0)
             #else:
             #    if o.dopt.has(['X1']):
             #        pass
