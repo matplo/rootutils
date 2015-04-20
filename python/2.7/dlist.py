@@ -28,6 +28,7 @@ class style_iterator(debugable):
         self.color_idx  = 0
         self.line_idx   = 0
         self.marker_idx = 0
+        self.line_width = 2
         
     def colorize(self, force_color=None):
         self.color_idx = 0
@@ -462,6 +463,9 @@ class dlist(debugable):
             else:
                 if o.dopt.use_line:
                     o.obj.SetLineStyle(self.style.next_line())
+            #width
+            if o.dopt.lwidth > 0:
+                o.obj.SetLineWidth(o.dopt.lwidth)
             #marker                    
             if o.dopt.pstyle > 0:
                 o.obj.SetMarkerStyle(o.dopt.pstyle)
