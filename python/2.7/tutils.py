@@ -197,6 +197,14 @@ def get_object_from_file(hname = '', fname = '', new_title = ''):
         f.Close()
     return cobj
 
+def filter_single_entries(h, href=None, thr=10):
+    if href == None:
+        href = h
+    for ib in range(1, h.GetNbinsX()+1):
+        if href.GetBinContent(ib) < thr:
+            h.SetBinContent(ib, 0)
+            h.SetBinError(ib, 0)
+
 def next_weekday(d, weekday):
     # note: next is ok if this is the same day
     days_ahead = weekday - d.weekday()

@@ -58,6 +58,7 @@ def run():
     if f:
         #ol.gDebug = True
         l = ol.show_file(f, tutils.is_arg_set('--logy'), pattern, draw_opt, names_not_titles, xmin, xmax)
+        tutils.gList.append(l)        
         tutils.wait()
     else:
         print >> sys.stderr,'[e] no file specified: use -f <file.root>'
