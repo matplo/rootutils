@@ -23,14 +23,25 @@ def make_graph_from_file(fn = None, xye = [0, 1, 2, 3]):
     d = read_data(fn)
     x  = d[:,xye[0]]
     y  = d[:,xye[1]]
-    xe = d[:,xye[2]]
-    ye = d[:,xye[3]]
-    gr = dlist.make_graph_xy(ut.random_string('raa_gr'),x,y,xe=xe,ye=ye)
+    try:
+        xe = d[:,xye[2]]
+    except:
+        xe = []
+    try:
+        ye = d[:,xye[3]]
+    except:
+        ye = []
+    grname = 'graph'
+    gr = dlist.make_graph_xy(grname,x,y,xe=xe,ye=ye)
     return gr
 
-def graph():    
-    hl = dlist.dlist('stdin')
+def graph():
+    
     fname = ut.get_arg_with('-f')
+    hlname = 'stdin'
+    if fname:
+        hlname = fname
+    hl = dlist.dlist(hlname)
     xye  = [0, 1, 2, 3]
     sxye = ut.get_arg_with('--xye')
     if sxye != None:
@@ -43,9 +54,15 @@ def graph():
         stitle = 'stdin'
     hl.add(gr, stitle, 'P')
     hl.make_canvas()
-    hl.draw()
+    logy = ut.is_arg_set('--logy')
+    hl.draw(logy=logy)
     hl.self_legend()
-
+    if logy:
+        r.gPad.SetLogy()
+    xlabel = ut.get_arg_with('-x')
+    ylabel = ut.get_arg_with('-y')
+    hl.reset_axis_titles(xlabel,ylabel)
+    hl.update()    
     if ut.is_arg_set('--print'):
         hl.tcanvas.Print()
     
