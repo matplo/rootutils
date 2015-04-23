@@ -22,7 +22,7 @@ except:
     print '[ info:] setup the environment (remember PYTHONPATH)'
     sys.exit(-1)
 
-import ol
+import dlist #was ol
 
 def run():
     ROOT.gROOT.Reset()
@@ -45,7 +45,7 @@ def run():
     pattern = tutils.get_arg_with('--pattern')
     draw_opt = tutils.get_arg_with('--dopt')
     if draw_opt == None:
-        draw_opt = 'lpf'
+        draw_opt = 'p'
 
     xmin = None
     xmax = None
@@ -57,7 +57,7 @@ def run():
     f = tutils.get_arg_with('-f')
     if f:
         #ol.gDebug = True
-        l = ol.show_file(f, tutils.is_arg_set('--logy'), pattern, draw_opt, names_not_titles, xmin, xmax)
+        l = dlist.show_file(f, tutils.is_arg_set('--logy'), pattern, draw_opt, names_not_titles, xmin, xmax)
         tutils.gList.append(l)        
         tutils.wait()
     else:
