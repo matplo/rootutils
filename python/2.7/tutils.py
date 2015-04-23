@@ -181,15 +181,18 @@ def draw_h2d_from_ntuple(fname, ntname, var, cuts,
         hret.SetTitle(htitle)
     return hret
 
-def get_object_from_file(hname = '', fname = '', new_title = ''):
+def get_object_from_file(hname = '', fname = '', new_title = '', nmod=None):
     if fname == None:
         return None
+    name_mod = '-read'
+    if nmod:
+        name_mod = nmod
     cobj = None
     f = ROOT.TFile(fname)
     if f:
         h = f.Get(hname)
         if h:
-            newname = h.GetName() + '-read'
+            newname = h.GetName() + name_mod
             cobj = h.Clone(newname)
             cobj.SetDirectory(0)
             if len(new_title) > 0:

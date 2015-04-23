@@ -51,7 +51,7 @@ def graph():
     gr = make_graph_from_file(fname, xye)
     stitle = ut.get_arg_with('--title')
     if stitle == None:
-        stitle = 'stdin'
+        stitle = hlname
     hl.add(gr, stitle, 'P')
     hl.make_canvas()
     logy = ut.is_arg_set('--logy')

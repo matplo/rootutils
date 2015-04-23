@@ -406,13 +406,13 @@ class dlist(debugable):
             
     def rebin(self, val = 2, norm = False):
         for o in self.l:
-            if o.InheritsFrom('TH1') == False:
+            if o.obj.InheritsFrom('TH1') == False:
                 continue
-            if not o.GetSumw2():
-                o.Sumw2()
-            o.Rebin(val)
+            if not o.obj.GetSumw2():
+                o.obj.Sumw2()
+            o.obj.Rebin(val)
             if norm == True:
-                o.Scale(1./val)
+                o.obj.Scale(1./val)
                 
     def adjust_pad_margins(self, _left=0.17, _right=0.05, _top=0.1, _bottom=0.17+0.03):
         du.adjust_pad_margins(_left, _right, _top, _bottom)
@@ -580,20 +580,20 @@ class dlist(debugable):
         
     def normalize_self(self, scale_by_binwidth = True, modTitle = False):
         for h in self.l:
-            if h.InheritsFrom('TH1'):
+            if h.obj.InheritsFrom('TH1'):
                 #if h.GetSumw2() == None:
-                h.Sumw2()
-                intg = h.Integral(1, h.GetNbinsX())
-                bw   = h.GetBinWidth(1)
+                h.obj.Sumw2()
+                intg = h.obj.Integral(1, h.obj.GetNbinsX())
+                bw   = h.obj.GetBinWidth(1)
                 if intg > 0:
                     if scale_by_binwidth:
-                        h.Scale(1./intg/bw)
+                        h.obj.Scale(1./intg/bw)
                     else:
-                        h.Scale(1./intg)
+                        h.obj.Scale(1./intg)
                     if modTitle == True:
-                        ytitle = h.GetYaxis().GetTitle()
+                        ytitle = h.obj.GetYaxis().GetTitle()
                         ytitle += ' ({0})'.format(bw)
-                        h.GetYaxis().SetTitle(ytitle)
+                        h.obj.GetYaxis().SetTitle(ytitle)
             else:
                 print '[w] normalize not defined for non histogram...'
                 
@@ -722,12 +722,13 @@ def load_file(fname='', pattern=None, names_not_titles=True, draw_opt='HIST'):
 
     return hl
 
-def show_file(fname='', logy=False, pattern=None, draw_opt='lpf', names_not_titles=True, xmin=None, xmax=None):
+def show_file(fname='', logy=False, pattern=None, draw_opt='p', names_not_titles=True, xmin=None, xmax=None):
 
-    ROOT.gROOT.Reset()
-    ROOT.gStyle.SetScreenFactor(1)
+    tu.setup_basic_root()
+    #ROOT.gROOT.Reset()
+    #ROOT.gStyle.SetScreenFactor(1)
 
-    hl = load_file(fname, pattern, names_not_titles)
+    hl = load_file(fname, pattern, names_not_titles, draw_opt)
     hl.pattern = pattern
 
     hl.make_canvas()
@@ -736,9 +737,9 @@ def show_file(fname='', logy=False, pattern=None, draw_opt='lpf', names_not_titl
     if 'self' in draw_opt:
         hl.draw(draw_opt, None, None, logy)
     else:
-        hl.colorize()
-        hl.markerize()
-        hl.lineize()
+        #hl.colorize()
+        #hl.markerize()
+        #hl.lineize()
         if xmin!=None and xmax!=None:
             hl.zoom_axis(0, xmin, xmax)
         hl.draw(draw_opt, None, None, logy)
