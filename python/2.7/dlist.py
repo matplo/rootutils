@@ -5,8 +5,7 @@ import tutils as tu
 from array import array
 gDebug = False
 #needs a fix: the import below depends on where the module is...
-#from debug_utils
-import debug_utils as dbgu
+from dbgu import debug_utils as dbgu
 
 class debugable(object):
     def __init__(self):
@@ -118,10 +117,21 @@ class draw_option(debugable):
         marks = ['p']
         return self.has(marks)
     
+    def legend_option(self):
+        ret = ''
+        if self.no_legend:
+            return ret
+        if self.use_marker:
+            ret = ret + 'p'
+        if self.use_line:
+            ret = ret + 'l'
+        return ret
+
     def has(self, lst, strip=False):
         ret = False
         for e in lst:
-            for s in self.s.split(' '):
+            #for s in self.s.split(' '):
+            for s in self.strip.split(' '):
                 if e == s[:len(e)]:
                     ret = True
                     if strip == True:
@@ -526,7 +536,8 @@ class dlist(debugable):
                 continue
             if o.dopt.no_legend:
                 continue
-            opt = o.dopt.stripped()
+            #opt = o.dopt.stripped()
+            opt = o.dopt.legend_option()
             self.debug('::self_legend legend entry with opt: {0} {1}'.format(opt,o.obj.GetTitle()) )
             self.legend.AddEntry(o.obj, o.obj.GetTitle(), opt)
         self.legend.Draw()
@@ -597,7 +608,9 @@ class dlist(debugable):
             else:
                 print '[w] normalize not defined for non histogram...'
                 
-    def write_to_file(self, fname, opt='RECREATE', name_mod=''):
+    def write_to_file(self, fname=None, opt='RECREATE', name_mod=''):
+        if fname==None:
+            fname = self.name.replace(' ','_') + '.root'
         try:
             f = ROOT.TFile(fname, opt)
             f.cd()
@@ -642,6 +655,9 @@ class dlist(debugable):
                 scale = scales[i]
             reth.obj.Add(h.obj, scale)
         return reth
+
+    def pdf(self):
+        self.tcanvas.Print(self.name+'.pdf','.pdf')
     
 def load_tlist(tlist, pattern=None, names_not_titles=True, draw_opt='HIST', hl = None):
     listname = tlist.GetName()
