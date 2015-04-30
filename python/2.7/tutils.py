@@ -136,7 +136,7 @@ def draw_h1d_from_ntuple(fname, ntname, var, cuts, bwidth, xlow, xhigh, title=No
             if tn:
                 hname_tmp = 'htmp({0},{1},{2})'.format(nbins, xlow, xhigh)
                 dstr = '{0}>>{1}'.format(var, hname_tmp)
-                dentries = tn.Draw(dstr, cuts)
+                dentries = tn.Draw(dstr, cuts, 'e') #call sumw2 before the histogram creation!
                 hret = ROOT.gDirectory.Get('htmp')
                 hret.SetDirectory(0)
             fin.Close()
