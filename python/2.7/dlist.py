@@ -402,17 +402,15 @@ class dlist(debugable):
 
     def scale_any(self, val = 1.):
         for o in self.l:
-            if o.InheritsFrom('TH1') == True:
-                o.Sumw2()
-                o.Scale(val)
-            if o.InheritsFrom('TGraph') == True:
-                for i in range(o.GetN()):
-                    o.SetPoint(i, o.GetX()[i], o.GetY()[i] * val)
-            #for i in range(1, o.GetNbinsX()):
-            #    err = o.GetBinError(i)
-            #    o.SetBinError(i, err * val)
-            #    v = o.GetBinContent(i)
-            #    o.SetBinContent(i, v * val)
+            if o.obj.InheritsFrom('TH1') == True:
+                o.obj.Sumw2()
+                o.obj.Scale(val)
+            if o.obj.InheritsFrom('TGraph') == True:
+                for i in range(o.obj.GetN()):
+                    o.obj.SetPoint(i, o.obj.GetX()[i], o.obj.GetY()[i] * val)
+            if o.obj.InheritsFrom('TGraphErrors') == True:
+                for i in range(o.obj.GetN()):
+                    o.obj.SetPointError(i, o.obj.GetEX()[i], o.obj.GetEY()[i] * val)
             
     def rebin(self, val = 2, norm = False):
         for o in self.l:
@@ -571,8 +569,10 @@ class dlist(debugable):
         
         return self.legend
 
-    def update(self):
+    def update(self, logy=False):
         if ROOT.gPad:
+            if logy:
+                ROOT.gPad.SetLogy()
             ROOT.gPad.Update()        
 
     def make_canvas(self, w=600, h=400, 
