@@ -214,6 +214,14 @@ class dlist(debugable):
     def __len__(self):
         return len(self.l)
         
+    def __str__(self):
+        ret = []
+        ret.append('[i] dlist named: {}'.format(self.name))
+        for i,item in enumerate(self.l):
+            o = item.obj
+            ret.append('    {} {} {} {}'.format(i, o.IsA().GetName(), o.GetName(), o.GetTitle()))
+        return '\n'.join(ret)
+
     def copy_list(self, l=[]):
         for h in l:
             self.addh(h)
@@ -588,7 +596,16 @@ class dlist(debugable):
             if split > 0:
                 du.split_gPad(split, orientation)
         return self.tcanvas
-        
+    
+    def scale_by_binwidth(self):
+        for h in self.l:
+            if h.obj.InheritsFrom('TH1'):
+                h.obj.Sumw2()
+                bw   = h.obj.GetBinWidth(1)
+                h.obj.Scale(1./bw)
+            else:
+                print '[w] normalize not defined for non histogram...'
+
     def normalize_self(self, scale_by_binwidth = True, modTitle = False):
         for h in self.l:
             if h.obj.InheritsFrom('TH1'):
@@ -659,6 +676,34 @@ class dlist(debugable):
     def pdf(self):
         self.tcanvas.Print(self.name+'.pdf','.pdf')
     
+class ListStorage:
+    def __init__(self, name = None):
+        if name == None:
+            name = 'global_debug_list_of_lists'
+        self.name = name
+        self.lists = []
+        tu.gList.append(self)
+
+    def add_to_list(self, lname, obj, title, dopt):
+        hl = self.get(lname)
+        hl.add(obj, title, dopt)
+
+    def get(self, lname):
+        for l in self.lists:
+            if lname == l.name:
+                return l
+        retl = dlist(lname)
+        self.lists.append(retl)
+        return self.get(lname)
+
+    def draw_all(self):
+        for l in self.lists:
+            l.make_canvas()
+            l.draw()
+            l.self_legend()
+
+gDebugLists = ListStorage()
+
 def load_tlist(tlist, pattern=None, names_not_titles=True, draw_opt='HIST', hl = None):
     listname = tlist.GetName()
     if hl == None:
