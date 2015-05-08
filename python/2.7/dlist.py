@@ -399,8 +399,8 @@ class dlist(debugable):
         for o in self.l:
             if o.obj.InheritsFrom('TH1') == False:
                 continue
-            #if o.GetSumw2() == None:
-            o.obj.Sumw2()
+            if o.obj.GetSumw2() == None:
+                o.obj.Sumw2()
             o.obj.Scale(val)
             #for i in range(1, o.GetNbinsX()):
             #    err = o.GetBinError(i)
@@ -600,7 +600,8 @@ class dlist(debugable):
     def scale_by_binwidth(self):
         for h in self.l:
             if h.obj.InheritsFrom('TH1'):
-                h.obj.Sumw2()
+                if h.obj.GetSumw2() == None:
+                    h.obj.Sumw2()
                 bw   = h.obj.GetBinWidth(1)
                 h.obj.Scale(1./bw)
             else:
@@ -639,15 +640,15 @@ class dlist(debugable):
         except:
             print >> sys.stderr,'[e] writing to file {0} failed'.format(fname)
 
-    def ratio_to(self, ito = 0):
-        hdenom = self.l[ito]
-        hret = ol('{}-ratio-to-index-{}'.format(self.name, ito))
+    def ratio_to(self, ito = 0, extra_opt=''):
+        hdenom = self.l[ito].obj
+        hret = dlist('{}-ratio-to-index-{}'.format(self.name, ito))
         for i in range(len(self.l)):
             if i == ito:
                 continue
-            h = self.l[i]
+            h = self.l[i].obj
             hlr = make_ratio(h, hdenom)
-            hret.addh(hlr.last(), hlr.last().GetTitle(), 'HIST')
+            hret.add(hlr.last().obj, hlr.last().obj.GetTitle(), 'HIST ' + extra_opt)
         return hret
 
     def reset_titles(self, stitles):
@@ -682,6 +683,7 @@ class ListStorage:
             name = 'global_debug_list_of_lists'
         self.name = name
         self.lists = []
+        self.tcanvas = None
         tu.gList.append(self)
 
     def add_to_list(self, lname, obj, title, dopt):
@@ -697,12 +699,18 @@ class ListStorage:
         return self.get(lname)
 
     def draw_all(self):
-        for l in self.lists:
-            l.make_canvas()
+        if len(self.lists) <= 0:
+            return
+        self.tc = du.make_canvas_grid(len(self.lists), None, self.name+'-canvas', self.name)
+        for i,l in enumerate(self.lists):
+            #if i == 0:
+            #    l.make_canvas()
+            self.tc.cd(i+1)
             l.draw()
             l.self_legend()
 
 gDebugLists = ListStorage()
+gDL = gDebugLists
 
 def load_tlist(tlist, pattern=None, names_not_titles=True, draw_opt='HIST', hl = None):
     listname = tlist.GetName()
