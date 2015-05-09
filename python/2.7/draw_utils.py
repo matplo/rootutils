@@ -124,9 +124,12 @@ def draw_comment(comment, font_size = None, x1 = 0.0, y1 = 0.9, x2 = 0.99, y2 = 
     tu.gList.append(tx)
     return tx
 
-def make_canvas_grid(n, tc = None, name = 'tmp_tc', title = 'tmp_tc'):
+def make_canvas_grid(n, tc = None, name = 'tmp_tc', title = 'tmp_tc', orient=0, xm=0.01, ym=0.01):
     if tc == None:        
-        tc = ROOT.TCanvas(name, title)
+        if orient == 0:
+            tc = ROOT.TCanvas(name, title, 800, 600)
+        else:
+            tc = ROOT.TCanvas(name, title, 600, 800)
     nv = float(n)
     ir = int(math.sqrt(nv))
     ic = int(math.sqrt(nv))
@@ -134,7 +137,22 @@ def make_canvas_grid(n, tc = None, name = 'tmp_tc', title = 'tmp_tc'):
         ir = ir + 1
         if (ir * ic) < n:        
             ic = ic + 1
-    tc.Divide(ir, ic)    
+    if orient == 0:
+        tc.Divide(ir, ic, xm, ym)    
+    else:
+        tc.Divide(ic, ir, xm, ym)            
     return tc
 
-        
+def readjust_6fold(tc):
+    tc.cd(1)
+    gp = ROOT.gPad
+    gp.SetBottomMargin(0)
+    gp.SetRightMargin(0)
+    gp.Update()
+    tc.cd(2)
+    gp = ROOT.gPad
+    gp.SetBottomMargin(0)
+    gp.SetLeftMargin(0)
+    gp.SetRightMargin(0)
+    tc.Update()
+

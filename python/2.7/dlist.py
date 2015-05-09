@@ -6,6 +6,7 @@ from array import array
 gDebug = False
 #needs a fix: the import below depends on where the module is...
 from dbgu import debug_utils as dbgu
+import pcanvas
 
 class debugable(object):
     def __init__(self):
@@ -17,7 +18,7 @@ class debugable(object):
             print '[d]',msg
 
 class style_iterator(debugable):
-    good_colors  = [ -1,  2,  1,  9,  6,  8, 40, 43, 46, 49, 32, 39, 28, 38]
+    good_colors  = [ -1,  2,  1,  9,  6, 32, 49, 40,  8, 43, 46, 39, 28, 38]
     good_markers = [ -1, 20, 24, 21, 25, 27, 28, 33, 34, 29, 30]
     good_lines   = [ -1,  1,  2,  3,  5,  8,  6,  7,  4,  9, 10]
     
@@ -101,6 +102,7 @@ class draw_option(debugable):
         self.use_marker  = self.check_use_marker()
         self.is_error    = self.has(['serror'],strip=True)
         self.no_legend   = self.has(['noleg'],strip=True)
+        self.hidden      = self.has(['hidden'],strip=True)
         self.last_kolor  = self.has(['-k'])
         
     def stripped(self):
@@ -197,20 +199,22 @@ class dlist(debugable):
         self.style = style_iterator()
         self.maxy = 1e6 # was 1
         self.miny = -1e6 # was 0
-        self.max_adjusted = False
+        self.max_adjusted      = False
         self.axis_title_offset = [1.4, 1.4, 1.4]
         self.axis_title_size   = [0.05, 0.05, 0.05]
         self.axis_label_size   = [0.04, 0.04, 0.04]
         self.pattern = None
         self.tcanvas = None
-        self.minx = None
-        self.maxx = None
-        
+        self.minx    = None
+        self.maxx    = None
+        self.pad     = None # pad where last drawn
+
     def __getitem__(self, i):
         if i < len(self.l) and i >= 0:
             return self.l[i]
         else:
             return None
+
     def __len__(self):
         return len(self.l)
         
@@ -233,9 +237,12 @@ class dlist(debugable):
             
     def last(self):
         if len(self.l) > 0:
-            return self.l[len(self.l)-1]
+            return self.l[-1]
         return None
-            
+
+    def last_index(self):
+        return len(self.l)-1
+
     def is_selected(self, o):
         if self.pattern != None:
             if not self.pattern in o.name:
@@ -354,6 +361,10 @@ class dlist(debugable):
                 self.miny = robj.GetMinimum()
         return cobj    
         
+    def add_list(self, hl):
+        for l in hl:
+            self.add(l.obj, l.obj.GetTitle(), l.dopt)
+
     def reset_axis_titles(self, xt=None, yt=None, zt=None):
         for o in self.l:
             if xt:
@@ -419,6 +430,20 @@ class dlist(debugable):
             if o.obj.InheritsFrom('TGraphErrors') == True:
                 for i in range(o.obj.GetN()):
                     o.obj.SetPointError(i, o.obj.GetEX()[i], o.obj.GetEY()[i] * val)
+
+    def scale_at_index(self, i=-1, val = 1.):
+        if i < 0:
+            return
+        o = self.l[i]
+        if o.obj.InheritsFrom('TH1') == True:
+            o.obj.Sumw2()
+            o.obj.Scale(val)
+        if o.obj.InheritsFrom('TGraph') == True:
+            for i in range(o.obj.GetN()):
+                o.obj.SetPoint(i, o.obj.GetX()[i], o.obj.GetY()[i] * val)
+        if o.obj.InheritsFrom('TGraphErrors') == True:
+            for i in range(o.obj.GetN()):
+                o.obj.SetPointError(i, o.obj.GetEX()[i], o.obj.GetEY()[i] * val)
             
     def rebin(self, val = 2, norm = False):
         for o in self.l:
@@ -461,7 +486,98 @@ class dlist(debugable):
                 ax.SetLabelSize(_label_size)
                 ax.SetLabelFont(42)
     
-    def draw(self, option='', miny=None, maxy=None, logy=False, colopt=''):
+    def adjust_axis(self, xfactor, yfactor):
+        print xfactor/yfactor
+        for i in range(3):
+            self.axis_title_size[i]   = self.axis_title_size[i]   * xfactor/yfactor
+            self.axis_label_size[i]   = self.axis_label_size[i]   * xfactor/yfactor
+            self.axis_title_offset[i] = self.axis_title_offset[i] * xfactor/yfactor
+
+    def _process_dopts(self, i):
+        o = self.l[i]
+        if o.dopt.hidden:
+            kolor = 0
+            o.obj.SetFillColor(kolor)
+            o.obj.SetFillColorAlpha(kolor, 0.0)
+            o.obj.SetLineColor(kolor)
+            o.obj.SetLineColorAlpha(kolor, 0.0)
+            o.obj.SetMarkerColor(kolor)                           
+            o.obj.SetMarkerColorAlpha(kolor, 0)
+            o.obj.SetFillStyle(1001)
+            o.obj.SetMarkerColor(kolor)   
+            o.obj.SetMarkerSize(-1)
+            o.obj.SetMarkerStyle(-1)
+            return
+        #line
+        if o.dopt.lstyle > 0:
+            o.obj.SetLineStyle(o.dopt.lstyle)
+        else:
+            if o.dopt.use_line:
+                o.obj.SetLineStyle(self.style.next_line())
+        #width
+        if o.dopt.lwidth > 0:
+            o.obj.SetLineWidth(o.dopt.lwidth)
+        #marker                    
+        if o.dopt.pstyle > 0:
+            o.obj.SetMarkerStyle(o.dopt.pstyle)
+        else:
+            if o.dopt.use_marker:
+                o.obj.SetMarkerStyle(self.style.next_marker())
+        o.obj.SetMarkerSize(o.dopt.psize)            
+        #fill
+        if o.dopt.fstyle > 0:
+                o.obj.SetFillStyle(o.dopt.fstyle)
+        else:
+            o.obj.SetFillStyle(0000)                
+            o.obj.SetFillColor(0)
+        #kolor
+        kolor = -1
+        if o.dopt.kolor > 0:
+            kolor = o.dopt.kolor
+        else:
+            if o.dopt.last_kolor:
+                if i > 0:
+                    kolor = self.l[i-1].dopt.kolor
+        if kolor < 0:
+            kolor = self.style.next_color()
+            o.dopt.kolor = kolor
+
+        o.obj.SetFillColor(kolor)
+        o.obj.SetLineColor(kolor)
+        o.obj.SetMarkerColor(kolor)                                
+
+    def _process_serror_dopts(self, i):
+        o = self.l[i]
+        #errx = ROOT.gStyle.GetErrorX()
+        #ROOT.gStyle.SetErrorX(0.5)
+        #ROOT.gStyle.SetErrorX(errx)
+        o.obj.SetMarkerColor(0)
+        o.obj.SetMarkerSize(-1)
+        o.obj.SetMarkerStyle(0)
+
+        #kolor
+        kolor = -1
+        if o.dopt.kolor > 0:
+            kolor = o.dopt.kolor
+        else:
+            if o.dopt.last_kolor:
+                if i > 0:
+                    kolor = self.l[i-1].dopt.kolor
+        if kolor < 0:
+            kolor = 7
+            o.dopt.kolor = kolor
+
+        o.obj.SetFillColor(kolor)
+        o.obj.SetLineColor(kolor)
+        o.obj.SetLineColorAlpha(kolor, 0.3)
+
+        o.obj.SetMarkerColor(kolor)                           
+        o.obj.SetMarkerColorAlpha(kolor, 0)
+
+        o.obj.SetFillColorAlpha(kolor, 0.3)
+        o.obj.SetFillStyle(1001)
+
+    def draw(self, option='', miny=None, maxy=None, logy=False, colopt='', adjust_pad=True):
         self.adjust_maxima(miny=miny, maxy=maxy, logy=logy)
         self.adjust_axis_attributes(0)
         self.adjust_axis_attributes(1)
@@ -471,70 +587,26 @@ class dlist(debugable):
         gdopt = draw_option(option)
         self.style.reset()
         
-        for i in range(len(self.l)):
-            o = self.l[i]
+        for i,o in enumerate(self.l):
             self.debug('::draw ' + o.name + ' ' + o.dopt.stripped())
-            #line
-            if o.dopt.lstyle > 0:
-                o.obj.SetLineStyle(o.dopt.lstyle)
-            else:
-                if o.dopt.use_line:
-                    o.obj.SetLineStyle(self.style.next_line())
-            #width
-            if o.dopt.lwidth > 0:
-                o.obj.SetLineWidth(o.dopt.lwidth)
-            #marker                    
-            if o.dopt.pstyle > 0:
-                o.obj.SetMarkerStyle(o.dopt.pstyle)
-            else:
-                if o.dopt.use_marker:
-                    o.obj.SetMarkerStyle(self.style.next_marker())
-            o.obj.SetMarkerSize(o.dopt.psize)
-            
-            #fill
-            if o.dopt.fstyle > 0:
-                    o.obj.SetFillStyle(o.dopt.fstyle)
-            else:
-                o.obj.SetFillStyle(0000)                
-                o.obj.SetFillColor(0)
-            #kolor
-            kolor = -1
-            if o.dopt.kolor > 0:
-                kolor = o.dopt.kolor
-            else:
-                if o.dopt.last_kolor:
-                    if i > 0:
-                        kolor = self.l[i-1].dopt.kolor
-            if kolor < 0:
-                kolor = self.style.next_color()
-                o.dopt.kolor = kolor
-
-            o.obj.SetFillColor(kolor)
-            o.obj.SetLineColor(kolor)
-            o.obj.SetMarkerColor(kolor)                                
-                
+            if o.dopt.is_error == False:
+                self._process_dopts(i)
             #errors
             extra_opt = []
             if o.dopt.is_error:
-                #errx = ROOT.gStyle.GetErrorX()
-                #ROOT.gStyle.SetErrorX(0.5)
                 extra_opt.append('E2')
-                #ROOT.gStyle.SetErrorX(errx)
-                o.obj.SetMarkerColor(0)
-                o.obj.SetMarkerSize(0)
-                o.obj.SetMarkerStyle(0)
-            #else:
-            #    if o.dopt.has(['X1']):
-            #        pass
-            #    else:
-            #        extra_opt.append(' X0')
+                self._process_serror_dopts(i)
+
             o.draw(' '.join(extra_opt))
             if gDebug:
                 dbgu.debug_obj(o.dopt)
-            
-        self.adjust_pad_margins()            
+
+        if adjust_pad == True:
+            self.adjust_pad_margins()            
         self.update()
-                            
+        self.pad = ROOT.gPad
+        print '[i]', self.name,'drawing on',self.pad
+
     def self_legend(self, ncols = 1, title='', x1=None, y1=None, x2=None, y2=None, tx_size=None):
         self.empty_legend(ncols, title, x1, y1, x2, y2, tx_size)
         for o in self.l:
@@ -685,6 +757,16 @@ class ListStorage:
         self.lists = []
         self.tcanvas = None
         tu.gList.append(self)
+        self.lx1 = None
+        self.lx2 = None
+        self.ly1 = None
+        self.ly2 = None
+
+    def __getitem__(self, i):
+        if i < len(self.lists) and i >= 0:
+            return self.lists[i]
+        else:
+            return None
 
     def add_to_list(self, lname, obj, title, dopt):
         hl = self.get(lname)
@@ -698,16 +780,44 @@ class ListStorage:
         self.lists.append(retl)
         return self.get(lname)
 
-    def draw_all(self):
+    def append(self, hl):
+        self.lists.append(hl)
+
+    def legend_position(self, x1, y1, x2, y2):
+        self.lx1 = x1
+        self.lx2 = x2
+        self.ly1 = y1
+        self.ly2 = y2
+
+    def draw_all(self, option='', miny=None, maxy=None, logy=False, colopt='', logtitle='', orient=0, condense=False):
         if len(self.lists) <= 0:
             return
-        self.tc = du.make_canvas_grid(len(self.lists), None, self.name+'-canvas', self.name)
+        if condense == False:
+            self.tcanvas = du.make_canvas_grid(len(self.lists), None, self.name+'-canvas', self.name, orient=orient)
+        else:
+            tmptc = ROOT.TCanvas('tc-'+self.name, 'tc-'+self.name)
+            self.tcanvas = pcanvas.pcanvas(tmptc, len(self.lists))
+            self.adjust_axis()
         for i,l in enumerate(self.lists):
-            #if i == 0:
-            #    l.make_canvas()
-            self.tc.cd(i+1)
-            l.draw()
-            l.self_legend()
+            self.tcanvas.cd(i+1)
+            if condense == False:
+                l.draw(logy=logy, option=option, miny=miny, maxy=maxy, colopt=colopt)
+            else:
+                l.draw(logy=logy, option=option, miny=miny, maxy=maxy, colopt=colopt, adjust_pad=False)
+            if self.lx1 != None:
+                l.self_legend(1, logtitle, self.lx1, self.ly1, self.lx2, self.ly2)
+            else:
+                l.self_legend(1, title=logtitle)
+            l.update(logy=logy)
+
+    def adjust_axis(self):
+        for i,hl in enumerate(self.lists):
+            xFactor = self.tcanvas.pad(0).GetAbsWNDC() / self.tcanvas.pad(i).GetAbsWNDC()
+            yFactor = self.tcanvas.pad(0).GetAbsHNDC() / self.tcanvas.pad(i).GetAbsHNDC()
+            hl.adjust_axis(xFactor, yFactor)
+
+    def pdf(self):
+        self.tc.Print(self.name+'.pdf','.pdf')
 
 gDebugLists = ListStorage()
 gDL = gDebugLists
@@ -1029,3 +1139,11 @@ def make_graph(name, data):
             pass
         
     return make_graph_xy(name, x, y, xe, ye)
+
+def make_list(name, xmin, xmax):
+    hl = dlist(name)
+    gr = ROOT.TGraph(1)
+    gr.SetPoint(0, xmin, 0)
+    gr.SetPoint(1, xmax,  0)
+    hl.add(gr, 'fake', 'noleg hidden p')
+    return hl
