@@ -2,7 +2,7 @@ import ROOT
 import tutils as tu
 import math
 
-def draw_line(x1, y1, x2, y2, col=2, style=7, width=2):
+def draw_line(x1, y1, x2, y2, col=2, style=7, width=2, option='brNDC'):
     l = ROOT.TLine(x1, y1, x2, y2)
     l.SetLineColor(col)
     l.SetLineWidth(width)
@@ -156,24 +156,49 @@ def readjust_6fold(tc):
     gp.SetRightMargin(0)
     tc.Update()
 
-def fix_graph(gr):
+def fix_graph(gr, thr=None, debug=False):
     xgr = gr.GetX()
     ygr = gr.GetY()
     points_to_remove = []
     npoints = gr.GetN()
     for i in range(0, npoints):
+        if thr != None:
+            if ygr[i] < thr:
+                points_to_remove.append(i)
+                continue
+        if math.isinf(xgr[i]) or math.isinf(ygr[i]):
+            points_to_remove.append(i)
+            continue
+        if math.isnan(xgr[i]) or math.isnan(ygr[i]):
+            points_to_remove.append(i)            
+            continue
         if i == 0:
             if xgr[i] == 0 and ygr[i] == 0:
                 points_to_remove.append(i)
             continue
         if xgr[i] <= xgr[i-1]:
             points_to_remove.append(i)
+            continue
 
     for i in points_to_remove:
         if i == 0:
-            print '[e] problem with:',gr.GetName()
-        print '    removing point at',i, xgr[i], ygr[i]
+            if debug: 
+                print '[e] problem with:',gr.GetName()
+        if debug:
+            print '    removing point at',i, xgr[i], ygr[i]
         gr.RemovePoint(i)
 
+    if len(points_to_remove)>0:
+        fix_graph(gr)
+
+    npoints = gr.GetN()
+    for i in range(0, npoints):
+        xgr = gr.GetX()
+        ygr = gr.GetY()
+        if debug:
+            print '    left point at',i, xgr[i], ygr[i]
     npoints_new = gr.GetN()
-    print '[i]', gr.GetName(),'npoints:',npoints_new,'was:',npoints
+    if debug:
+        print '[i]', gr.GetName(),'npoints:',npoints_new,'was:',npoints
+    return gr
+

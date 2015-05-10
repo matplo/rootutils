@@ -18,6 +18,9 @@ class pcanvas(object):
 	def pad(self, i):
 		return self.pads[self.mapping[i]].cd()
 
+	def Print(self, name, option):
+		self.tc.Print(name, option)
+
 	def set_nx_ny(self, n):
 		nv = float(n)
 		ir = int(math.sqrt(nv))

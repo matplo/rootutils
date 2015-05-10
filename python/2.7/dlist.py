@@ -503,11 +503,11 @@ class dlist(debugable):
     
     def adjust_to_pad(self, pad):
         if pad == self.pad:
-            print '[i] nothing to adjust:',pad, self.pad
+            #print '[i] nothing to adjust:',pad, self.pad
             return
         xfactor = pad.GetAbsWNDC() / self.pad.GetAbsWNDC()
         yfactor = pad.GetAbsHNDC() / self.pad.GetAbsHNDC()
-        print '::adjust_to_pad',xfactor, yfactor
+        #print '::adjust_to_pad',xfactor, yfactor
         i = 0
         new_size_t  = self.axis_title_size[i]   * yfactor
         new_size_l  = self.axis_label_size[i]   * yfactor
@@ -634,7 +634,7 @@ class dlist(debugable):
         self.update()
         self.pad_name = ROOT.gPad.GetName() # name is better
         self.get_pad_drawn();
-        print '[i]', self.name,'drawing on',self.pad
+        self.debug('[i] ' + self.name + ' drawing on ' + str(self.pad))
 
     def get_pad_drawn(self):
         self.pad = ROOT.gROOT.FindObject(self.pad_name);
@@ -856,7 +856,7 @@ class ListStorage:
             hl.adjust_to_pad(self.lists[0].pad)
 
     def pdf(self):
-        self.tc.Print(self.name+'.pdf','.pdf')
+        self.tcanvas.Print(self.name+'.pdf','.pdf')
 
 gDebugLists = ListStorage()
 gDL = gDebugLists
