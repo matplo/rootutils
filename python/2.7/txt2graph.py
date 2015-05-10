@@ -35,11 +35,10 @@ def make_graph_from_file(fn = None, xye = [0, 1, 2, 3]):
     gr = dlist.make_graph_xy(grname,x,y,xe=xe,ye=ye)
     return gr
 
-def graph():
-    
-    fname = ut.get_arg_with('-f')
-    hlname = 'stdin'
-    if fname:
+def graph(fname):    
+    if fname == None:
+        hlname = 'stdin'
+    else:
         hlname = fname
     hl = dlist.dlist(hlname)
     xye  = [0, 1, 2, 3]
@@ -76,5 +75,6 @@ if __name__=="__main__":
     tu.setup_basic_root()
     if ut.is_arg_set('--debug'):
         dlist.gDebug = True    
-    graph()
+    fname = ut.get_arg_with('-f')
+    graph(fname)
     tu.wait()

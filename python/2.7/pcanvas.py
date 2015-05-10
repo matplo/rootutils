@@ -10,12 +10,13 @@ class pcanvas(object):
 		self.pads = []
 		self.set_nx_ny(self.n)
 		self.partition(self.nx, self.ny, lm, rm, bm, tm)
+		self.mapping = [1, 3, 5, 0, 2, 4]
 
 	def cd(self, i):
-		return self.pads[i-1].cd()
+		return self.pads[self.mapping[i-1]].cd()
 
 	def pad(self, i):
-		return self.pads[i].cd()
+		return self.pads[self.mapping[i]].cd()
 
 	def set_nx_ny(self, n):
 		nv = float(n)
@@ -27,7 +28,7 @@ class pcanvas(object):
 				ic = ic + 1
 		self.nx = ir
 		self.ny = ic
-		print self.ny, self.nx
+		#print self.ny, self.nx
 
 	def partition(self, Nx = 2, Ny = 2,
 					lMargin = 0.15, rMargin = 0.05,

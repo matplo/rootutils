@@ -194,20 +194,37 @@ class draw_object(debugable):
              
 class dlist(debugable):
     def __init__(self, name='hl'):
-        self.name = name
-        self.l = []
-        self.style = style_iterator()
-        self.maxy = 1e6 # was 1
-        self.miny = -1e6 # was 0
+        self.name              = name
+        self.l                 = []
+        self.style             = style_iterator()
+        self.maxy              = 1e6 # was 1
+        self.miny              = -1e6 # was 0
         self.max_adjusted      = False
-        self.axis_title_offset = [1.4, 1.4, 1.4]
-        self.axis_title_size   = [0.05, 0.05, 0.05]
-        self.axis_label_size   = [0.04, 0.04, 0.04]
-        self.pattern = None
-        self.tcanvas = None
-        self.minx    = None
-        self.maxx    = None
-        self.pad     = None # pad where last drawn
+        self.axis_title_offset = [5,   5,  5] #[1.4, 1.4, 1.4]
+        self.axis_title_size   = [12, 12, 12] #[0.05, 0.05, 0.05]
+        self.axis_label_size   = [12, 12, 12] # for font 42 [0.04, 0.04, 0.04]
+        self.axis_label_offset = [0.02, 0.02, 0.02]
+        self.font              = 42
+        self.pattern           = None
+        self.tcanvas           = None
+        self.minx              = None
+        self.maxx              = None
+        self.pad_name          = None # pad where last drawn
+        self.pad               = None # pad where last drawn
+        self.set_font(42)
+
+    def set_font(self, fn, scale=1.):
+        self.font = fn
+        if self.font == 42:
+            self.axis_title_offset = [1.40, 1.40, 1.40]
+            self.axis_title_size   = [0.05, 0.05, 0.05]
+            self.axis_label_size   = [0.04, 0.04, 0.04]
+            self.axis_label_offset = [0.02, 0.02, 0.02]
+        if self.font == 43:
+            self.axis_title_offset = [ 3,     3,     3] #[1.4, 1.4, 1.4]
+            self.axis_label_offset = [ 0.01,  0.01,  0.01]
+            self.axis_title_size   = [12 * scale, 12 * scale, 12 * scale] #[0.05, 0.05, 0.05]
+            self.axis_label_size   = [12 * scale, 12 * scale, 12 * scale] # for font 42 [0.04, 0.04, 0.04]
 
     def __getitem__(self, i):
         if i < len(self.l) and i >= 0:
@@ -477,21 +494,31 @@ class dlist(debugable):
                 if label_size != -1:
                     self.axis_label_size[which]   = label_size
 
-                _title_offset = self.axis_title_offset[which]
-                _title_size   = self.axis_title_size[which]
-                _label_size   = self.axis_label_size[which]
-                ax.SetTitleOffset(_title_offset)
-                ax.SetTitleSize(_title_size)
-                ax.SetTitleFont(42)
-                ax.SetLabelSize(_label_size)
-                ax.SetLabelFont(42)
+                ax.SetTitleFont  (self.font)
+                ax.SetTitleOffset(self.axis_title_offset[which])
+                ax.SetTitleSize  (self.axis_title_size[which])
+                ax.SetLabelFont  (self.font)
+                ax.SetLabelSize  (self.axis_label_size[which])
+                ax.SetLabelOffset(self.axis_label_offset[which])
     
-    def adjust_axis(self, xfactor, yfactor):
-        print xfactor/yfactor
-        for i in range(3):
-            self.axis_title_size[i]   = self.axis_title_size[i]   * xfactor/yfactor
-            self.axis_label_size[i]   = self.axis_label_size[i]   * xfactor/yfactor
-            self.axis_title_offset[i] = self.axis_title_offset[i] * xfactor/yfactor
+    def adjust_to_pad(self, pad):
+        if pad == self.pad:
+            print '[i] nothing to adjust:',pad, self.pad
+            return
+        xfactor = pad.GetAbsWNDC() / self.pad.GetAbsWNDC()
+        yfactor = pad.GetAbsHNDC() / self.pad.GetAbsHNDC()
+        print '::adjust_to_pad',xfactor, yfactor
+        i = 0
+        new_size_t  = self.axis_title_size[i]   * yfactor
+        new_size_l  = self.axis_label_size[i]   * yfactor
+        new_size_to = self.axis_title_offset[i] * yfactor
+        self.adjust_axis_attributes(i, new_size_t, new_size_l, new_size_to)
+        i = 1
+        new_size_t  = self.axis_title_size[i]   * xfactor
+        new_size_l  = self.axis_label_size[i]   * xfactor
+        new_size_to = self.axis_title_offset[i] * xfactor
+        self.adjust_axis_attributes(i, new_size_t, new_size_l, new_size_to)
+        self.update()
 
     def _process_dopts(self, i):
         o = self.l[i]
@@ -603,12 +630,18 @@ class dlist(debugable):
 
         if adjust_pad == True:
             self.adjust_pad_margins()            
+
         self.update()
-        self.pad = ROOT.gPad
+        self.pad_name = ROOT.gPad.GetName() # name is better
+        self.get_pad_drawn();
         print '[i]', self.name,'drawing on',self.pad
 
-    def self_legend(self, ncols = 1, title='', x1=None, y1=None, x2=None, y2=None, tx_size=None):
-        self.empty_legend(ncols, title, x1, y1, x2, y2, tx_size)
+    def get_pad_drawn(self):
+        self.pad = ROOT.gROOT.FindObject(self.pad_name);
+        return self.pad
+
+    def self_legend(self, ncols = 1, title='', x1=None, y1=None, x2=None, y2=None, tx_size=None, option='brNDC'):
+        self.empty_legend(ncols, title, x1, y1, x2, y2, tx_size, option)
         for o in self.l:
             if not self.is_selected(o):
                 continue
@@ -621,11 +654,11 @@ class dlist(debugable):
         self.legend.Draw()
         self.update()
 
-    def draw_legend(self, ncols = 1, title='', x1=None, y1=None, x2=None, y2=None, tx_size=None):
+    def draw_legend(self, ncols = 1, title='', x1=None, y1=None, x2=None, y2=None, tx_size=None, option='brNDC'):
         print '[w] obsolete call to draw_legend use self_legend instead...'
-        self.self_legend(ncols, title, x1, y1, x2, y2, tx_size)
-                    
-    def empty_legend(self, ncols, title='', x1=None, y1=None, x2=None, y2=None, tx_size=None):
+        self.self_legend(ncols, title, x1, y1, x2, y2, tx_size, option)
+
+    def empty_legend(self, ncols, title='', x1=None, y1=None, x2=None, y2=None, tx_size=None, option='brNDC'):
         if x1==None:
             x1 = 0.6 # was 0.3 # was 0.5
         if y1==None:
@@ -635,25 +668,29 @@ class dlist(debugable):
         if y2==None:
             y2 = 0.9 #0.88            
 
-        self.legend = ROOT.TLegend(x1, y1, x2, y2)
-        self.legend.SetHeader(title)
+        self.legend = ROOT.TLegend(x1, y1, x2, y2, title, option)
+        #self.legend.SetHeader(title)
         self.legend.SetNColumns(ncols)
         self.legend.SetBorderSize(0)
         self.legend.SetFillColor(ROOT.kWhite)
-        self.legend.SetFillStyle(0)            
+        self.legend.SetFillStyle(0)      
         #self.legend.SetTextSize(0.032)
+        self.legend.SetTextFont(self.font)
         if tx_size==None:
-            #tx_size=self.axis_title_size[0]
-            tx_size = 0.035 #0.045
+            if self.font == 42:
+                #tx_size=self.axis_title_size[0]
+                tx_size = 0.035 #0.045
+            if self.font == 43:
+                tx_size = 0.01
         self.legend.SetTextSize(tx_size)
         
         return self.legend
 
     def update(self, logy=False):
-        if ROOT.gPad:
+        if self.pad:
             if logy:
-                ROOT.gPad.SetLogy()
-            ROOT.gPad.Update()        
+                self.pad.SetLogy()
+            self.pad.Update()        
 
     def make_canvas(self, w=600, h=400, 
                     split=0, orientation=0, 
@@ -789,7 +826,8 @@ class ListStorage:
         self.ly1 = y1
         self.ly2 = y2
 
-    def draw_all(self, option='', miny=None, maxy=None, logy=False, colopt='', logtitle='', orient=0, condense=False):
+    def draw_all(self, option='', miny=None, maxy=None, logy=False, colopt='', legtitle='', orient=0, condense=False):
+        legoption = 'brNDC'
         if len(self.lists) <= 0:
             return
         if condense == False:
@@ -797,24 +835,25 @@ class ListStorage:
         else:
             tmptc = ROOT.TCanvas('tc-'+self.name, 'tc-'+self.name)
             self.tcanvas = pcanvas.pcanvas(tmptc, len(self.lists))
-            self.adjust_axis()
+            legoption = 'br'
         for i,l in enumerate(self.lists):
             self.tcanvas.cd(i+1)
+            if condense == True:
+                l.set_font(43, 1.4)
             if condense == False:
                 l.draw(logy=logy, option=option, miny=miny, maxy=maxy, colopt=colopt)
             else:
                 l.draw(logy=logy, option=option, miny=miny, maxy=maxy, colopt=colopt, adjust_pad=False)
             if self.lx1 != None:
-                l.self_legend(1, logtitle, self.lx1, self.ly1, self.lx2, self.ly2)
+                l.self_legend(1, legtitle, self.lx1, self.ly1, self.lx2, self.ly2, None, legoption)
             else:
-                l.self_legend(1, title=logtitle)
+                l.self_legend(ncols=1, title=legtitle, option=legoption)
             l.update(logy=logy)
+        self.adjust_pads()
 
-    def adjust_axis(self):
+    def adjust_pads(self):
         for i,hl in enumerate(self.lists):
-            xFactor = self.tcanvas.pad(0).GetAbsWNDC() / self.tcanvas.pad(i).GetAbsWNDC()
-            yFactor = self.tcanvas.pad(0).GetAbsHNDC() / self.tcanvas.pad(i).GetAbsHNDC()
-            hl.adjust_axis(xFactor, yFactor)
+            hl.adjust_to_pad(self.lists[0].pad)
 
     def pdf(self):
         self.tc.Print(self.name+'.pdf','.pdf')
