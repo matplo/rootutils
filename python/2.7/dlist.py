@@ -673,15 +673,17 @@ class dlist(debugable):
         self.legend.SetNColumns(ncols)
         self.legend.SetBorderSize(0)
         self.legend.SetFillColor(ROOT.kWhite)
-        self.legend.SetFillStyle(0)      
+        self.legend.SetFillStyle(0)
+        self.legend.SetFillColorAlpha(ROOT.kWhite, 0.0)
         #self.legend.SetTextSize(0.032)
         self.legend.SetTextFont(self.font)
+        self.legend.SetTextColor(1)
         if tx_size==None:
             if self.font == 42:
                 #tx_size=self.axis_title_size[0]
                 tx_size = 0.035 #0.045
             if self.font == 43:
-                tx_size = 0.01
+                tx_size = 14
         self.legend.SetTextSize(tx_size)
         
         return self.legend
