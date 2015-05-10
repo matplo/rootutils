@@ -105,21 +105,21 @@ def split_gPad(split_ratio=0.5, orient=0):
         tp1.cd()
     return savepad
 
-def draw_comment(comment, font_size = None, x1 = 0.0, y1 = 0.9, x2 = 0.99, y2 = 0.99):
+def draw_comment(comment, font_size = None, x1 = 0.0, y1 = 0.9, x2 = 0.99, y2 = 0.99, font = 42, dopt='brNDC'):
     if font_size == None:
         font_size = 0.04
     p = ROOT.gPad
     if p and x1==0.0:
         x1 = p.GetLeftMargin()
         x2 = 1. - p.GetRightMargin()
-    tx = ROOT.TPaveText(x1, y1, x2, y2, 'brNDC')
+    tx = ROOT.TPaveText(x1, y1, x2, y2, dopt)
     tx.SetBorderSize(0)
     tx.SetTextAlign(22)
     tx.SetTextSize( font_size )
-    #print 'setting text font to',42
-    tx.SetTextFont(42)
+    tx.SetTextFont( font )
     tx.AddText(comment)
     tx.SetFillColor(ROOT.kWhite)
+    tx.SetFillColorAlpha(ROOT.kWhite, 0.0)
     tx.Draw()
     tu.gList.append(tx)
     return tx
@@ -156,3 +156,24 @@ def readjust_6fold(tc):
     gp.SetRightMargin(0)
     tc.Update()
 
+def fix_graph(gr):
+    xgr = gr.GetX()
+    ygr = gr.GetY()
+    points_to_remove = []
+    npoints = gr.GetN()
+    for i in range(0, npoints):
+        if i == 0:
+            if xgr[i] == 0 and ygr[i] == 0:
+                points_to_remove.append(i)
+            continue
+        if xgr[i] <= xgr[i-1]:
+            points_to_remove.append(i)
+
+    for i in points_to_remove:
+        if i == 0:
+            print '[e] problem with:',gr.GetName()
+        print '    removing point at',i, xgr[i], ygr[i]
+        gr.RemovePoint(i)
+
+    npoints_new = gr.GetN()
+    print '[i]', gr.GetName(),'npoints:',npoints_new,'was:',npoints
