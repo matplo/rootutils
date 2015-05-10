@@ -42,7 +42,7 @@ class pcanvas(object):
 		hSpacing = 0.0;
 		hStep  = (1.- lMargin - rMargin - (Nx-1) * hSpacing) / Nx;
 
-		print Nx, Ny
+		#print Nx, Ny
 
 		for i in range(Nx):
 			if i==0:
