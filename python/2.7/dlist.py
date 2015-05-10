@@ -379,8 +379,8 @@ class dlist(debugable):
         return cobj    
         
     def add_list(self, hl):
-        for l in hl:
-            self.add(l.obj, l.obj.GetTitle(), l.dopt)
+        for l in hl.l:
+            self.add(l.obj, l.obj.GetTitle(), l.dopt.s)
 
     def reset_axis_titles(self, xt=None, yt=None, zt=None):
         for o in self.l:
@@ -766,7 +766,7 @@ class dlist(debugable):
         for h in self.l:
             i = self.l.index(h)
             if i < len(stitles):
-                h.SetTitle(stitles[i])
+                h.obj.SetTitle(stitles[i])
 
     def draw_comment(self, comment = '', font_size=None, x1 = 0.0, y1 = 0.9, x2 = 0.99, y2 = 0.99):
         du.draw_comment(comment, font_size, x1, y1, x2, y2)
