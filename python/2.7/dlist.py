@@ -743,8 +743,15 @@ class dlist(debugable):
         try:
             f = ROOT.TFile(fname, opt)
             f.cd()
-            for h in self.l:
-                newname = h.obj.GetName() + name_mod
+            for i,h in enumerate(self.l):
+                if 'mod:' in name_mod:
+                    smod = name_mod.replace('mod:', '')
+                    if len(smod) > 0:
+                        newname = self.name + '-{}-'.format(i) + smod
+                    else:
+                        newname = self.name + '-{}'.format(i)
+                else:
+                    newname = h.obj.GetName() + name_mod
                 h.obj.Write(newname)
             f.Close()
             print '[i] written to file',fname
