@@ -235,11 +235,11 @@ def resample_test(hin, hout, n, shift=0.0):
     #scale = (get_sum_of_bins(hin) / get_sum_of_bins(hout)) * (hin.GetBinWidth(1) / hout.GetBinWidth(1))
     #hout.Scale(scale)
 
-def shift_h(hin, shift=0.0):
-    hout = hin.Clone(hin.GetName() + '-shift-{}'.format(shift))
+def shift_h(hin, delta=0.0):
+    hout = hin.Clone(hin.GetName() + '-delta-{}'.format(delta))
     hout.Reset('M')
     for ib in range(1, hin.GetNbinsX() + 1):
-        bc   = hin.GetBinCenter(ib) + shift
+        bc   = hin.GetBinCenter(ib) + delta
         bnew = hout.FindBin(bc)
         if bnew > 1 and bnew <= hin.GetNbinsX():
             val  = hin.GetBinContent(ib)
