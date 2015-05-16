@@ -708,6 +708,11 @@ class dlist(debugable):
                 du.split_gPad(split, orientation)
         return self.tcanvas
     
+    def destroy_canvas(self):
+        if self.tcanvas != None:
+            self.tcanvas.Destructor()
+            self.tcanvas = None
+
     def scale_by_binwidth(self):
         for h in self.l:
             if h.obj.InheritsFrom('TH1'):
@@ -846,6 +851,7 @@ class ListStorage:
             self.tcanvas = pcanvas.pcanvas(tmptc, len(self.lists))
             legoption = 'br'
         for i,l in enumerate(self.lists):
+            legtitle = l.name
             self.tcanvas.cd(i+1)
             if condense == True:
                 l.set_font(43, 1.4)
@@ -866,6 +872,10 @@ class ListStorage:
 
     def pdf(self):
         self.tcanvas.Print(self.name+'.pdf','.pdf')
+
+    def write_all(self, mod=None):
+        for i,hl in enumerate(self.lists):
+            hl.write_to_file(name_mod = mod)
 
 gDebugLists = ListStorage()
 gDL = gDebugLists
