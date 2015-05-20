@@ -1178,7 +1178,7 @@ def make_graph_xy(name, x, y, xe = [], ye = []):
     gr = ROOT.TGraphErrors(len(xf), xa, ya, xae, yae)
     gr.SetName(name)
     return gr
-        
+
 def make_graph(name, data):
     x = []
     y = []
@@ -1197,6 +1197,38 @@ def make_graph(name, data):
             pass
         
     return make_graph_xy(name, x, y, xe, ye)
+
+def make_graph_ae_xy(name, x, y, xlow = [], xhigh = [], ylow = [], yhigh = []):
+    xf     = array('f', x)
+    yf     = array('f', y)
+    zs     = []
+    for i in range(len(x)):
+        zs.append(0)
+
+    if len(xlow) > 0:
+        xflow  = array('f', xlow)
+    else:
+        xflow  = array('f', zs)
+
+    if len(xhigh) > 0:
+       xfhigh = array('f', xhigh)
+    else:
+       xfhigh = array('f', zs)
+
+    if len(ylow) > 0:
+        yflow  = array('f', ylow)
+    else:
+        yflow  = array('f', zs)
+
+    if len(yhigh) > 0:
+       yfhigh = array('f', yhigh)
+    else:
+       yfhigh = array('f', zs)
+
+    #print len(x), xf, yf, xflow, xfhigh, yflow, yfhigh
+    gr = ROOT.TGraphAsymmErrors(len(x), xf, yf, xflow, xfhigh, yflow, yfhigh)
+    gr.SetName(name)
+    return gr
 
 def make_list(name, xmin, xmax):
     hl = dlist(name)

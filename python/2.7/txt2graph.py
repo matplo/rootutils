@@ -35,6 +35,63 @@ def make_graph_from_file(fn = None, xye = [0, 1, 2, 3]):
     gr = dlist.make_graph_xy(grname,x,y,xe=xe,ye=ye)
     return gr
 
+def make_graph_from_hepfile(fn = None, xye = [0,1,2,3,4,5], xe=None):
+    d     = read_data(fn)
+    x     = d[:,xye[0]]
+    y     = d[:,xye[1]]
+    xlow  = []
+    xhigh = []
+    dyem  = []    
+    dyep  = []    
+
+    if xye[2] >= 0:
+        try:
+            xlow  = d[:,xye[2]]
+        except:
+            xlow  = []
+    if xye[3] >= 0:
+        try:
+            xhigh = d[:,xye[3]]
+        except:
+            xhigh = []
+    if xye[4] >= 0:
+        try:
+            dyem = d[:,xye[4]]
+        except:
+            dyem = []    
+    if xye[5] >= 0:
+        try:
+            dyep = d[:,xye[5]]
+        except:
+            dyep = []    
+    name = 'graph_hepfile_' + str(xye)
+    if len(xlow) > 0:
+        for i,ix in enumerate(xlow):
+            v = x[i] - ix
+            if xe != None:
+                v = xe
+            xlow[i] = v
+    if len(xhigh) > 0:
+        for i,ix in enumerate(xhigh):
+            v = ix - x[i]
+            if xe != None:
+                v = xe
+            xhigh[i] = v
+    if len(dyem) > 0:
+        for i, ix in enumerate(dyem):
+            v = dyem[i]
+            dyem[i] = abs(v)
+    if len(dyep) > 0:
+        for i, ix in enumerate(dyep):
+            v = dyep[i]
+            dyep[i] = abs(v)
+    print name
+    print ' - ',x, y
+    print ' - ',xlow, xhigh
+    print ' - ',dyem, dyep
+    gr = dlist.make_graph_ae_xy(name, x, y, xlow, xhigh, dyem, dyep)
+    return gr
+
 def graph(fname):    
     if fname == None:
         hlname = 'stdin'
