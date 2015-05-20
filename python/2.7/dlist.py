@@ -20,7 +20,8 @@ class debugable(object):
 class style_iterator(debugable):
     good_colors  = [ -1,  2,  1,  9,  6, 32, 49, 40,  8, 43, 46, 39, 28, 38]
     good_markers = [ -1, 20, 24, 21, 25, 27, 28, 33, 34, 29, 30]
-    good_lines   = [ -1,  1,  2,  3,  5,  8,  6,  7,  4,  9, 10]
+    #good_lines   = [ -1,  1,  2,  3,  5,  8,  6,  7,  4,  9, 10]
+    good_lines   = [ -1,  1,  2,  3,  5,  7,  9,  6, 8, 4, 10]
     
     def __init__(self):
         self.reset()
@@ -104,7 +105,8 @@ class draw_option(debugable):
         self.no_legend   = self.has(['noleg'],strip=True)
         self.hidden      = self.has(['hidden'],strip=True)
         self.last_kolor  = self.has(['-k'])
-        
+        self.last_line   = self.has(['-l'])
+
     def stripped(self):
         return self.strip
     
@@ -540,7 +542,14 @@ class dlist(debugable):
             o.obj.SetLineStyle(o.dopt.lstyle)
         else:
             if o.dopt.use_line:
-                o.obj.SetLineStyle(self.style.next_line())
+                kline = -1
+                if o.dopt.last_line:
+                    if i > 0:
+                        kline = self.l[i-1].obj.GetLineStyle()
+                if kline < 0:
+                    kline = self.style.next_line()
+                o.dopt.lstyle = kline
+                o.obj.SetLineStyle(kline)
         #width
         if o.dopt.lwidth > 0:
             o.obj.SetLineWidth(o.dopt.lwidth)
@@ -567,7 +576,8 @@ class dlist(debugable):
                     kolor = self.l[i-1].dopt.kolor
         if kolor < 0:
             kolor = self.style.next_color()
-            o.dopt.kolor = kolor
+
+        o.dopt.kolor = kolor
 
         o.obj.SetFillColor(kolor)
         o.obj.SetLineColor(kolor)
