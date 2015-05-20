@@ -722,6 +722,11 @@ class dlist(debugable):
             self.tcanvas.Destructor()
             self.tcanvas = None
 
+    def resize_window(self, w, h):
+        self.tcanvas.SetWindowSize(w, h) # + (w - self.tcanvas.GetWw()), h + (h - self.tcanvas.GetWh()));
+        self.tcanvas.SetWindowSize(w + (w - self.tcanvas.GetWw()), h + (h - self.tcanvas.GetWh()));
+        self.tcanvas.Update()
+
     def scale_by_binwidth(self):
         for h in self.l:
             if h.obj.InheritsFrom('TH1'):
@@ -848,6 +853,11 @@ class ListStorage:
         self.lx2 = x2
         self.ly1 = y1
         self.ly2 = y2
+
+    def resize_window(self, w, h):
+        self.tcanvas.SetWindowSize(w, h) # + (w - self.tcanvas.GetWw()), h + (h - self.tcanvas.GetWh()));
+        self.tcanvas.SetWindowSize(w + (w - self.tcanvas.GetWw()), h + (h - self.tcanvas.GetWh()));
+        self.tcanvas.Update()
 
     def draw_all(self, option='', miny=None, maxy=None, logy=False, colopt='', legtitle='', orient=0, condense=False):
         legoption = 'brNDC'
