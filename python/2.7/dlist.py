@@ -667,7 +667,6 @@ class dlist(debugable):
             x2 = 0.8 #0.88
         if y2==None:
             y2 = 0.9 #0.88            
-
         self.legend = ROOT.TLegend(x1, y1, x2, y2, title, option)
         #self.legend.SetHeader(title)
         self.legend.SetNColumns(ncols)
@@ -851,7 +850,8 @@ class ListStorage:
             self.tcanvas = pcanvas.pcanvas(tmptc, len(self.lists))
             legoption = 'br'
         for i,l in enumerate(self.lists):
-            legtitle = l.name
+            if legtitle == '':
+                legtitle = l.name
             self.tcanvas.cd(i+1)
             if condense == True:
                 l.set_font(43, 1.4)
