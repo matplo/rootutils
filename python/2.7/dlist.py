@@ -197,6 +197,7 @@ class draw_object(debugable):
 class dlist(debugable):
     def __init__(self, name='hl'):
         self.name              = name
+        self.title             = name
         self.l                 = []
         self.style             = style_iterator()
         self.maxy              = 1e6 # was 1
@@ -218,9 +219,9 @@ class dlist(debugable):
     def set_font(self, fn, scale=1.):
         self.font = fn
         if self.font == 42:
-            self.axis_title_offset = [1.40, 1.40, 1.40]
-            self.axis_title_size   = [0.05, 0.05, 0.05]
-            self.axis_label_size   = [0.04, 0.04, 0.04]
+            self.axis_title_offset = [1.40, 1.45, 1.40] # y offset was 1.40
+            self.axis_title_size   = [0.05 * scale, 0.05 * scale, 0.05 * scale]
+            self.axis_label_size   = [0.04 * scale, 0.04 * scale, 0.04 * scale]
             self.axis_label_offset = [0.02, 0.02, 0.02]
         if self.font == 43:
             self.axis_title_offset = [ 3,     3,     3] #[1.4, 1.4, 1.4]
@@ -239,7 +240,7 @@ class dlist(debugable):
         
     def __str__(self):
         ret = []
-        ret.append('[i] dlist named: {}'.format(self.name))
+        ret.append('[i] dlist named: {} titled: {}'.format(self.name, self.title))
         for i,item in enumerate(self.l):
             o = item.obj
             ret.append('    {} {} {} {}'.format(i, o.IsA().GetName(), o.GetName(), o.GetTitle()))
@@ -378,6 +379,8 @@ class dlist(debugable):
                 self.maxy = robj.GetMaximum()
             if self.miny < robj.GetMinimum():
                 self.miny = robj.GetMinimum()
+        if robj.InheritsFrom('TH2'):
+            cobj = self.append(robj, new_title, draw_opt)            
         return cobj    
         
     def add_list(self, hl):
@@ -701,6 +704,7 @@ class dlist(debugable):
         if self.pad:
             if logy:
                 self.pad.SetLogy()
+            self.pad.Modified()
             self.pad.Update()        
 
     def make_canvas(self, w=600, h=400, 
@@ -727,12 +731,15 @@ class dlist(debugable):
         self.tcanvas.SetWindowSize(w + (w - self.tcanvas.GetWw()), h + (h - self.tcanvas.GetWh()));
         self.tcanvas.Update()
 
-    def scale_by_binwidth(self):
+    def scale_by_binwidth(self, modifYtitle = True):
         for h in self.l:
             if h.obj.InheritsFrom('TH1'):
                 if h.obj.GetSumw2() == None:
                     h.obj.Sumw2()
                 bw   = h.obj.GetBinWidth(1)
+                if modifYtitle == True:
+                    newytitle = h.obj.GetYaxis().GetTitle() + ' / {}'.format(bw)
+                    h.obj.GetYaxis().SetTitle(newytitle)
                 h.obj.Scale(1./bw)
             else:
                 print '[w] normalize not defined for non histogram...'
@@ -871,7 +878,9 @@ class ListStorage:
             legoption = 'br'
         for i,l in enumerate(self.lists):
             if legtitle == '':
-                legtitle = l.name
+                slegtitle = l.title
+            else:
+                slegtitle = legtitle
             self.tcanvas.cd(i+1)
             if condense == True:
                 l.set_font(43, 1.4)
@@ -880,9 +889,9 @@ class ListStorage:
             else:
                 l.draw(logy=logy, option=option, miny=miny, maxy=maxy, colopt=colopt, adjust_pad=False)
             if self.lx1 != None:
-                l.self_legend(1, legtitle, self.lx1, self.ly1, self.lx2, self.ly2, None, legoption)
+                l.self_legend(1, slegtitle, self.lx1, self.ly1, self.lx2, self.ly2, None, legoption)
             else:
-                l.self_legend(ncols=1, title=legtitle, option=legoption)
+                l.self_legend(ncols=1, title=slegtitle, option=legoption)
             l.update(logy=logy)
         self.adjust_pads()
 

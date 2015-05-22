@@ -42,10 +42,13 @@ def split_canvas(name, title, w=600, h=400, split_ratio=0.2, vertical=0):
     tp1 = ROOT.TPad('1', '1', 0.0, 1.0, 0.7, 0.0)
     tp1.Draw()
     tp2 = ROOT.TPad('2', '2', 0.7, 1.0, 1.0, 0.0)
-    tp2.Draw()
-    
+    tp2.Draw()    
+
     tu.gList.append(tc)
 
+    return tc
+
+#def adjust_pad_margins(_left=0.17, _right=0.01, _top=0.05, _bottom=0.13):
 def adjust_pad_margins(_left=0.17, _right=0.01, _top=0.1, _bottom=0.17):
     p = ROOT.gPad
     if p:
@@ -156,9 +159,15 @@ def readjust_6fold(tc):
     gp.SetRightMargin(0)
     tc.Update()
 
+def resize_window(tcanvas, w, h):
+    tcanvas.SetWindowSize(w, h) # + (w - self.tcanvas.GetWw()), h + (h - self.tcanvas.GetWh()));
+    tcanvas.SetWindowSize(w + (w - tcanvas.GetWw()), h + (h - tcanvas.GetWh()));
+    tcanvas.Update()
+
+
 def fix_graph(gr, thr=None, debug=False):
-    xgr = gr.GetX()
-    ygr = gr.GetY()
+    xgr              = gr.GetX()
+    ygr              = gr.GetY()
     points_to_remove = []
     npoints = gr.GetN()
     for i in range(0, npoints):
