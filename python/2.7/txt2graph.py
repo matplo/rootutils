@@ -35,6 +35,11 @@ def make_graph_from_file(fn = None, xye = [0, 1, 2, 3]):
     gr = dlist.make_graph_xy(grname,x,y,xe=xe,ye=ye)
     return gr
 
+def get_hep_xeye(err=False):
+    if err == True:
+        return [0, 3, 1, 2, 6, 7]
+    return [0, 3, 1, 2, 4, 5]
+
 def make_graph_from_hepfile(fn = None, xye = [0,1,2,3,4,5], xe=None):
     d     = read_data(fn)
     x     = d[:,xye[0]]

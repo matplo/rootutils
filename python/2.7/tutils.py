@@ -389,3 +389,9 @@ class DateHistogramRoot(object):
             return self.hcumulant
 
         return self.histogram
+
+def shift_graph(gr, xdelta):
+    npoints = gr.GetN()
+    for i in range(0, npoints):
+        xgr = gr.GetX()[i]
+        gr.GetX()[i] = xgr + xdelta
