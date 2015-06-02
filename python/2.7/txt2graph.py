@@ -97,7 +97,7 @@ def make_graph_from_hepfile(fn = None, xye = [0,1,2,3,4,5], xe=None):
     gr = dlist.make_graph_ae_xy(name, x, y, xlow, xhigh, dyem, dyep)
     return gr
 
-def graph(fname):    
+def graph(fname, write=False):    
     if fname == None:
         hlname = 'stdin'
     else:
@@ -129,7 +129,8 @@ def graph(fname):
     
     tu.gList.append(hl)
 
-    hl.write_to_file(hl.name+'.root')
+    if write==True:
+        hl.write_to_file(hl.name+'.root')
     
     return gr
 
