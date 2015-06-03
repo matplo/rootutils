@@ -126,9 +126,11 @@ class draw_option(debugable):
         if self.no_legend:
             return ret
         if self.use_marker:
-            ret = ret + 'p'
+            ret = ret + ' p '
         if self.use_line:
-            ret = ret + 'l'
+            ret = ret + ' l '
+        if self.is_error:
+            ret = ret + ' f '
         return ret
 
     def has(self, lst, strip=False):
@@ -397,6 +399,13 @@ class dlist(debugable):
                 if o.obj.InheritsFrom('TH1'):
                     o.obj.GetZaxis().SetTitle(zt)
 
+    def fix_x_range(self, xmin, xmax):
+        gr = ROOT.TGraph(2)
+        gr.SetPoint(0, xmin,  100)
+        gr.SetPoint(1, xmax,  200)
+        o = draw_object(gr, 'zoom_axis_obj', 'fake', 'noleg hidden p')
+        self.l.insert(0, o)
+
     def zoom_axis(self, which, xmin, xmax):
         ax = None
         for o in self.l:
@@ -595,6 +604,13 @@ class dlist(debugable):
         o.obj.SetMarkerSize(-1)
         o.obj.SetMarkerStyle(0)
 
+        #line
+        if o.dopt.lstyle > 0:
+            o.obj.SetLineStyle(o.dopt.lstyle)
+        #width
+        if o.dopt.lwidth > 0:
+            o.obj.SetLineWidth(o.dopt.lwidth)
+
         #kolor
         kolor = -1
         if o.dopt.kolor > 0:
@@ -607,14 +623,18 @@ class dlist(debugable):
             kolor = 7
             o.dopt.kolor = kolor
 
+        alpha = 0.3
+        if o.dopt.alpha > 0:
+            alpha = o.dopt.alpha/100.
+
         o.obj.SetFillColor(kolor)
         o.obj.SetLineColor(kolor)
-        o.obj.SetLineColorAlpha(kolor, 0.3)
+        o.obj.SetLineColorAlpha(kolor, alpha)
 
         o.obj.SetMarkerColor(kolor)                           
         o.obj.SetMarkerColorAlpha(kolor, 0)
 
-        o.obj.SetFillColorAlpha(kolor, 0.3)
+        o.obj.SetFillColorAlpha(kolor, alpha)
         o.obj.SetFillStyle(1001)
 
     def draw(self, option='', miny=None, maxy=None, logy=False, colopt='', adjust_pad=True):
@@ -820,6 +840,9 @@ class dlist(debugable):
 
     def pdf(self):
         self.tcanvas.Print(self.name+'.pdf','.pdf')
+
+    def png(self):
+        self.tcanvas.Print(self.name+'.png','.png')
     
 class ListStorage:
     def __init__(self, name = None):
@@ -852,6 +875,11 @@ class ListStorage:
         self.lists.append(retl)
         return self.get(lname)
 
+    def zoom_axis(self, which, xmin, xmax):
+        for l in self.lists:
+            l.zoom_axis(which, xmin, xmax)
+        self.update()
+
     def append(self, hl):
         self.lists.append(hl)
 
@@ -865,6 +893,11 @@ class ListStorage:
         self.tcanvas.SetWindowSize(w, h) # + (w - self.tcanvas.GetWw()), h + (h - self.tcanvas.GetWh()));
         self.tcanvas.SetWindowSize(w + (w - self.tcanvas.GetWw()), h + (h - self.tcanvas.GetWh()));
         self.tcanvas.Update()
+
+    def fix_x_range(self, xmin, xmax):
+        for l in self.lists:
+            l.fix_x_range(xmin, xmax)
+            print l
 
     def draw_all(self, option='', miny=None, maxy=None, logy=False, colopt='', legtitle='', orient=0, condense=False):
         legoption = 'brNDC'
@@ -902,9 +935,16 @@ class ListStorage:
     def pdf(self):
         self.tcanvas.Print(self.name+'.pdf','.pdf')
 
+    def png(self):
+        self.tcanvas.Print(self.name+'.png','.png')
+
     def write_all(self, mod=None):
         for i,hl in enumerate(self.lists):
             hl.write_to_file(name_mod = mod)
+
+    def update(self):
+        for l in self.lists:
+            l.update()
 
 gDebugLists = ListStorage()
 gDL = gDebugLists
@@ -1261,7 +1301,7 @@ def make_graph_ae_xy(name, x, y, xlow = [], xhigh = [], ylow = [], yhigh = []):
 
 def make_list(name, xmin, xmax):
     hl = dlist(name)
-    gr = ROOT.TGraph(1)
+    gr = ROOT.TGraph(2)
     gr.SetPoint(0, xmin, 0)
     gr.SetPoint(1, xmax,  0)
     hl.add(gr, 'fake', 'noleg hidden p')
