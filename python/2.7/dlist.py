@@ -131,6 +131,8 @@ class draw_option(debugable):
             ret = ret + ' l '
         if self.is_error:
             ret = ret + ' f '
+        if self.fstyle != 0:
+            ret = ret + ' f '
         return ret
 
     def has(self, lst, strip=False):
