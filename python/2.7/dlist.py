@@ -594,6 +594,14 @@ class dlist(debugable):
         o.obj.SetLineColor(kolor)
         o.obj.SetMarkerColor(kolor)                                
 
+        alpha = 1.0
+        if o.dopt.alpha > 0:
+            alpha = o.dopt.alpha/100.
+            o.obj.SetFillColorAlpha(kolor, alpha)
+            o.obj.SetLineColorAlpha(kolor, alpha)
+            o.obj.SetMarkerColorAlpha(kolor, alpha)
+
+
     def _process_serror_dopts(self, i):
         o = self.l[i]
         #errx = ROOT.gStyle.GetErrorX()
