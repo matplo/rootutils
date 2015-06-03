@@ -154,11 +154,8 @@ class draw_option(debugable):
                 continue
             if what in tt[0]:
                 try:
-                    nt = tt[1:]
-                    if what=='a':
-                        val = float(nt)
-                    else:
-                        val = int(nt)
+                    nt  = tt[1:]
+                    val = int(nt)
                 except:
                     pass
         self.debug('::get_style_from_opt on {} returning {}'.format(what, val))
@@ -221,7 +218,7 @@ class dlist(debugable):
     def set_font(self, fn, scale=1.):
         self.font = fn
         if self.font == 42:
-            self.axis_title_offset = [1.40, 1.45, 1.40] # y offset was 1.40
+            self.axis_title_offset = [1.40, 1.20, 1.40] # y offset was 1.40 then 1.45
             self.axis_title_size   = [0.05 * scale, 0.05 * scale, 0.05 * scale]
             self.axis_label_size   = [0.04 * scale, 0.04 * scale, 0.04 * scale]
             self.axis_label_offset = [0.02, 0.02, 0.02]
