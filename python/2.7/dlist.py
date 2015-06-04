@@ -98,14 +98,14 @@ class draw_option(debugable):
             self.psize = 0.9
         else:
             self.psize = self.psize/100.
-        self.use_line    = self.check_use_line()
-        self.bw          = self.check_black_white()
-        self.use_marker  = self.check_use_marker()
-        self.is_error    = self.has(['serror'],strip=True)
-        self.no_legend   = self.has(['noleg'],strip=True)
-        self.hidden      = self.has(['hidden'],strip=True)
-        self.last_kolor  = self.has(['-k'])
-        self.last_line   = self.has(['-l'])
+        self.use_line   = self.check_use_line()
+        self.bw         = self.check_black_white()
+        self.use_marker = self.check_use_marker()
+        self.is_error   = self.has(['serror'], strip=True)
+        self.no_legend  = self.has(['noleg'],  strip=True)
+        self.hidden     = self.has(['hidden'], strip=True)
+        self.last_kolor = self.has(['-k'])
+        self.last_line  = self.has(['-l'])
 
     def stripped(self):
         return self.strip
@@ -220,7 +220,7 @@ class dlist(debugable):
     def set_font(self, fn, scale=1.):
         self.font = fn
         if self.font == 42:
-            self.axis_title_offset = [1.40, 1.20, 1.40] # y offset was 1.40 then 1.45
+            self.axis_title_offset = [1.40, 1.40, 1.40] # y offset was 1.40 then 1.45
             self.axis_title_size   = [0.05 * scale, 0.05 * scale, 0.05 * scale]
             self.axis_label_size   = [0.04 * scale, 0.04 * scale, 0.04 * scale]
             self.axis_label_offset = [0.02, 0.02, 0.02]
@@ -1305,6 +1305,17 @@ def make_graph_ae_xy(name, x, y, xlow = [], xhigh = [], ylow = [], yhigh = []):
     gr = ROOT.TGraphAsymmErrors(len(x), xf, yf, xflow, xfhigh, yflow, yfhigh)
     gr.SetName(name)
     return gr
+
+def norm_error_graph(name, x, width, y, ymin, ymax=-1):
+    ax = [x - width/2.]
+    xl = [width/2.]
+    xh = [width/2.]
+    ay = [y]
+    yl = [ymin]
+    yh = [ymax]
+    if ymax < 0:
+        yh = [ymin]
+    return make_graph_ae_xy(name, ax, ay, xl, xh, yl, yh)
 
 def make_list(name, xmin, xmax):
     hl = dlist(name)

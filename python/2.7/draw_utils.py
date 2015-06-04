@@ -2,9 +2,11 @@ import ROOT
 import tutils as tu
 import math
 
-def draw_line(x1, y1, x2, y2, col=2, style=7, width=2, option='brNDC'):
+def draw_line(x1, y1, x2, y2, col=2, style=7, width=2, option='brNDC', alpha=0.3):
     l = ROOT.TLine(x1, y1, x2, y2)
     l.SetLineColor(col)
+    if alpha < 1.0:
+        l.SetLineColorAlpha(col, alpha)        
     l.SetLineWidth(width)
     l.SetLineStyle(style)
     l.Draw()
