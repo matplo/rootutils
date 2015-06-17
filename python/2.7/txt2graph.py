@@ -1,4 +1,4 @@
-#!/usr/bin/env python -i
+#!/usr/bin/env ipython
 
 import ROOT as r 
 import tutils as tu
