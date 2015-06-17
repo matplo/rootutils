@@ -35,11 +35,72 @@ def make_graph_from_file(fn = None, xye = [0, 1, 2, 3]):
     gr = dlist.make_graph_xy(grname,x,y,xe=xe,ye=ye)
     return gr
 
-def graph():
-    
-    fname = ut.get_arg_with('-f')
-    hlname = 'stdin'
-    if fname:
+def get_hep_xeye(err=False):
+    if err == True:
+        return [0, 3, 1, 2, 6, 7]
+    return [0, 3, 1, 2, 4, 5]
+
+def make_graph_from_hepfile(fn = None, xye = [0,1,2,3,4,5], xe=None):
+    d     = read_data(fn)
+    x     = d[:,xye[0]]
+    y     = d[:,xye[1]]
+    xlow  = []
+    xhigh = []
+    dyem  = []    
+    dyep  = []    
+
+    if xye[2] >= 0:
+        try:
+            xlow  = d[:,xye[2]]
+        except:
+            xlow  = []
+    if xye[3] >= 0:
+        try:
+            xhigh = d[:,xye[3]]
+        except:
+            xhigh = []
+    if xye[4] >= 0:
+        try:
+            dyem = d[:,xye[4]]
+        except:
+            dyem = []    
+    if xye[5] >= 0:
+        try:
+            dyep = d[:,xye[5]]
+        except:
+            dyep = []    
+    name = 'graph_hepfile_' + str(xye)
+    if len(xlow) > 0:
+        for i,ix in enumerate(xlow):
+            v = x[i] - ix
+            if xe != None:
+                v = xe
+            xlow[i] = v
+    if len(xhigh) > 0:
+        for i,ix in enumerate(xhigh):
+            v = ix - x[i]
+            if xe != None:
+                v = xe
+            xhigh[i] = v
+    if len(dyem) > 0:
+        for i, ix in enumerate(dyem):
+            v = dyem[i]
+            dyem[i] = abs(v)
+    if len(dyep) > 0:
+        for i, ix in enumerate(dyep):
+            v = dyep[i]
+            dyep[i] = abs(v)
+    print name
+    print ' - ',x, y
+    print ' - ',xlow, xhigh
+    print ' - ',dyem, dyep
+    gr = dlist.make_graph_ae_xy(name, x, y, xlow, xhigh, dyem, dyep)
+    return gr
+
+def graph(fname, write=False):    
+    if fname == None:
+        hlname = 'stdin'
+    else:
         hlname = fname
     hl = dlist.dlist(hlname)
     xye  = [0, 1, 2, 3]
@@ -68,7 +129,8 @@ def graph():
     
     tu.gList.append(hl)
 
-    hl.write_to_file(hl.name+'.root')
+    if write==True:
+        hl.write_to_file(hl.name+'.root')
     
     return gr
 
@@ -76,5 +138,6 @@ if __name__=="__main__":
     tu.setup_basic_root()
     if ut.is_arg_set('--debug'):
         dlist.gDebug = True    
-    graph()
+    fname = ut.get_arg_with('-f')
+    graph(fname)
     tu.wait()

@@ -208,6 +208,54 @@ def filter_single_entries(h, href=None, thr=10):
             h.SetBinContent(ib, 0)
             h.SetBinError(ib, 0)
 
+def get_sum_of_bins(h):
+    sum = 0.0
+    for ib in range(1, h.GetNbinsX()+1):
+        sum += h.GetBinContent(ib)
+    return sum
+
+def resample(hin, hout, n):
+    if hout.GetSumw2N() == 0:
+        hout.Sumw2()
+    for i in range(0, int(n)):
+        rndm = hin.GetRandom()
+        hout.Fill(rndm)
+    scale = (get_sum_of_bins(hin) / get_sum_of_bins(hout)) * (hin.GetBinWidth(1) / hout.GetBinWidth(1))
+    hout.Scale(scale)
+
+def resample_test(hin, hout, n, shift=0.0):
+    if hout.GetSumw2N() == 0:
+        hout.Sumw2()
+    for i in range(0, int(n)):
+        rndm = hin.GetRandom() + shift
+        rndm_bin = hin.FindBin(rndm)
+        bc = hin.GetBinContent(rndm_bin)
+        hout.Fill(rndm, bc)
+    hout.Scale(1./n)
+    #scale = (get_sum_of_bins(hin) / get_sum_of_bins(hout)) * (hin.GetBinWidth(1) / hout.GetBinWidth(1))
+    #hout.Scale(scale)
+
+def shift_h(hin, delta=0.0):
+    hout = hin.Clone(hin.GetName() + '-delta-{}'.format(delta))
+    hout.Reset('M')
+    for ib in range(1, hin.GetNbinsX() + 1):
+        bc   = hin.GetBinCenter(ib) + delta
+        bnew = hout.FindBin(bc)
+        if bnew > 1 and bnew <= hin.GetNbinsX():
+            val  = hin.GetBinContent(ib)
+            vale = hin.GetBinError(ib)
+            hout.SetBinContent(bnew, val)
+            hout.SetBinError(bnew, vale)
+    return hout
+
+def resample_to_new(hin, ntimes, nb, minx, maxx, shift=0.0):
+    hname = hin.GetName() + '-resampled'
+    htitle = hin.GetTitle() + '-resampled'
+    hout = ROOT.TH1D(hname, htitle, nb, minx, maxx)
+    hout.Sumw2()
+    resample(hin, hout, ntimes)
+    return hout
+
 def next_weekday(d, weekday):
     # note: next is ok if this is the same day
     days_ahead = weekday - d.weekday()
@@ -341,3 +389,9 @@ class DateHistogramRoot(object):
             return self.hcumulant
 
         return self.histogram
+
+def shift_graph(gr, xdelta):
+    npoints = gr.GetN()
+    for i in range(0, npoints):
+        xgr = gr.GetX()[i]
+        gr.GetX()[i] = xgr + xdelta
