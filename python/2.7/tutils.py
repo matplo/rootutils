@@ -115,7 +115,7 @@ def signal_handler(signum, frame):
             sub_p.send_signal(signal.SIGKILL)            
         sys.exit(0)
 
-def draw_h1d_from_ntuple(fname, ntname, var, cuts, bwidth, xlow, xhigh, title=None):
+def draw_h1d_from_ntuple(fname, ntname, var, cuts, bwidth, xlow, xhigh, title=None, modname=''):
     nbins = int((xhigh-xlow)/bwidth*1.)
     if nbins < 1:
         return None
@@ -124,6 +124,8 @@ def draw_h1d_from_ntuple(fname, ntname, var, cuts, bwidth, xlow, xhigh, title=No
     hname = hname.replace('*', 'x')
     hname = hname.replace('(', '.')
     hname = hname.replace(')', '.')
+    if len(modname) > 0:
+        hname = modname
     if title==None:
         htitle = ut.build_string([fname, var],' ')    
     else:
