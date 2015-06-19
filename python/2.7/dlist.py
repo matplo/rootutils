@@ -792,17 +792,21 @@ class dlist(debugable):
                 
     def write_to_file(self, fname=None, opt='RECREATE', name_mod=''):
         if fname==None:
-            fname = self.name.replace(' ','_') + '.root'
+            fname = self.name.replace(' ','_').replace('&&','and') + '.root'
         try:
             f = ROOT.TFile(fname, opt)
             f.cd()
             for i,h in enumerate(self.l):
-                if 'mod:' in name_mod:
+                if 'mod:' in name_mod or 'modn:' in name_mod:
                     smod = name_mod.replace('mod:', '')
+                    smod = name_mod.replace('modn:', '')                    
                     if len(smod) > 0:
                         newname = self.name + '-{}-'.format(i) + smod
                     else:
-                        newname = self.name + '-{}'.format(i)
+                        if 'modn:' in name_mod:
+                            newname =  'o-{}'.format(i)                            
+                        else:
+                            newname = self.name + '-{}'.format(i)
                 else:
                     newname = h.obj.GetName() + name_mod
                 h.obj.Write(newname)
@@ -945,9 +949,9 @@ class ListStorage:
     def png(self):
         self.tcanvas.Print(self.name+'.png','.png')
 
-    def write_all(self, mod=None):
+    def write_all(self, mod=None, opt='RECREATE'):
         for i,hl in enumerate(self.lists):
-            hl.write_to_file(name_mod = mod)
+            hl.write_to_file(opt=opt, name_mod = mod)
 
     def update(self):
         for l in self.lists:
@@ -1022,8 +1026,10 @@ def load_file(fname='', pattern=None, names_not_titles=True, draw_opt='HIST'):
                 draw_opt = draw_opt + 'l'
             if names_not_titles:
                 hl.add(obj, obj.GetName(), draw_opt)
+                hl.last().obj.SetName(key.GetName())
             else:
                 hl.add(obj, draw_opt=draw_opt)                    
+                hl.last().obj.SetName(key.GetName())
             #print '[i] add   :',key.GetName()
         else:
             #print '[i] ignore:',key.GetName()
@@ -1035,7 +1041,7 @@ def load_file(fname='', pattern=None, names_not_titles=True, draw_opt='HIST'):
 
     return hl
 
-def show_file(fname='', logy=False, pattern=None, draw_opt='p', names_not_titles=True, xmin=None, xmax=None):
+def show_file(fname='', logy=False, pattern=None, draw_opt='p', names_not_titles=True, xmin=None, xmax=None, ymin=None, ymax=None):
 
     tu.setup_basic_root()
     #ROOT.gROOT.Reset()
@@ -1055,7 +1061,7 @@ def show_file(fname='', logy=False, pattern=None, draw_opt='p', names_not_titles
         #hl.lineize()
         if xmin!=None and xmax!=None:
             hl.zoom_axis(0, xmin, xmax)
-        hl.draw(draw_opt, None, None, logy)
+        hl.draw(draw_opt, ymin, ymax, logy)
     if logy:
         ROOT.gPad.SetLogy()
 

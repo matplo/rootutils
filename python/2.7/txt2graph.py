@@ -90,10 +90,10 @@ def make_graph_from_hepfile(fn = None, xye = [0,1,2,3,4,5], xe=None):
         for i, ix in enumerate(dyep):
             v = dyep[i]
             dyep[i] = abs(v)
-    print name
-    print ' - ',x, y
-    print ' - ',xlow, xhigh
-    print ' - ',dyem, dyep
+    #print name
+    #print ' - ',x, y
+    #print ' - ',xlow, xhigh
+    #print ' - ',dyem, dyep
     gr = dlist.make_graph_ae_xy(name, x, y, xlow, xhigh, dyem, dyep)
     return gr
 
