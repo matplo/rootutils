@@ -216,7 +216,6 @@ class dlist(debugable):
         self.pad_name          = None # pad where last drawn
         self.pad               = None # pad where last drawn
         self.set_font(42)
-        self.d2canvas          = []
 
     def set_font(self, fn, scale=1.):
         self.font = fn
@@ -372,6 +371,9 @@ class dlist(debugable):
             robj = obj.obj
         except:
             robj = obj
+        if robj.InheritsFrom('TH2'):
+            cobj = self.append(robj, new_title, draw_opt)            
+            return cobj
         if robj.InheritsFrom("TH1") \
             or robj.InheritsFrom("TGraph") \
             or robj.InheritsFrom("TF1"):
@@ -381,8 +383,6 @@ class dlist(debugable):
                 self.maxy = robj.GetMaximum()
             if self.miny < robj.GetMinimum():
                 self.miny = robj.GetMinimum()
-        if robj.InheritsFrom('TH2'):
-            cobj = self.append(robj, new_title, draw_opt)            
         return cobj    
         
     def add_list(self, hl):
@@ -645,8 +645,16 @@ class dlist(debugable):
         o.obj.SetFillColorAlpha(kolor, alpha)
         o.obj.SetFillStyle(1001)
 
+    def has2D(self):
+        has2D = False
+        for i,o in enumerate(self.l):
+            if o.obj.IsA().InheritsFrom('TH2') == True:
+                has2D = True
+        return has2D
+
     def draw(self, option='', miny=None, maxy=None, logy=False, colopt='', adjust_pad=True):
-        self.adjust_maxima(miny=miny, maxy=maxy, logy=logy)
+        if self.has2D() == False:
+            self.adjust_maxima(miny=miny, maxy=maxy, logy=logy)
         self.adjust_axis_attributes(0)
         self.adjust_axis_attributes(1)
         self.adjust_axis_attributes(2)
@@ -655,6 +663,16 @@ class dlist(debugable):
         gdopt = draw_option(option)
         self.style.reset()
         
+        if self.has2D():
+            self.tcanvas = ROOT.gPad
+            if not self.tcanvas:
+                self.make_canvas()
+            self.tcanvas = du.make_canvas_grid(len(self.l), self.tcanvas)
+        if self.tcanvas != None:
+            tcname = self.tcanvas.GetName()
+        else:
+            tcname = 'used only in 2D case'
+
         for i,o in enumerate(self.l):
             self.debug('::draw ' + o.name + ' ' + o.dopt.stripped())
             if o.dopt.is_error == False:
@@ -664,20 +682,19 @@ class dlist(debugable):
             if o.dopt.is_error:
                 extra_opt.append('E2')
                 self._process_serror_dopts(i)
-            #check if 2D and draw in new tvanvas
-            if o.obj.IsA().InheritsFrom('TH2') == True:
-                tc = ROOT.TCanvas(self.name + '-{}'.format(i), self.name + '-{}'.format(i))
-                tc.cd()
+            if self.has2D():
+                tc = ROOT.gROOT.FindObject(tcname)
+                tc.cd(i+1)
+                ROOT.gStyle.SetOptTitle(True)
                 o.obj.Draw('colz')
-                self.d2canvas.append(tc)
-                tc.Update()
+                self.adjust_pad_margins(_right=0.17)
             else:
                 o.draw(' '.join(extra_opt))
             if gDebug:
                 dbgu.debug_obj(o.dopt)
 
-        if adjust_pad == True:
-            self.adjust_pad_margins()            
+        if adjust_pad == True and self.has2D() == False:
+            self.adjust_pad_margins()
 
         self.update()
         self.pad_name = ROOT.gPad.GetName() # name is better
@@ -690,6 +707,9 @@ class dlist(debugable):
 
     def self_legend(self, ncols = 1, title='', x1=None, y1=None, x2=None, y2=None, tx_size=None, option='brNDC'):
         self.empty_legend(ncols, title, x1, y1, x2, y2, tx_size, option)
+        if self.has2D():
+            self.update()
+            return self.legend
         for o in self.l:
             if not self.is_selected(o):
                 continue
@@ -754,6 +774,7 @@ class dlist(debugable):
             self.tcanvas.cd()
             if split > 0:
                 du.split_gPad(split, orientation)
+            tu.gList.append(self.tcanvas)
         return self.tcanvas
     
     def destroy_canvas(self):
