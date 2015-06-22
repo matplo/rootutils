@@ -216,6 +216,7 @@ class dlist(debugable):
         self.pad_name          = None # pad where last drawn
         self.pad               = None # pad where last drawn
         self.set_font(42)
+        self.d2canvas          = []
 
     def set_font(self, fn, scale=1.):
         self.font = fn
@@ -663,8 +664,15 @@ class dlist(debugable):
             if o.dopt.is_error:
                 extra_opt.append('E2')
                 self._process_serror_dopts(i)
-
-            o.draw(' '.join(extra_opt))
+            #check if 2D and draw in new tvanvas
+            if o.obj.IsA().InheritsFrom('TH2') == True:
+                tc = ROOT.TCanvas(self.name + '-{}'.format(i), self.name + '-{}'.format(i))
+                tc.cd()
+                o.obj.Draw('colz')
+                self.d2canvas.append(tc)
+                tc.Update()
+            else:
+                o.draw(' '.join(extra_opt))
             if gDebug:
                 dbgu.debug_obj(o.dopt)
 

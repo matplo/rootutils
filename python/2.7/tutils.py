@@ -151,7 +151,7 @@ def draw_h1d_from_ntuple(fname, ntname, var, cuts, bwidth, xlow, xhigh, title=No
 def draw_h2d_from_ntuple(fname, ntname, var, cuts, 
                          xbwidth, xlow, xhigh, 
                          ybwidth, ylow, yhigh,                          
-                         title=None):
+                         title=None, modname=''):
     xnbins = int((xhigh-xlow)/xbwidth*1.)
     if xnbins < 1:
         return None
@@ -163,6 +163,8 @@ def draw_h2d_from_ntuple(fname, ntname, var, cuts,
     hname = hname.replace('*', 'x')
     hname = hname.replace('(', '.')
     hname = hname.replace(')', '.')
+    if len(modname) > 0:
+        hname = modname    
     if title==None:
         htitle = ut.build_string([fname, var],' ')    
     else:
