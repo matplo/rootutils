@@ -1,8 +1,9 @@
-#!/usr/bin/env python -i
+#!/usr/bin/env python
 
 import os
 import sys
 import tutils
+import IPython
 
 def print_usage():
     print '[i] usage:',os.path.basename(sys.argv[0]),'-f <file.root> [--keep-stats] [--keep-title] [--logy] [--pattern <something in the name>] [--dopt <draw option>] [--x <min:max>] [--titles]'
@@ -53,13 +54,22 @@ def run():
     if xaxis:
         xmin = float(xaxis.split(':')[0])
         xmax = float(xaxis.split(':')[1])
-        
+
+    ymin = None
+    ymax = None
+    yaxis = tutils.get_arg_with('--y')
+    if yaxis:
+        ymin = float(yaxis.split(':')[0])
+        ymax = float(yaxis.split(':')[1])
+
     f = tutils.get_arg_with('-f')
     if f:
         #ol.gDebug = True
-        l = dlist.show_file(f, tutils.is_arg_set('--logy'), pattern, draw_opt, names_not_titles, xmin, xmax)
+        l = dlist.show_file(f, tutils.is_arg_set('--logy'), pattern, draw_opt, names_not_titles, xmin, xmax, ymin, ymax)
+        if tutils.is_arg_set('--pdf'):
+            l.pdf()
         tutils.gList.append(l)        
-        tutils.wait()
+        #tutils.wait()
     else:
         print >> sys.stderr,'[e] no file specified: use -f <file.root>'
         print_usage()
@@ -69,3 +79,5 @@ def main():
         
 if __name__=="__main__":
     main()
+    if not tutils.is_arg_set('-b'):
+        IPython.embed()

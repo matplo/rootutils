@@ -23,7 +23,7 @@ except:
     print '[ info:] setup the environment (remember PYTHONPATH)'
     sys.exit(-1)
 
-import ol
+import dlist as ol
 
 def run():
     ROOT.gROOT.Reset()
@@ -45,7 +45,8 @@ def run():
         print "[i] File:",f
         table = []
         table.append(['', 'Class', 'Name', 'Title', 'GetEntries', 'Integral'])
-        for o in l.l:
+        for obj in l.l:
+            o = obj.obj
             oname = o.GetName()
             oname = oname.replace(f.replace("/", "_"), "").replace("_--hlist", "")            
             try:
