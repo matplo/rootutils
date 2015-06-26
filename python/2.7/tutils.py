@@ -62,6 +62,11 @@ def wait():
             time.sleep(10) # this actually does not matter as long as large
             pass
 
+def wait_i():
+    import IPython
+    if not '-b' in sys.argv:
+        IPython.embed()
+
 def setup_basic_root():
     ROOT.gROOT.Reset()
     ROOT.gStyle.SetScreenFactor(1)

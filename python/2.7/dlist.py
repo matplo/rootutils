@@ -730,11 +730,11 @@ class dlist(debugable):
         if x1==None:
             x1 = 0.6 # was 0.3 # was 0.5
         if y1==None:
-            y1 = 0.7 #was 0.67
+            y1 = 0.67 #0.7 #was 0.67
         if x2==None:
             x2 = 0.8 #0.88
         if y2==None:
-            y2 = 0.9 #0.88            
+            y2 = 0.87 #0.88 #used also 0.9            
         self.legend = ROOT.TLegend(x1, y1, x2, y2, title, option)
         #self.legend.SetHeader(title)
         self.legend.SetNColumns(ncols)
@@ -800,7 +800,7 @@ class dlist(debugable):
             else:
                 print '[w] normalize not defined for non histogram...'
 
-    def normalize_self(self, scale_by_binwidth = True, modTitle = False):
+    def normalize_self(self, scale_by_binwidth = True, modTitle = False, scaleE = False):
         for h in self.l:
             if h.obj.InheritsFrom('TH1'):
                 #if h.GetSumw2() == None:
@@ -810,8 +810,14 @@ class dlist(debugable):
                 if intg > 0:
                     if scale_by_binwidth:
                         h.obj.Scale(1./intg/bw)
+                        if scaleE == True:
+                            scale_errors(h.obj, 1./intg/bw)
+                            print '[i] scale by:',1./intg/bw
                     else:
                         h.obj.Scale(1./intg)
+                        if scaleE == True:
+                            scale_errors(h.obj, 1./intg)
+                            print '[i] scale by:',1./intg
                     if modTitle == True:
                         ytitle = h.obj.GetYaxis().GetTitle()
                         ytitle += ' ({0})'.format(bw)
