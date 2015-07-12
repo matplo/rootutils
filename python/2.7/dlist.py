@@ -831,20 +831,29 @@ class dlist(debugable):
         try:
             f = ROOT.TFile(fname, opt)
             f.cd()
-            for i,h in enumerate(self.l):
-                if 'mod:' in name_mod or 'modn:' in name_mod:
-                    smod = name_mod.replace('mod:', '')
-                    smod = name_mod.replace('modn:', '')                    
-                    if len(smod) > 0:
-                        newname = self.name + '-{}-'.format(i) + smod
-                    else:
-                        if 'modn:' in name_mod:
-                            newname =  'o-{}'.format(i)                            
-                        else:
-                            newname = self.name + '-{}'.format(i)
+        except:
+            print >> sys.stderr, '[e] unable to open file:',fname
+            return
+
+        for i,h in enumerate(self.l):
+            if 'mod:' in name_mod or 'modn:' in name_mod:
+                smod = name_mod.replace('mod:', '')
+                smod = name_mod.replace('modn:', '')                    
+                if len(smod) > 0:
+                    newname = self.name + '-{}-'.format(i) + smod
                 else:
-                    newname = h.obj.GetName() + name_mod
+                    if 'modn:' in name_mod:
+                        newname =  'o-{}'.format(i)                            
+                    else:
+                        newname = self.name + '-{}'.format(i)
+            else:
+                newname = h.obj.GetName() + name_mod
+            try:
                 h.obj.Write(newname)
+            except:
+                print >> sys.stderr, '[e] unable to write object:',h.obj.GetName()
+
+        try:
             f.Close()
             print '[i] written to file',fname
         except:
@@ -984,7 +993,7 @@ class ListStorage:
     def png(self):
         self.tcanvas.Print(self.name+'.png','.png')
 
-    def write_all(self, mod=None, opt='RECREATE'):
+    def write_all(self, mod='', opt='RECREATE'):
         for i,hl in enumerate(self.lists):
             hl.write_to_file(opt=opt, name_mod = mod)
 
