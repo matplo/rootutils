@@ -98,14 +98,15 @@ class draw_option(debugable):
             self.psize = 0.9
         else:
             self.psize = self.psize/100.
-        self.use_line   = self.check_use_line()
-        self.bw         = self.check_black_white()
-        self.use_marker = self.check_use_marker()
-        self.is_error   = self.has(['serror'], strip=True)
-        self.no_legend  = self.has(['noleg'],  strip=True)
-        self.hidden     = self.has(['hidden'], strip=True)
-        self.last_kolor = self.has(['-k'])
-        self.last_line  = self.has(['-l'])
+        self.use_line        = self.check_use_line()
+        self.use_line_legend = self.check_use_line_legend()
+        self.bw              = self.check_black_white()
+        self.use_marker      = self.check_use_marker()
+        self.is_error        = self.has(['serror'], strip=True)
+        self.no_legend       = self.has(['noleg'],  strip=True)
+        self.hidden          = self.has(['hidden'], strip=True)
+        self.last_kolor      = self.has(['-k'])
+        self.last_line       = self.has(['-l'])
 
     def stripped(self):
         return self.strip
@@ -116,6 +117,10 @@ class draw_option(debugable):
     def check_use_line(self):
         marks = ['hist', 'l', 'c']
         return self.has(marks)
+
+    def check_use_line_legend(self):
+        marks = ['-']
+        return not self.has(marks)
     
     def check_use_marker(self):
         marks = ['p']
@@ -127,7 +132,7 @@ class draw_option(debugable):
             return ret
         if self.use_marker:
             ret = ret + ' p '
-        if self.use_line:
+        if self.use_line or self.use_line_legend:
             ret = ret + ' l '
         if self.is_error:
             ret = ret + ' f '
