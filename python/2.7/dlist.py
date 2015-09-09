@@ -222,7 +222,7 @@ class dlist(debugable):
         self.pad               = None # pad where last drawn
         self.set_font(42)
 
-    def set_font(self, fn, scale=1.):
+    def set_font(self, fn=42, scale=1.):
         self.font = fn
         if self.font == 42:
             self.axis_title_offset = [1.40, 1.40, 1.40] # y offset was 1.40 then 1.45
@@ -726,6 +726,7 @@ class dlist(debugable):
             self.legend.AddEntry(o.obj, o.obj.GetTitle(), opt)
         self.legend.Draw()
         self.update()
+        return self.legend
 
     def draw_legend(self, ncols = 1, title='', x1=None, y1=None, x2=None, y2=None, tx_size=None, option='brNDC'):
         print '[w] obsolete call to draw_legend use self_legend instead...'
@@ -747,16 +748,17 @@ class dlist(debugable):
         self.legend.SetFillColor(ROOT.kWhite)
         self.legend.SetFillStyle(0)
         self.legend.SetFillColorAlpha(ROOT.kWhite, 0.0)
-        #self.legend.SetTextSize(0.032)
+        self.legend.SetTextSize(self.axis_title_size[0] * 0.5)
         self.legend.SetTextFont(self.font)
         self.legend.SetTextColor(1)
-        if tx_size==None:
+        if tx_size!=None:
             if self.font == 42:
                 #tx_size=self.axis_title_size[0]
-                tx_size = 0.035 #0.045
+                tx_size = self.axis_title_size[0] * 0.8 * tx_size #0.045
             if self.font == 43:
-                tx_size = 14
-        self.legend.SetTextSize(tx_size)
+                tx_size = 14 * tx_size
+            print tx_size,self.font
+            self.legend.SetTextSize(tx_size)
         
         return self.legend
 
@@ -916,6 +918,7 @@ class ListStorage:
         self.lx2 = None
         self.ly1 = None
         self.ly2 = None
+        self.legend_font_scale = 1.
 
     def __getitem__(self, i):
         if i < len(self.lists) and i >= 0:
@@ -974,6 +977,8 @@ class ListStorage:
                 slegtitle = l.title
             else:
                 slegtitle = legtitle
+            if legtitle == None:
+                slegtitle = ''
             self.tcanvas.cd(i+1)
             if condense == True:
                 l.set_font(43, 1.4)
@@ -982,9 +987,10 @@ class ListStorage:
             else:
                 l.draw(logy=logy, option=option, miny=miny, maxy=maxy, colopt=colopt, adjust_pad=False)
             if self.lx1 != None:
-                l.self_legend(1, slegtitle, self.lx1, self.ly1, self.lx2, self.ly2, None, legoption)
+                legend = l.self_legend(1, slegtitle, self.lx1, self.ly1, self.lx2, self.ly2, 
+                    tx_size=self.legend_font_scale, option=legoption)
             else:
-                l.self_legend(ncols=1, title=slegtitle, option=legoption)
+                legend = l.self_legend(ncols=1, title=slegtitle, tx_size=self.legend_font_scale, option=legoption)
             l.update(logy=logy)
         self.adjust_pads()
 
