@@ -18,7 +18,7 @@ class debugable(object):
             print '[d]',msg
 
 class style_iterator(debugable):
-    good_colors  = [ -1,  2,  1,  9,  6, 32, 49, 40,  8, 43, 46, 39, 28, 38]
+    good_colors  = [ -1,  2,  1,  9,  6, 32, 49, 40,  8, 43, 46, 39, 28, 38, 21, 22, 23]
     good_markers = [ -1, 20, 24, 21, 25, 27, 28, 33, 34, 29, 30]
     #good_lines   = [ -1,  1,  2,  3,  5,  8,  6,  7,  4,  9, 10]
     good_lines   = [ -1,  1,  2,  3,  5,  7,  9,  6, 8, 4, 10]
@@ -1045,7 +1045,7 @@ def load_tlist(tlist, pattern=None, names_not_titles=True, draw_opt='HIST', hl =
             pass
     return ol
 
-def load_file(fname='', pattern=None, names_not_titles=True, draw_opt='HIST'):
+def load_file(fname='', pattern=None, names_not_titles=True, draw_opt='HIST', xmin=None, xmax=None):
     if not fname:
         return None
 
@@ -1061,6 +1061,8 @@ def load_file(fname='', pattern=None, names_not_titles=True, draw_opt='HIST'):
         listname = fname.replace('/','_')+'-'+pattern.replace(' ','-')+'-hlist'
 
     hl = dlist(listname)
+    if xmin!=None and xmax!=None:
+        hl = make_list(listname, xmin, xmax)
 
     lkeys = fin.GetListOfKeys()
     for key in lkeys:
@@ -1102,7 +1104,7 @@ def show_file(fname='', logy=False, pattern=None, draw_opt='p', names_not_titles
     #ROOT.gROOT.Reset()
     #ROOT.gStyle.SetScreenFactor(1)
 
-    hl = load_file(fname, pattern, names_not_titles, draw_opt)
+    hl = load_file(fname, pattern, names_not_titles, draw_opt, xmin, xmax)
     hl.pattern = pattern
 
     hl.make_canvas()
@@ -1119,6 +1121,8 @@ def show_file(fname='', logy=False, pattern=None, draw_opt='p', names_not_titles
         hl.draw(draw_opt, ymin, ymax, logy)
     if logy:
         ROOT.gPad.SetLogy()
+    if tu.is_arg_set('--logx'):
+        ROOT.gPad.SetLogx()
 
     exs = ' '.join(sys.argv)
     exs = exs.replace(sys.argv[0], 'show_file:')
