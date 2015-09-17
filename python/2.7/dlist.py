@@ -576,7 +576,10 @@ class dlist(debugable):
         else:
             if o.dopt.use_marker:
                 o.obj.SetMarkerStyle(self.style.next_marker())
-        o.obj.SetMarkerSize(o.dopt.psize)            
+        mscale = 1.
+        #if o.obj.GetMarkerStyle() >= 27 and o.obj.GetMarkerStyle() != 28: mscale = 1.4
+        if o.obj.GetMarkerStyle() >= 27: mscale = 1.4
+        o.obj.SetMarkerSize(o.dopt.psize * mscale)            
         #fill
         if o.dopt.fstyle > 0:
                 o.obj.SetFillStyle(o.dopt.fstyle)
