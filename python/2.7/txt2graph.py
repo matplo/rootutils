@@ -1,4 +1,4 @@
-#!/usr/bin/env ipython
+#!/usr/bin/env python
 
 import ROOT as r 
 import tutils as tu
@@ -7,6 +7,7 @@ from StringIO import StringIO
 import dlist
 import sys
 import pyutils as ut
+import IPython
 
 def read_data(fn = None):
     f = sys.stdin
@@ -139,5 +140,9 @@ if __name__=="__main__":
     if ut.is_arg_set('--debug'):
         dlist.gDebug = True    
     fname = ut.get_arg_with('-f')
-    graph(fname)
-    tu.wait()
+    write=False
+    if ut.is_arg_set('--root'):
+        write=True
+    gr = graph(fname, write)
+    if not ut.is_arg_set('-b'):
+        IPython.embed()
