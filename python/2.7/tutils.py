@@ -190,6 +190,15 @@ def draw_h2d_from_ntuple(fname, ntname, var, cuts,
         hret.SetTitle(htitle)
     return hret
 
+def get_max_from_ntuple(fname, ntname, var, cuts = None):
+    fin = ROOT.TFile(fname)
+    if fin:
+        tn = fin.Get(ntname)
+        if tn:
+            return tn.GetMaximum(var)
+    print >> sys.stderr, '[e] unable to get maximum of',var,'from',fname,ntname
+    return None
+
 def get_object_from_file(hname = '', fname = '', new_title = '', nmod=None):
     if fname == None:
         return None
