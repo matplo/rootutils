@@ -141,3 +141,11 @@ def wait():
 def random_string(prefix='', ns = 30):
     lst = [random.choice(string.ascii_letters + string.digits) for n in xrange(ns)]
     return str(prefix)+''.join(lst) 
+
+def remove_duplicates(l):
+    newl = []
+    for o in l:
+        if o in newl:
+            continue
+        newl.append(o)
+    return newl
