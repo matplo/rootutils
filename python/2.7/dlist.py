@@ -691,8 +691,8 @@ class dlist(debugable):
                 extra_opt.append('E2')
                 self._process_serror_dopts(i)
             if self.has2D():
-                tc = ROOT.gROOT.FindObject(tcname)
-                tc.cd(i+1)
+                #tc = ROOT.gROOT.FindObject(tcname)
+                #tc.cd(i+1)
                 ROOT.gStyle.SetOptTitle(True)
                 o.obj.Draw('colz')
                 self.adjust_pad_margins(_right=0.17)
