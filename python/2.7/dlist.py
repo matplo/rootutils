@@ -254,12 +254,11 @@ class dlist(debugable):
 
     def copy_list(self, l=[]):
         for h in l:
-            self.addh(h)
+            self.add(h)
 
     def copy(self, l):
         for h in l.l:
-            idx = l.l.index(h)
-            self.add(h, h.GetTitle() + '_copy', l.dopts[idx].s)
+            self.add(h.obj, h.obj.GetTitle(), h.dopt.s)
             
     def last(self):
         if len(self.l) > 0:
@@ -1183,15 +1182,15 @@ def reset_points(h, xmin, xmax, val=0.0, err=0.0):
 
 #yields above threshold - bin-by-bin
 def yats(olin):
-    oret = ol(olin.name + '_yat')
+    oret = dlist(olin.name + '_yat')
     oret.copy(olin)
-    for h in oret.l:
+    for idx,ho in enumerate(oret.l):
+        h = ho.obj
         h.Reset()
-        idx = oret.l.index(h)
-        hin = olin.l[idx]
+        hin = olin.l[idx].obj
         for ib in range(1, hin.GetNbinsX()):
             maxbin = hin.GetNbinsX()
-            yat    = hin.Integral(ib, maxbin)
+            yat    = hin.Integral(ib, maxbin, "width")
             h.SetBinContent(ib, yat)
             #oret.lopts[idx] = olin.lopts[idx] # not needed - within copy
     return oret
