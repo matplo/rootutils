@@ -759,7 +759,7 @@ class dlist(debugable):
                 tx_size = self.axis_title_size[0] * 0.8 * tx_size #0.045
             if self.font == 43:
                 tx_size = 14 * tx_size
-            print tx_size,self.font
+            #print tx_size,self.font
             self.legend.SetTextSize(tx_size)
         
         return self.legend
