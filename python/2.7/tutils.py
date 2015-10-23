@@ -413,3 +413,10 @@ def shift_graph(gr, xdelta):
     for i in range(0, npoints):
         xgr = gr.GetX()[i]
         gr.GetX()[i] = xgr + xdelta
+
+gTempCanvas = None
+def getTempCanvas():
+    global gTempCanvas
+    if gTempCanvas == None:
+        gTempCanvas = ROOT.TCanvas('tc_temp_canvas', 'tc_temp_canvas')
+    return gTempCanvas       
