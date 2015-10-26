@@ -13,9 +13,13 @@ def draw_line(x1, y1, x2, y2, col=2, style=7, width=2, option='brNDC', alpha=0.3
     tu.gList.append(l)
     return l
 
+def to_file_name(s):
+    return "".join([x if x.isalnum() else "_" for x in s])
+
 class canvas:
     def __init__(self, name, title, w=600, h=400, split_fraction=0.0, split_mode=0):
-        self.tcanvas = ROOT.TCanvas(name, title, h, w)        
+        self.name = name
+        self.tcanvas = ROOT.TCanvas(name, title, w, h)        
         self.pads = []
         if split_fraction > 0:                        
             for i in range(2):            
@@ -36,8 +40,37 @@ class canvas:
                 p = ROOT.TPad(pname, ptitle, x1, y1, x2, y2)
                 p.Draw()
                 self.pads.append(p)
+        self.adjust_pad_margins()
         tu.gList.append(self)
-    
+
+    def pdf(self):
+        self.tcanvas.Print(to_file_name(self.name)+'.pdf','.pdf')
+
+    def resize_window(self, w, h):
+        self.tcanvas.SetWindowSize(w, h) # + (w - self.tcanvas.GetWw()), h + (h - self.tcanvas.GetWh()));
+        self.tcanvas.SetWindowSize(w + (w - self.tcanvas.GetWw()), h + (h - self.tcanvas.GetWh()));
+        self.tcanvas.Update()
+
+    def adjust_pad_margins(self, _left=0.15, _right=0.15, _top=0.1, _bottom=0.15):
+        if len(self.pads) > 0:
+            for sp in self.pads():
+                sp.cd()
+                p = ROOT.gPad
+                if p:
+                    p.SetLeftMargin(_left)
+                    p.SetRightMargin(_right)
+                    p.SetTopMargin(_top)
+                    p.SetBottomMargin(_bottom)
+        else:
+            self.tcanvas.cd()
+            p = ROOT.gPad
+            if p:
+                p.SetLeftMargin(_left)
+                p.SetRightMargin(_right)
+                p.SetTopMargin(_top)
+                p.SetBottomMargin(_bottom)
+
+        
 def split_canvas(name, title, w=600, h=400, split_ratio=0.2, vertical=0):
     tc = ROOT.TCanvas(name, title, h, w)
 
