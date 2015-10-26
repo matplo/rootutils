@@ -1195,6 +1195,24 @@ def yats(olin):
             #oret.lopts[idx] = olin.lopts[idx] # not needed - within copy
     return oret
 
+def fractional_yats(olin):
+    oret = dlist(olin.name + '_fyat')
+    oret.copy(olin)
+    for idx,ho in enumerate(oret.l):
+        h = ho.obj
+        h.Reset()
+        hin    = olin.l[idx].obj
+        maxbin = hin.GetNbinsX()
+        integ  = hin.Integral(1, maxbin, "width")
+        if integ <= 0:
+            print "[w] integral ? ",integ
+            integ = -1.
+        for ib in range(1, maxbin):
+            yat    = hin.Integral(ib, maxbin, "width") / integ
+            h.SetBinContent(ib, yat)
+            #oret.lopts[idx] = olin.lopts[idx] # not needed - within copy
+    return oret
+
 def rejs(olin):
     oret = ol(olin.name + '_rej')
     oret.copy(olin)
