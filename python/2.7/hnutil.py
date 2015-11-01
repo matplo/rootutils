@@ -180,6 +180,9 @@ class Proj3to1d(object):
         if h3d == None:
             print '[e] ::Proj3to1d pass None in __init__ - this will not work'
         self.h = h3d
+        self.is3d = False
+        if self.h.IsA().InheritsFrom('TH3'):
+            self.is3d = True
         self.name = 'Proj3to1d-' + self.h.GetName()
         self.ls = dlist.ListStorage(self.name)
 
@@ -189,19 +192,30 @@ class Proj3to1d(object):
 
     def get_projection_axis(self, axis, ixmin=0., ixmax=1e6, iymin=0., iymax=1e6):
         hname = '{}--{}--{}-{}-{}-{}'.format(self.h.GetName(), axis, ixmin, ixmax, iymin, iymax)
+        if self.is3d:
+            hname = '{}--{}--{}-{}-{}-{}'.format(self.h.GetName(), axis, ixmin, ixmax, iymin, iymax)            
+        else:
+            hname = '{}--{}--{}-{}'.format(self.h.GetName(), axis, ixmin, ixmax)
+        hproj = None
         if axis == 0:
             ixminb  = self.h.GetYaxis().FindBin(ixmin)
             ixmaxb  = self.h.GetYaxis().FindBin(ixmax)
-            iyminb  = self.h.GetZaxis().FindBin(iymin)
-            iymaxb  = self.h.GetZaxis().FindBin(iymax)
-            hproj   = self.h.ProjectionX(hname, ixminb, ixmaxb, iyminb, iymaxb)        
+            if self.is3d:
+                iyminb  = self.h.GetZaxis().FindBin(iymin)
+                iymaxb  = self.h.GetZaxis().FindBin(iymax)
+                hproj   = self.h.ProjectionX(hname, ixminb, ixmaxb, iyminb, iymaxb)        
+            else:
+                hproj   = self.h.ProjectionX(hname, ixminb, ixmaxb)
         if axis == 1:
             ixminb  = self.h.GetXaxis().FindBin(ixmin)
             ixmaxb  = self.h.GetXaxis().FindBin(ixmax)
-            iyminb  = self.h.GetZaxis().FindBin(iymin)
-            iymaxb  = self.h.GetZaxis().FindBin(iymax)
-            hproj   = self.h.ProjectionY(hname, ixminb, ixmaxb, iyminb, iymaxb)        
-        if axis == 2:
+            if self.is3d:
+                iyminb  = self.h.GetZaxis().FindBin(iymin)
+                iymaxb  = self.h.GetZaxis().FindBin(iymax)
+                hproj   = self.h.ProjectionY(hname, ixminb, ixmaxb, iyminb, iymaxb)        
+            else:
+                hproj   = self.h.ProjectionY(hname, ixminb, ixmaxb)
+        if self.is3d == True and axis == 2:
             ixminb  = self.h.GetXaxis().FindBin(ixmin)
             ixmaxb  = self.h.GetXaxis().FindBin(ixmax)
             iyminb  = self.h.GetYaxis().FindBin(iymin)
@@ -210,13 +224,23 @@ class Proj3to1d(object):
         #hproj.Sumw2()
         return hproj
 
-    def get_projections_axis(self, axis, binsx, binsy, nrebin = None):
-        outlname = '{}-{}-{}-{}'.format(self.name, axis, to_file_name(str(binsx)), to_file_name(str(binsy)))
+    def get_projections_axis(self, axis, binsx, binsy=None, nrebin = None):
+        if self.is3d:
+            outlname = '{}-{}-{}-{}'.format(self.name, axis, to_file_name(str(binsx)), to_file_name(str(binsy)))
+        else:
+            outlname = '{}-{}-{}'.format(self.name, axis, to_file_name(str(binsx)))            
+        print '[i] new list:', outlname
         for i,x in enumerate(binsx):
-            y = binsy[i]
-            proj = self.get_projection_axis(axis, x[0], x[1], y[0], y[1])
+            if self.is3d:
+                y = binsy[i]
+                proj = self.get_projection_axis(axis, x[0], x[1], y[0], y[1])
+            else:
+                proj = self.get_projection_axis(axis, x[0], x[1])
             if nrebin!=None:
                 proj.Rebin(nrebin)
                 proj.Scale(1./nrebin)
-            titles = '{} -> {} [{}:{}] [{}:{}]'.format(self.h.GetTitle(), axis, x[0], x[1], y[0], y[1])
+            if self.is3d:
+                titles = '{} -> {} [{}:{}] [{}:{}]'.format(self.h.GetTitle(), axis, x[0], x[1], y[0], y[1])
+            else:
+                titles = '{} -> {} [{}:{}]'.format(self.h.GetTitle(), axis, x[0], x[1])
             self.ls.add_to_list(outlname, proj, titles, 'p')

@@ -1014,6 +1014,32 @@ class ListStorage:
         for l in self.lists:
             l.update()
 
+    def get_pads(self):
+        self.pads = []
+        for ip in [ self.tcanvas.cd(i+1) for i in range(len(self.lists)) ]:
+            self.pads.append(ip)
+        return self.pads
+
+    def set_grid_x(self, what=True):
+        for p in self.get_pads():
+            p.SetGridx(what)
+            p.Update()
+
+    def set_grid_y(self, what=True):
+        for p in self.get_pads():
+            p.SetGridy(what)
+            p.Update()
+
+    def set_log_axis(self, axis='', what=True):
+        for p in self.get_pads():
+            if 'x' in axis:
+                p.SetLogx(what)
+            if 'y' in axis:
+                p.SetLogy(what)
+            if 'z' in axis:
+                p.SetLogz(what)
+            p.Update()
+
 gDebugLists = ListStorage()
 gDL = gDebugLists
 

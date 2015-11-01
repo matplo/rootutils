@@ -226,6 +226,17 @@ def filter_single_entries(h, href=None, thr=10):
             h.SetBinContent(ib, 0)
             h.SetBinError(ib, 0)
 
+def filter_single_entries_3d(h, href=None, thr=10):
+    if href == None:
+        href = h
+    for ibx in range(1, h.GetNbinsX()+1):
+        for iby in range(1, h.GetNbinsY()+1):
+            for ibz in range(1, h.GetNbinsZ()+1):
+                if href.GetBinContent(ibx, iby, ibz) < thr:
+                    print ibx, iby, ibz
+                    h.SetBinContent(ibx, iby, ibz, 0)
+                    h.SetBinError(ibx, iby, ibz, 0)
+
 def get_sum_of_bins(h):
     sum = 0.0
     for ib in range(1, h.GetNbinsX()+1):

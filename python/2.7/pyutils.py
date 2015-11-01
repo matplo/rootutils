@@ -10,6 +10,9 @@ import time
 import string
 import random
 
+def to_file_name(s):
+        return "".join([x if x.isalnum() else "_" for x in s])
+
 def find_files(rootdir='.', pattern='*'):
     return [os.path.join(rootdir, filename)
             for rootdir, dirnames, filenames in os.walk(rootdir)
