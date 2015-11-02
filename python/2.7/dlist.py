@@ -410,11 +410,28 @@ class dlist(debugable):
         o = draw_object(gr, 'zoom_axis_obj', 'fake', 'noleg hidden p')
         self.l.insert(0, o)
 
+    def find_xlimits(self):
+        xmin = 0
+        xmax = 0
+        for o in self.l:
+            h = o.obj
+            for ix in range(1, h.GetNbinsX()+1):
+                if h.GetBinContent(ix) != 0:
+                    if xmin > h.GetBinLowEdge(ix):
+                        xmin = h.GetBinLowEdge(ix)
+                    if xmax < h.GetBinCenter(ix) + h.GetBinWidth(ix):
+                        xmax = h.GetBinCenter(ix) + h.GetBinWidth(ix)
+        return [xmin - xmin*0.1, xmax + xmax*0.1]
+
     def zoom_axis(self, which, xmin, xmax):
-        ax = None
+        ax = None            
         for o in self.l:
             if which == 0:
                 ax = o.obj.GetXaxis()
+                if xmax == None:
+                    xlims = self.find_xlimits()
+                    self.zoom_axis(which, xlims[0], xlims[1])
+                    return
             if which == 1:
                 ax = o.obj.GetYaxis()
             if which == 2:
@@ -948,7 +965,7 @@ class ListStorage:
     def append(self, hl):
         self.lists.append(hl)
 
-    def legend_position(self, x1, y1, x2, y2):
+    def legend_position(self, x1=None, y1=None, x2=None, y2=None):
         self.lx1 = x1
         self.lx2 = x2
         self.ly1 = y1
@@ -1010,9 +1027,9 @@ class ListStorage:
         for i,hl in enumerate(self.lists):
             hl.write_to_file(opt=opt, name_mod = mod)
 
-    def update(self):
+    def update(self, logy=False):
         for l in self.lists:
-            l.update()
+            l.update(logy=logy)
 
     def get_pads(self):
         self.pads = []
