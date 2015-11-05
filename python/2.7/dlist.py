@@ -869,7 +869,7 @@ class dlist(debugable):
                     newname = self.name + '-{}-'.format(i) + smod
                 else:
                     if 'modn:' in name_mod:
-                        newname =  'o-{}'.format(i)                            
+                        newname =  'o_{}'.format(i)                            
                     else:
                         newname = self.name + '-{}'.format(i)
             else:
