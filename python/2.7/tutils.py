@@ -16,6 +16,29 @@ timer = time.time()
 gList = []
 app = None
 
+def get_gList_names():
+    names = []
+    for o in gList:
+        try:
+            n = o.GetName()
+            names.append(n)
+        except:
+            pass
+        try:
+            n = o.name
+            names.append(n)
+        except:
+            pass
+    return names
+
+def unique_name(name):
+    n = name
+    i = 0
+    while n in get_gList_names():
+        n = '{}_{}'.format(name, i)
+        i += 1
+    return n
+
 def is_arg_set(arg=''):
     for a in sys.argv:
         if a==arg:
@@ -120,7 +143,26 @@ def signal_handler(signum, frame):
             sub_p.send_signal(signal.SIGKILL)            
         sys.exit(0)
 
-def draw_h1d_from_ntuple(fname, ntname, var, cuts, bwidth, xlow, xhigh, title=None, modname=''):
+def filter_single_entries(h, href=None, thr=10):
+    if href == None:
+        href = h
+    for ib in range(1, h.GetNbinsX()+1):
+        if href.GetBinContent(ib) < thr:
+            h.SetBinContent(ib, 0)
+            h.SetBinError(ib, 0)
+
+def filter_single_entries_3d(h, href=None, thr=10):
+    if href == None:
+        href = h
+    for ibx in range(1, h.GetNbinsX()+1):
+        for iby in range(1, h.GetNbinsY()+1):
+            for ibz in range(1, h.GetNbinsZ()+1):
+                if href.GetBinContent(ibx, iby, ibz) < thr:
+                    print ibx, iby, ibz
+                    h.SetBinContent(ibx, iby, ibz, 0)
+                    h.SetBinError(ibx, iby, ibz, 0)
+
+def draw_h1d_from_ntuple(fname, ntname, var, cuts, bwidth, xlow, xhigh, title=None, modname='', nev=-1):
     nbins = int((xhigh-xlow)/bwidth*1.)
     if nbins < 1:
         return None
@@ -143,7 +185,10 @@ def draw_h1d_from_ntuple(fname, ntname, var, cuts, bwidth, xlow, xhigh, title=No
             if tn:
                 hname_tmp = 'htmp({0},{1},{2})'.format(nbins, xlow, xhigh)
                 dstr = '{0}>>{1}'.format(var, hname_tmp)
-                dentries = tn.Draw(dstr, cuts, 'e') #call sumw2 before the histogram creation!
+                if nev > 0:
+                    dentries = tn.Draw(dstr, cuts, 'e', nev) #call sumw2 before the histogram creation!
+                else:
+                    dentries = tn.Draw(dstr, cuts, 'e') #call sumw2 before the histogram creation!
                 hret = ROOT.gDirectory.Get('htmp')
                 hret.SetDirectory(0)
             fin.Close()
@@ -217,25 +262,6 @@ def get_object_from_file(hname = '', fname = '', new_title = '', nmod=None):
                 cobj.SetTitle(new_title)
         f.Close()
     return cobj
-
-def filter_single_entries(h, href=None, thr=10):
-    if href == None:
-        href = h
-    for ib in range(1, h.GetNbinsX()+1):
-        if href.GetBinContent(ib) < thr:
-            h.SetBinContent(ib, 0)
-            h.SetBinError(ib, 0)
-
-def filter_single_entries_3d(h, href=None, thr=10):
-    if href == None:
-        href = h
-    for ibx in range(1, h.GetNbinsX()+1):
-        for iby in range(1, h.GetNbinsY()+1):
-            for ibz in range(1, h.GetNbinsZ()+1):
-                if href.GetBinContent(ibx, iby, ibz) < thr:
-                    print ibx, iby, ibz
-                    h.SetBinContent(ibx, iby, ibz, 0)
-                    h.SetBinError(ibx, iby, ibz, 0)
 
 def get_sum_of_bins(h):
     sum = 0.0
