@@ -345,7 +345,7 @@ class dlist(debugable):
         self.max_adjusted = True
         self.debug('::adjust_maxima min: {} max {}'.format(self.miny, self.maxy))
 
-    def append(self, obj=ROOT.TObject, new_title = '', draw_opt = ''):
+    def append(self, obj=ROOT.TObject, new_title = '', draw_opt = '', prep=False):
         newname_root = obj.GetName() + '_' + self.name.replace(' ', '_')
         newname = newname_root
         count = 1
@@ -353,10 +353,16 @@ class dlist(debugable):
             newname = newname_root + '_' + str(count)
             count = count + 1
         o = draw_object(obj, newname, new_title, draw_opt)
-        if len(self.l) == 0:
+        if prep == True:
+            for oi in self.l:
+                oi.is_first = False
+        if len(self.l) == 0 or prep == True:
             o.is_first = True
-        self.l.append(o)
-        self.debug('::append ' + o.name + ' ' + o.dopt.s)
+        if prep == True:
+            self.l.insert(0, o)
+        else:            
+            self.l.append(o)
+        self.debug('::append ' + o.name + ' ' + o.dopt.s + 'prepend:' + str(prep) )
    
     def add_from_file(self, hname = '', fname = '', new_title = '', draw_opt = ''):
         cobj = None
@@ -368,7 +374,7 @@ class dlist(debugable):
             f.Close()
         return cobj
 
-    def add(self, obj=ROOT.TObject, new_title = '', draw_opt = ''):
+    def add(self, obj=ROOT.TObject, new_title = '', draw_opt = '', prep=False):
         if obj == None: return
         cobj = None
         try:
@@ -382,7 +388,7 @@ class dlist(debugable):
             or robj.InheritsFrom("TGraph") \
             or robj.InheritsFrom("TF1"):
             #h = ROOT.TH1(obj)
-            cobj = self.append(robj, new_title, draw_opt)
+            cobj = self.append(robj, new_title, draw_opt, prep)
             if self.maxy < robj.GetMaximum():
                 self.maxy = robj.GetMaximum()
             if self.miny < robj.GetMinimum():
@@ -930,9 +936,10 @@ class ListStorage:
         if name == None:
             name = 'global_debug_list_of_lists'
         self.name = name
+        self.name = tu.unique_name(name)
+        tu.gList.append(self)
         self.lists = []
         self.tcanvas = None
-        tu.gList.append(self)
         self.lx1 = None
         self.lx2 = None
         self.ly1 = None
