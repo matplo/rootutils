@@ -73,8 +73,8 @@ def h1d_from_ntuple_dir_filter(cdir, ntname, var, cuts, bwidth, xlow, xhigh, tit
     hlretref = dlist.dlist(hl.name + '_filtered_ref')
     hlretref.copy(hlref)
     for i,o in enumerate(hl.l):
-        h    = o.obj
-        href = hlref[i].obj
+        h     = o.obj
+        href  = hlref[i].obj
         hrefc = hlretref[i].obj
         filter_single_entries(h, href, thr)
         hlret.add(h, h.GetTitle(), 'hist')

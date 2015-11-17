@@ -31,6 +31,13 @@ def get_gList_names():
             pass
     return names
 
+def make_unique_name(sbase, *namemods):
+    newname = '{}_{}'.format(sbase, '_'.join([str(s) for s in namemods]) )
+    newname = ut.to_file_name(newname)
+    newname = unique_name(newname)
+    newname = ut.to_file_name(newname)
+    return newname
+
 def unique_name(name):
     n = name
     i = 0
@@ -142,6 +149,15 @@ def signal_handler(signum, frame):
         if sub_p!=None:
             sub_p.send_signal(signal.SIGKILL)            
         sys.exit(0)
+
+def clone(obj, *namemods):
+    newname = '{}_clone_{}'.format(obj.GetName(), '-'.join([str(s) for s in namemods]) )
+    newname = unique_name(newname)
+    clone   = obj.Clone(newname)
+    clone.SetDirectory(0)
+    gList.append(clone)
+    #print '[i] new clone:', newname
+    return clone
 
 def filter_single_entries(h, href=None, thr=10):
     if href == None:
