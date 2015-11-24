@@ -56,18 +56,19 @@ def h1d_from_ntuple_flist(flist, ntname, var, cuts, bwidth, xlow, xhigh, title='
     hltitle = ut.to_file_name(hltitle)
     hl = dlist.dlist(hltitle)
     for i,fname in enumerate(flist):
+        print '    ',fname,i,'of',len(flist)
         htitle = title + '_{}'.format(i)
         h = h1d_from_ntuple(fname, ntname, var, cuts, bwidth, xlow, xhigh, htitle, modname, nev)
         hl.add(h, htitle, 'hist')
     return hl
 
-def h1d_from_ntuple_dir(cdir, ntname, var, cuts, bwidth, xlow, xhigh, title='h', modname='', nev=-1):
-    flist = ut.find_files(cdir, '*.root')
+def h1d_from_ntuple_dir(cdir, ntname, var, cuts, bwidth, xlow, xhigh, title='h', modname='', nev=-1, fpatt='*.root'):
+    flist = ut.find_files(cdir, fpatt)
     return h1d_from_ntuple_flist(flist, ntname, var, cuts, bwidth, xlow, xhigh, title, modname, nev)
 
-def h1d_from_ntuple_dir_filter(cdir, ntname, var, cuts, bwidth, xlow, xhigh, title='h', modname='', nev=-1, refcuts=None, thr=100):
-    hl      = h1d_from_ntuple_dir(cdir, ntname, var,    cuts, bwidth, xlow, xhigh, title, modname, nev)
-    hlref   = h1d_from_ntuple_dir(cdir, ntname, var, refcuts, bwidth, xlow, xhigh, title, modname, nev)
+def h1d_from_ntuple_dir_filter(cdir, ntname, var, cuts, bwidth, xlow, xhigh, title='h', modname='', nev=-1, refcuts=None, thr=100, fpatt='*.root'):
+    hl      = h1d_from_ntuple_dir(cdir, ntname, var,    cuts, bwidth, xlow, xhigh, title, modname, nev, fpatt=fpatt)
+    hlref   = h1d_from_ntuple_dir(cdir, ntname, var, refcuts, bwidth, xlow, xhigh, title, modname, nev, fpatt=fpatt)
     lstore  = dlist.ListStorage(hl.name)
     hlret    = dlist.dlist(hl.name + '_filtered')
     hlretref = dlist.dlist(hl.name + '_filtered_ref')
