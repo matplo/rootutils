@@ -178,7 +178,7 @@ def filter_single_entries_3d(h, href=None, thr=10):
                     h.SetBinContent(ibx, iby, ibz, 0)
                     h.SetBinError(ibx, iby, ibz, 0)
 
-def draw_h1d_from_ntuple(fname, ntname, var, cuts, bwidth, xlow, xhigh, title=None, modname='', nev=-1):
+def __h1d_from_ntuple(fname, ntname, var, cuts, bwidth, xlow, xhigh, title=None, modname='', nev=-1):
     nbins = int((xhigh-xlow)/bwidth*1.)
     if nbins < 1:
         return None
@@ -217,7 +217,7 @@ def draw_h1d_from_ntuple(fname, ntname, var, cuts, bwidth, xlow, xhigh, title=No
 def draw_h2d_from_ntuple(fname, ntname, var, cuts, 
                          xbwidth, xlow, xhigh, 
                          ybwidth, ylow, yhigh,                          
-                         title=None, modname=''):
+                         title=None, modname='', nev=-1):
     xnbins = int((xhigh-xlow)/xbwidth*1.)
     if xnbins < 1:
         return None
@@ -242,7 +242,10 @@ def draw_h2d_from_ntuple(fname, ntname, var, cuts,
         if tn:
             hname_tmp = 'htmp({0},{1},{2},{3},{4},{5})'.format(xnbins, xlow, xhigh, ynbins, ylow, yhigh)
             dstr = '{0}>>{1}'.format(var, hname_tmp)
-            dentries = tn.Draw(dstr, cuts)
+            if nev > 0:
+                dentries = tn.Draw(dstr, cuts, 'e', nev)
+            else:
+                dentries = tn.Draw(dstr, cuts, 'e')
             hret = ROOT.gDirectory.Get('htmp')
             hret.SetDirectory(0)
         fin.Close()
