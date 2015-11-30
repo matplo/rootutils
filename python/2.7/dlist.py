@@ -371,6 +371,22 @@ class dlist(debugable):
             h = f.Get(hname)
             if h:
                 cobj = self.add(h, new_title, draw_opt)
+                f.Close()
+            else:
+                f.Close()
+                cobj = self.add_from_hashlist(hname, fname, new_title, draw_opt)                
+        return cobj
+
+    def add_from_hashlist(self, hname = '', fname = '', new_title = '', draw_opt = ''):
+        cobj = None
+        f = ROOT.TFile(fname)
+        if f:
+            splits = hname.split('/')
+            print splits[0], splits[1]
+            hlist = f.Get(splits[0])
+            h = hlist.FindObject(splits[1])
+            if h:
+                cobj = self.add(h, new_title, draw_opt)
             f.Close()
         return cobj
 
@@ -832,12 +848,15 @@ class dlist(debugable):
             else:
                 print '[w] normalize not defined for non histogram...'
 
-    def normalize_self(self, scale_by_binwidth = True, modTitle = False, scaleE = False):
+    def normalize_self(self, scale_by_binwidth = True, modTitle = False, scaleE = False, to_max=False):
         for h in self.l:
             if h.obj.InheritsFrom('TH1'):
                 #if h.GetSumw2() == None:
                 h.obj.Sumw2()
-                intg = h.obj.Integral(1, h.obj.GetNbinsX())
+                if to_max == True:
+                    intg = h.obj.GetMaximum()
+                else:
+                    intg = h.obj.Integral(1, h.obj.GetNbinsX())
                 bw   = h.obj.GetBinWidth(1)
                 if intg > 0:
                     if scale_by_binwidth:
@@ -956,6 +975,10 @@ class ListStorage:
         hl = self.get(lname)
         hl.add(obj, title, dopt)
 
+    def add_from_file(self, lname, hname, fname, htitle, dopt):
+        hl = self.get(lname)
+        hl.add_from_file(hname, fname, htitle, dopt)
+
     def get(self, lname):
         for l in self.lists:
             if lname == l.name:
@@ -971,6 +994,9 @@ class ListStorage:
 
     def append(self, hl):
         self.lists.append(hl)
+
+    def prepend(self, hl):
+        self.lists.insert(0, hl)
 
     def legend_position(self, x1=None, y1=None, x2=None, y2=None):
         self.lx1 = x1
