@@ -374,7 +374,10 @@ class dlist(debugable):
                 f.Close()
             else:
                 f.Close()
-                cobj = self.add_from_hashlist(hname, fname, new_title, draw_opt)                
+                try:
+                    cobj = self.add_from_hashlist(hname, fname, new_title, draw_opt)                
+                except:
+                    pass
         return cobj
 
     def add_from_hashlist(self, hname = '', fname = '', new_title = '', draw_opt = ''):
