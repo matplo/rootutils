@@ -476,3 +476,10 @@ def getTempCanvas():
     if gTempCanvas == None:
         gTempCanvas = ROOT.TCanvas('tc_temp_canvas', 'tc_temp_canvas')
     return gTempCanvas       
+
+def tchain_from_dir(tname, pattern='*.root'):
+    ch = ROOT.TChain(tname)
+    flist = ut.find_files(dname, pattern)
+    for fn in flist:
+        ch.AddFile(fn)    
+    return ch
