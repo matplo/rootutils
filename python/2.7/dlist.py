@@ -352,6 +352,8 @@ class dlist(debugable):
         while self._check_name(newname) == True:
             newname = newname_root + '_' + str(count)
             count = count + 1
+        if new_title == '':
+            new_title = obj.GetTitle()
         o = draw_object(obj, newname, new_title, draw_opt)
         if prep == True:
             for oi in self.l:
@@ -402,11 +404,17 @@ class dlist(debugable):
             robj = obj
         if robj.InheritsFrom('TH2'):
             cobj = self.append(robj, new_title, draw_opt)            
+            if draw_opt == '':
+                draw_opt = 'colz'
             return cobj
         if robj.InheritsFrom("TH1") \
             or robj.InheritsFrom("TGraph") \
             or robj.InheritsFrom("TF1"):
             #h = ROOT.TH1(obj)
+            if draw_opt == '':
+                draw_opt = 'hist'
+                if robj.InheritsFrom("TF1"):
+                    draw_opt = 'l'
             cobj = self.append(robj, new_title, draw_opt, prep)
             if self.maxy < robj.GetMaximum():
                 self.maxy = robj.GetMaximum()
@@ -1127,7 +1135,7 @@ def load_tlist(tlist, pattern=None, names_not_titles=True, draw_opt='HIST', hl =
             pass
     return ol
 
-def load_file(fname='', pattern=None, names_not_titles=True, draw_opt='HIST', xmin=None, xmax=None):
+def load_file(fname='', pattern=None, names_not_titles=True, draw_opt='', xmin=None, xmax=None):
     if not fname:
         return None
 
@@ -1161,13 +1169,11 @@ def load_file(fname='', pattern=None, names_not_titles=True, draw_opt='HIST', xm
 
         if to_load:
             obj = key.ReadObj()
-            if obj.InheritsFrom('TF1'):
-                draw_opt = draw_opt + 'l'
             if names_not_titles:
                 hl.add(obj, obj.GetName(), draw_opt)
                 hl.last().obj.SetName(key.GetName())
             else:
-                hl.add(obj, draw_opt=draw_opt)                    
+                hl.add(obj, '', draw_opt=draw_opt)                    
                 hl.last().obj.SetName(key.GetName())
             #print '[i] add   :',key.GetName()
         else:
