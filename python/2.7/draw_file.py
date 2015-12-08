@@ -62,12 +62,29 @@ def run():
         ymin = float(yaxis.split(':')[0])
         ymax = float(yaxis.split(':')[1])
 
+    w = tutils.get_arg_with('--w')
+    if w == None:
+        w = 600
+    h = tutils.get_arg_with('--h')
+    if h == None:
+        h = 400
+
     f = tutils.get_arg_with('-f')
     if f:
         #ol.gDebug = True
         l = dlist.show_file(f, tutils.is_arg_set('--logy'), pattern, draw_opt, names_not_titles, xmin, xmax, ymin, ymax)
+        l.resize_window(int(w),int(h))
+        if tutils.is_arg_set('--gridx'):
+            l.tcanvas.cd(1)
+            ROOT.gPad.SetGridx()
+        if tutils.is_arg_set('--gridy'):
+            l.tcanvas.cd(1)
+            ROOT.gPad.SetGridy()
+        l.update()
         if tutils.is_arg_set('--pdf'):
             l.pdf()
+        if tutils.is_arg_set('--png'):
+            l.png()
         tutils.gList.append(l)        
         #tutils.wait()
     else:
