@@ -6,7 +6,7 @@ import tutils as tu
 import IPython
 
 def print_usage():
-	print '[i] usage:',os.path.basename(sys.argv[0]),'-f <file.root> [--keep-stats] [--keep-title] [--logy] [--pattern <something in the name>] [--dopt <draw option>] [--x <min:max>] [--titles]'
+	print '[i] usage:',os.path.basename(sys.argv[0]),'-b'
 
 if __name__=="__main__":
 	if tu.is_arg_set('--help') or tu.is_arg_set('-h') or tu.is_arg_set('-?') or tu.is_arg_set('-help'):
