@@ -162,6 +162,10 @@ def draw_comment(comment, font_size = None, x1 = 0.0, y1 = 0.9, x2 = 0.99, y2 = 
     tu.gList.append(tx)
     return tx
 
+def draw_comment_multiline(comment = [], font_size = None, x1 = 0.0, y1 = 0.9, x2 = 0.99, y2 = 0.99, font = 42, dopt='brNDC'):
+    for i,c in enumerate(comment):
+        draw_comment(c, font_size, x1, y1 - font_size * 1.2 * (i+1), x2, y2 - font_size * 1.2 * i, font, dopt)
+
 def make_canvas_grid(n, tc = None, name = 'tmp_tc', title = 'tmp_tc', orient=0, xm=0.01, ym=0.01):
     if tc == None:        
         if orient == 0:
