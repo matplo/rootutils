@@ -74,6 +74,8 @@ def h1d_from_ntuple_dir(cdir, ntname, var, cuts, bwidth, xlow, xhigh, title='h',
 
 def h1d_from_ntuple_dir_filter(cdir, ntname, var, cuts, bwidth, xlow, xhigh, title='h', modname='', nev=-1, refcuts=None, thr=100, fpatt='*.root'):
     hl      = h1d_from_ntuple_dir(cdir, ntname, var,    cuts, bwidth, xlow, xhigh, title, modname, nev, fpatt=fpatt)
+    if refcuts==None:
+        refcuts = cuts
     hlref   = h1d_from_ntuple_dir(cdir, ntname, var, refcuts, bwidth, xlow, xhigh, title, modname, nev, fpatt=fpatt)
     lstore  = dlist.ListStorage(hl.name)
     hlret    = dlist.dlist(hl.name + '_filtered')
