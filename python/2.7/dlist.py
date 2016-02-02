@@ -1220,7 +1220,7 @@ def show_file(fname='', logy=False, pattern=None, draw_opt='p', names_not_titles
 
     hl.tcanvas.cd(2)
     #hl.draw_legend(1,fname+'[{0}]'.format(pattern))
-    hl.self_legend(1, fname + ' [ {0} ]'.format(pattern), 0.0, 0.0, 1, 1, 0.03)
+    hl.self_legend(1, fname + ' [ {0} ]'.format(pattern), 0.0, 0.0, 1, 1)
     hl.tcanvas.Update()
     #the one below is better (?)
     ROOT.gPad.Update()
