@@ -155,7 +155,7 @@ def h2d_from_ntuple_flist(flist, ntname, var, cuts, bwidth, xlow, xhigh, ybwidth
     for i,fname in enumerate(flist):
         print '    ',fname,i,'of',len(flist)
         htitle = title + '_{}'.format(i)
-        h = h2d_from_ntuple(fname, ntname, var, cuts, bwidth, xlow, xhigh, htitle, modname, nev)
+        h = h2d_from_ntuple(fname, ntname, var, cuts, bwidth, xlow, xhigh, ybwidth, ylow, yhigh, htitle, modname, nev)
         hl.add(h, htitle, 'hist')
     return hl
 
@@ -163,9 +163,9 @@ def h2d_from_ntuple_flist_file(flist, ntname, var, cuts, bwidth, xlow, xhigh, yb
     fl = []
     with open(flist) as f:
         fl = f.readlines()
-    return h2d_from_ntuple_flist(fl, ntname, var, cuts, bwidth, xlow, xhigh, title, modname, nev)
+    return h2d_from_ntuple_flist(fl, ntname, var, cuts, bwidth, xlow, xhigh, ybwidth, ylow, yhigh, title, modname, nev)
 
 def h2d_from_ntuple_dir(cdir, ntname, var, cuts, bwidth, xlow, xhigh, ybwidth, ylow, yhigh, title='h', modname='', nev=-1, fpatt='*.root'):
     flist = ut.find_files(cdir, fpatt)
-    return h2d_from_ntuple_flist(flist, ntname, var, cuts, bwidth, xlow, xhigh, title, modname, nev)
+    return h2d_from_ntuple_flist(flist, ntname, var, cuts, bwidth, xlow, xhigh, ybwidth, ylow, yhigh, title, modname, nev)
 
