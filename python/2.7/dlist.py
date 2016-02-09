@@ -1321,6 +1321,15 @@ def filter_single_entries_h(h, href=None, thr=10):
         if href.GetBinContent(ib) < thr:
             h.SetBinContent(ib, 0)
             h.SetBinError(ib, 0)
+
+def filter_single_entries_h2d(h, href=None, thr=10):
+    if href == None:
+        href = h
+    for ib in range(1, h.GetNbinsX()+1):
+        for iby in range(1, h.GetNbinsY()+1):
+            if href.GetBinContent(ib, iby) < thr:
+                h.SetBinContent(ib, iby, 0)
+                h.SetBinError(ib, iby, 0)
     
 def filter_single_entries(hl, hlref, thr=10):
     for ih in range(len(hl.l)):
@@ -1330,6 +1339,16 @@ def filter_single_entries(hl, hlref, thr=10):
             if href.GetBinContent(ib) < thr:
                 h.SetBinContent(ib, 0)
                 h.SetBinError(ib, 0)
+
+def filter_single_entries_2d(hl, hlref, thr=10):
+    for ih in range(len(hl.l)):
+        h    = hl.l[ih].obj
+        href = hlref.l[ih].obj
+        for ib in range(1, h.GetNbinsX()+1):
+            for iby in range(1, h.GetNbinsY()+1):
+                if href.GetBinContent(ib, iby) < thr:
+                    h.SetBinContent(ib, iby, 0)
+                    h.SetBinError(ib, iby, 0)
 
 def get_projection_axis(hname, h2d, axis, ixmin=0, ixmax=105):
     if axis == 1:
