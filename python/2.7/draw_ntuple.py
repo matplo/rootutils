@@ -65,7 +65,7 @@ def h1d_from_ntuple_flist(flist, ntname, var, cuts, bwidth, xlow, xhigh, title='
 def h1d_from_ntuple_flist_file(flist, ntname, var, cuts, bwidth, xlow, xhigh, title='h', modname='', nev=-1):
     fl = []
     with open(flist) as f:
-        fl = f.readlines()
+        fl = [ l.strip() for l in f.readlines() ]
     return h1d_from_ntuple_flist(fl, ntname, var, cuts, bwidth, xlow, xhigh, title, modname, nev)
 
 def h1d_from_ntuple_dir(cdir, ntname, var, cuts, bwidth, xlow, xhigh, title='h', modname='', nev=-1, fpatt='*.root'):
