@@ -297,6 +297,23 @@ def resample(hin, hout, n):
     scale = (get_sum_of_bins(hin) / get_sum_of_bins(hout)) * (hin.GetBinWidth(1) / hout.GetBinWidth(1))
     hout.Scale(scale)
 
+def resample_new(hin, hout, n):
+    nsamples = 10
+    if hout.GetSumw2N() == 0:
+        hout.Sumw2()
+    integral_in = get_sum_of_bins(hin) #hin.Integral()
+    for ib in range(1, hin.GetNbinsX()):
+        w = hin.GetBinContent(ib) / integral_in * 1.
+        if w == 0:
+            continue
+        print 'bin=',ib,'w=',w
+        bwidth = hin.GetBinWidth(ib)
+        for i in range(0, int(nsamples)):
+            v = hin.GetBinLowEdge(ib) + ROOT.gRandom.Rndm() * bwidth
+            hout.Fill(v/nsamples/w)
+    #scale = (get_sum_of_bins(hin) / get_sum_of_bins(hout)) * (hin.GetBinWidth(1) / hout.GetBinWidth(1))
+    #hout.Scale(scale)
+
 def resample_test(hin, hout, n, shift=0.0):
     if hout.GetSumw2N() == 0:
         hout.Sumw2()
@@ -328,6 +345,7 @@ def resample_to_new(hin, ntimes, nb, minx, maxx, shift=0.0):
     hout = ROOT.TH1D(hname, htitle, nb, minx, maxx)
     hout.Sumw2()
     resample(hin, hout, ntimes)
+    #resample_new(hin, hout, ntimes)
     return hout
 
 def next_weekday(d, weekday):

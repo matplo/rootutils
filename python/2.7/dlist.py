@@ -799,7 +799,8 @@ class dlist(debugable):
         self.legend.SetBorderSize(0)
         self.legend.SetFillColor(ROOT.kWhite)
         self.legend.SetFillStyle(1001)
-        self.legend.SetFillColorAlpha(ROOT.kWhite, 0.9)
+        #self.legend.SetFillColorAlpha(ROOT.kWhite, 0.9)
+        self.legend.SetFillColorAlpha(ROOT.kWhite, 0)
         self.legend.SetTextAlign(12)
         self.legend.SetTextSize(self.axis_title_size[0] * 0.5)
         self.legend.SetTextFont(self.font)
@@ -1220,7 +1221,7 @@ def show_file(fname='', logy=False, pattern=None, draw_opt='p', names_not_titles
 
     hl.tcanvas.cd(2)
     #hl.draw_legend(1,fname+'[{0}]'.format(pattern))
-    hl.self_legend(1, fname + ' [ {0} ]'.format(pattern), 0.0, 0.0, 1, 1, 0.03)
+    hl.self_legend(1, fname + ' [ {0} ]'.format(pattern), 0.0, 0.0, 1, 1)
     hl.tcanvas.Update()
     #the one below is better (?)
     ROOT.gPad.Update()
@@ -1323,8 +1324,8 @@ def filter_single_entries_h(h, href=None, thr=10):
     
 def filter_single_entries(hl, hlref, thr=10):
     for ih in range(len(hl.l)):
-        h    = hl.l[ih]
-        href = hlref.l[ih]
+        h    = hl.l[ih].obj
+        href = hlref.l[ih].obj
         for ib in range(h.GetNbinsX()+1):
             if href.GetBinContent(ib) < thr:
                 h.SetBinContent(ib, 0)
@@ -1383,6 +1384,31 @@ def get_projections_axis(hname, fname, htitle, pTmin, pTmax, step, opt='P L HIST
         else:
             hn     = '{}-px-{}-{}'.format(hname, pT, pT + step)            
         hp = get_projection_axis(hn, h2d, axis, pT, pT + step)            
+        hp.Sumw2()
+        hl.append(hp, htitlepy, 'P L HIST')
+        pT = pT + step            
+    return hl
+
+def get_projections_axis_lowcut(hname, fname, htitle, pTmin, pTmax, step, opt='P L HIST', axis = 1, pTs=None):
+    h2d = tu.get_object_from_file(hname, fname, htitle + '2d')
+    if h2d == None:
+        print '[i] unable to get:',hname,'from:',fname
+        return None
+    hlname = 'projections-{}-{}-{}-{}-{}-{}'.format(hname, fname, htitle, pTmin, pTmax, step)
+    hl = dlist(hname+htitle)
+    pT = pTmin
+    Amax = h2d.GetXaxis().GetXmax()
+    if axis == 0:
+        Amax = h2d.GetYaxis().GetXmax()
+    while pT + step <= pTmax:
+        if pTs != None:
+            pTs.append(pT)
+        htitlepy = '{} [{}-{}]'.format(htitle, pT, Amax)
+        if axis == 1:
+            hn     = '{}-py-{}-{}'.format(hname, pT, Amax)
+        else:
+            hn     = '{}-px-{}-{}'.format(hname, pT, Amax)            
+        hp = get_projection_axis(hn, h2d, axis, pT, Amax)            
         hp.Sumw2()
         hl.append(hp, htitlepy, 'P L HIST')
         pT = pT + step            
