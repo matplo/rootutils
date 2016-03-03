@@ -1,5 +1,6 @@
-import ROOT
+import os
 import sys
+import ROOT
 import draw_utils as du
 import tutils as tu
 from array import array
@@ -7,6 +8,17 @@ gDebug = False
 #needs a fix: the import below depends on where the module is...
 from dbgu import debug_utils as dbgu
 import pcanvas
+
+def check_andor_make_output_dir(sname, isfilename=False):
+    sdir = sname
+    if isfilename:
+        sdir = os.path.dirname(sname)
+    if os.path.isdir(sdir) == False:
+        try:
+            os.makedirs(sdir)
+        except:
+            return False
+    return os.path.isdir(sdir)
 
 class debugable(object):
     def __init__(self):
@@ -892,6 +904,11 @@ class dlist(debugable):
     def write_to_file(self, fname=None, opt='RECREATE', name_mod=''):
         if fname==None:
             fname = self.name.replace(' ','_').replace('&&','and') + '.root'
+
+        if check_andor_make_output_dir(fname, isfilename=True) == False:
+            print >> sys.stderr, '[e] unable to create/access output dir for: ',fname
+            return
+
         try:
             f = ROOT.TFile(fname, opt)
             f.cd()
