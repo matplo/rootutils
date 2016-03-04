@@ -1,7 +1,9 @@
-#!/usr/bin/env python -i
+#!/usr/bin/env python
 
 import tutils
 import ROOT as r
+import IPython
+
 def main():
 
     tutils.setup_basic_root()
@@ -13,7 +15,8 @@ def main():
     h.Draw()
     r.gPad.Update()    
     tutils.gList.append(h)
-    tutils.wait()
     
 if __name__=="__main__":
     main()
+    if not tutils.is_arg_set('-b'):
+        IPython.embed()
