@@ -940,7 +940,7 @@ class dlist(debugable):
         except:
             print >> sys.stderr,'[e] writing to file {0} failed'.format(fname)
 
-    def ratio_to(self, ito = 0, extra_opt=''):
+    def ratio_to(self, ito = 0, opt='HIST'):
         hdenom = self.l[ito].obj
         hret = dlist('{}-ratio-to-index-{}'.format(self.name, ito))
         for i in range(len(self.l)):
@@ -948,7 +948,7 @@ class dlist(debugable):
                 continue
             h = self.l[i].obj
             hlr = make_ratio(h, hdenom)
-            hret.add(hlr.last().obj, hlr.last().obj.GetTitle(), 'HIST ' + extra_opt)
+            hret.add(hlr.last().obj, hlr.last().obj.GetTitle(), opt)
         return hret
 
     def reset_titles(self, stitles):
