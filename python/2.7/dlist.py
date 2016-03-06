@@ -903,7 +903,7 @@ class dlist(debugable):
                 
     def write_to_file(self, fname=None, opt='RECREATE', name_mod=''):
         if fname==None:
-            fname = self.name.replace(' ','_').replace('&&','and') + '.root'
+            fname = './' + self.name.replace(' ','_').replace('&&','and') + '.root'
 
         if check_andor_make_output_dir(fname, isfilename=True) == False:
             print >> sys.stderr, '[e] unable to create/access output dir for: ',fname
