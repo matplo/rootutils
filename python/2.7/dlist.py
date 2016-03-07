@@ -734,9 +734,13 @@ class dlist(debugable):
         self.style.reset()
         
         if self.has2D():
-            self.tcanvas = ROOT.gPad
+            #self.tcanvas = ROOT.gPad
             if not self.tcanvas:
-                self.make_canvas()
+                print '[i] 2D draw - making canvas here'
+                if len(self.l) > 8:
+                    self.make_canvas(1000, 800)
+                else:
+                    self.make_canvas()
             self.tcanvas = du.make_canvas_grid(len(self.l), self.tcanvas)
         if self.tcanvas != None:
             tcname = self.tcanvas.GetName()
@@ -755,8 +759,10 @@ class dlist(debugable):
             if self.has2D():
                 #tc = ROOT.gROOT.FindObject(tcname)
                 #tc.cd(i+1)
+                self.tcanvas.cd(i+1)
                 ROOT.gStyle.SetOptTitle(True)
                 o.obj.Draw('colz')
+                ROOT.gPad.SetToolTipText(o.obj.GetTitle(), 100)
                 self.adjust_pad_margins(_right=0.17)
             else:
                 o.draw(' '.join(extra_opt))
@@ -1213,10 +1219,11 @@ def show_file(fname='', logy=False, pattern=None, draw_opt='p', names_not_titles
 
     hl = load_file(fname, pattern, names_not_titles, draw_opt, xmin, xmax)
     hl.pattern = pattern
+    if not hl.has2D():
+        hl.make_canvas()
+        hl.tcanvas.Divide(2,1)
+        hl.tcanvas.cd(1)
 
-    hl.make_canvas()
-    hl.tcanvas.Divide(2,1)
-    hl.tcanvas.cd(1)
     if 'self' in draw_opt:
         hl.draw(draw_opt, None, None, logy)
     else:
@@ -1242,8 +1249,7 @@ def show_file(fname='', logy=False, pattern=None, draw_opt='p', names_not_titles
     hl.self_legend(1, fname + ' [ {0} ]'.format(pattern), 0.0, 0.0, 1, 1)
     hl.tcanvas.Update()
     #the one below is better (?)
-    ROOT.gPad.Update()
-    
+    #ROOT.gPad.Update()
     return hl
 
 def make_ratio(h1, h2):
