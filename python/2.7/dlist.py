@@ -8,6 +8,7 @@ gDebug = False
 #needs a fix: the import below depends on where the module is...
 from dbgu import debug_utils as dbgu
 import pcanvas
+import pyutils
 
 def check_andor_make_output_dir(sname, isfilename=False):
     sdir = sname
@@ -903,7 +904,7 @@ class dlist(debugable):
                 
     def write_to_file(self, fname=None, opt='RECREATE', name_mod=''):
         if fname==None:
-            fname = './' + self.name.replace(' ','_').replace('&&','and') + '.root'
+            fname = './' + pyutils.to_file_name(self.name) + '.root'
 
         if check_andor_make_output_dir(fname, isfilename=True) == False:
             print >> sys.stderr, '[e] unable to create/access output dir for: ',fname
