@@ -36,13 +36,17 @@ class style_iterator(debugable):
     #good_lines   = [ -1,  1,  2,  3,  5,  8,  6,  7,  4,  9, 10]
     good_lines   = [ -1,  1,  2,  3,  5,  7,  9,  6, 8, 4, 10, 1,  2,  3,  5,  7,  9,  6, 8, 4, 10]
     
-    def __init__(self):
+    def __init__(self, reset_idx = 0):
+        self.reset_index = reset_idx
         self.reset()
-        
+
+    def reset_to_index(self, idx):
+        self.reset_index = idx
+
     def reset(self):
-        self.color_idx  = 0
-        self.line_idx   = 0
-        self.marker_idx = 0
+        self.color_idx  = self.reset_index  
+        self.line_idx   = self.reset_index  
+        self.marker_idx = self.reset_index  
         self.line_width = 2
         
     def colorize(self, force_color=None):
@@ -91,7 +95,12 @@ class style_iterator(debugable):
         if self.line_idx >= len(self.good_lines):
             self.line_idx = 0
         return self.good_lines[self.line_idx]
-    
+
+    def next(self):
+        self.next_color();
+        self.next_marker();
+        self.next_line();
+
 class draw_option(debugable):
         
     def __init__(self, stro = ''):
@@ -841,6 +850,9 @@ class dlist(debugable):
                 self.pad.SetLogy()
             self.pad.Modified()
             self.pad.Update()        
+        if self.tcanvas:
+            self.tcanvas.Modified()
+            self.tcanvas.Update()
 
     def make_canvas(self, w=600, h=400, 
                     split=0, orientation=0, 
@@ -958,6 +970,14 @@ class dlist(debugable):
             hret.add(hlr.last().obj, hlr.last().obj.GetTitle(), opt)
         return hret
 
+    def ratio_to_href(self, hdenom, opt='HIST'):
+        hret = dlist('{}-ratio-to-href-{}'.format(self.name, hdenom.GetName()))
+        for i in range(len(self.l)):
+            h = self.l[i].obj
+            hlr = make_ratio(h, hdenom)
+            hret.add(hlr.last().obj, hlr.last().obj.GetTitle(), opt)
+        return hret
+
     def reset_titles(self, stitles):
         for h in self.l:
             i = self.l.index(h)
@@ -982,10 +1002,10 @@ class dlist(debugable):
         return reth
 
     def pdf(self):
-        self.tcanvas.Print(self.name+'.pdf','.pdf')
+        self.tcanvas.Print(pyutils.to_file_name(self.name)+'.pdf','.pdf')
 
     def png(self):
-        self.tcanvas.Print(self.name+'.png','.png')
+        self.tcanvas.Print(pyutils.to_file_name(self.name)+'.png','.png')
     
 class ListStorage:
     def __init__(self, name = None):
@@ -1051,7 +1071,7 @@ class ListStorage:
             l.fix_x_range(xmin, xmax)
             print l
 
-    def draw_all(self, option='', miny=None, maxy=None, logy=False, colopt='', legtitle='', orient=0, condense=False):
+    def draw_all(self, option='', miny=None, maxy=None, logy=False, colopt='', legtitle='', orient=0, condense=False, draw_legend=True):
         legoption = 'brNDC'
         if len(self.lists) <= 0:
             return
@@ -1075,11 +1095,15 @@ class ListStorage:
                 l.draw(logy=logy, option=option, miny=miny, maxy=maxy, colopt=colopt)
             else:
                 l.draw(logy=logy, option=option, miny=miny, maxy=maxy, colopt=colopt, adjust_pad=False)
-            if self.lx1 != None:
-                legend = l.self_legend(1, slegtitle, self.lx1, self.ly1, self.lx2, self.ly2, 
-                    tx_size=self.legend_font_scale, option=legoption)
+            if draw_legend:
+                if self.lx1 != None:
+                    legend = l.self_legend(1, slegtitle, self.lx1, self.ly1, self.lx2, self.ly2, 
+                        tx_size=self.legend_font_scale, option=legoption)
+                else:
+                    legend = l.self_legend(ncols=1, title=slegtitle, tx_size=self.legend_font_scale, option=legoption)
             else:
-                legend = l.self_legend(ncols=1, title=slegtitle, tx_size=self.legend_font_scale, option=legoption)
+                if legtitle == 'self':
+                    l.draw_comment(l.title, 0.05, 0, 0.9, 1., 1.) 
             l.update(logy=logy)
         self.adjust_pads()
 
@@ -1306,9 +1330,16 @@ def yats(olin):
             #oret.lopts[idx] = olin.lopts[idx] # not needed - within copy
     return oret
 
-def fractional_yats(olin):
+def fractional_yats(olin, refidx=-1):
     oret = dlist(olin.name + '_fyat')
     oret.copy(olin)
+
+    integRef = 1.
+    if refidx >= 0:
+        hin      = olin.l[refidx].obj
+        maxbin   = hin.GetNbinsX()
+        integRef = hin.Integral(1, maxbin, "width")
+
     for idx,ho in enumerate(oret.l):
         h = ho.obj
         h.Reset()
@@ -1319,7 +1350,10 @@ def fractional_yats(olin):
             print "[w] integral ? ",integ
             integ = -1.
         for ib in range(1, maxbin):
-            yat    = hin.Integral(ib, maxbin, "width") / integ
+            if refidx >= 0:
+                yat    = hin.Integral(ib, maxbin, "width") / integRef
+            else:
+                yat    = hin.Integral(ib, maxbin, "width") / integ
             h.SetBinContent(ib, yat)
             #oret.lopts[idx] = olin.lopts[idx] # not needed - within copy
     return oret
