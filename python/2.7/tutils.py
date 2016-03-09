@@ -263,6 +263,27 @@ def get_max_from_ntuple(fname, ntname, var, cuts = None):
     print >> sys.stderr, '[e] unable to get maximum of',var,'from',fname,ntname
     return None
 
+def get_mean_from_ntuple(fname, ntname, var, cuts = ''):
+    fin = ROOT.TFile(fname)
+    if fin:
+        tn = fin.Get(ntname)
+        if tn:
+            print '*** var:',var
+            #xmax = tn.GetMaximum(var)
+            #xmin = tn.GetMinimum(var)
+            #hname_tmp = 'htmp({0},{1},{2})'.format(100, xmin, xmax)
+            hname_tmp = 'htmp'
+            dstr = '{0}>>{1}'.format(var, hname_tmp)
+            dentries = tn.Draw(dstr, cuts, 'e') #call sumw2 before the histogram creation!
+            hret = ROOT.gDirectory.Get(hname_tmp)
+            hret.SetDirectory(0)            
+            mean = hret.GetMean()
+            hret.Reset()
+            print '*** mean = ', mean
+            return mean
+    print >> sys.stderr, '[e] unable to get mean of',var,'from',fname,ntname
+    return None
+
 def get_object_from_file(hname = '', fname = '', new_title = '', nmod=None):
     if fname == None:
         return None
