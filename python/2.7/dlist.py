@@ -1112,10 +1112,10 @@ class ListStorage:
             hl.adjust_to_pad(self.lists[0].pad)
 
     def pdf(self):
-        self.tcanvas.Print(self.name+'.pdf','.pdf')
+        self.tcanvas.Print(pyutils.to_file_name(self.name)+'.pdf','.pdf')
 
     def png(self):
-        self.tcanvas.Print(self.name+'.png','.png')
+        self.tcanvas.Print(pyutils.to_file_name(self.name)+'.png','.png')
 
     def write_all(self, mod='', opt='RECREATE'):
         for i,hl in enumerate(self.lists):
@@ -1412,10 +1412,14 @@ def get_projection_axis(hname, h2d, axis, ixmin=0, ixmax=105):
     if axis == 1:
         ixminb = h2d.GetXaxis().FindBin(ixmin)
         ixmaxb = h2d.GetXaxis().FindBin(ixmax)
+        if ixmaxb > h2d.GetXaxis().GetNbins():
+            imaxb = h2d.GetXaxis().GetNbins()
         hproj = h2d.ProjectionY(hname, ixminb, ixmaxb)
     else:
         ixminb = h2d.GetYaxis().FindBin(ixmin)
         ixmaxb = h2d.GetYaxis().FindBin(ixmax)
+        if ixmaxb > h2d.GetYaxis().GetNbins():
+            imaxb = h2d.GetYaxis().GetNbins()
         hproj = h2d.ProjectionX(hname, ixminb, ixmaxb)        
     return hproj
 
