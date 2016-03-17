@@ -97,6 +97,11 @@ def wait_i():
     if not '-b' in sys.argv:
         IPython.embed()
 
+def iprompt():
+    import IPython
+    if not '-b' in sys.argv:
+        IPython.embed()
+
 def setup_basic_root():
     ROOT.gROOT.Reset()
     ROOT.gStyle.SetScreenFactor(1)
