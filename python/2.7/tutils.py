@@ -31,6 +31,22 @@ def get_gList_names():
             pass
     return names
 
+def load_lib(lname, silent = True):
+    stmp = ROOT.gSystem.ExpandPathName(lname)
+    if not silent:
+        print '[i] loading',stmp,
+    try:
+        retval = ROOT.gSystem.Load(stmp)
+    except:
+        pass
+    if not silent:
+        print retval
+    return retval
+
+def add_ld_path(spath):
+    stmp = ROOT.gSystem.ExpandPathName(spath)
+    ROOT.gSystem.AddDynamicPath(stmp)
+
 def make_unique_name(sbase, *namemods):
     newname = '{}_{}'.format(sbase, '_'.join([str(s) for s in namemods]) )
     newname = ut.to_file_name(newname)
