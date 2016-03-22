@@ -127,6 +127,7 @@ class draw_option(debugable):
         self.is_error        = self.has(['serror'], strip=True)
         self.no_legend       = self.has(['noleg'],  strip=True)
         self.hidden          = self.has(['hidden'], strip=True)
+        self.rectangle       = self.has(['rect'], strip=True)        
         self.last_kolor      = self.has(['-k'])
         self.last_line       = self.has(['-l'])
 
@@ -716,13 +717,20 @@ class dlist(debugable):
 
         o.obj.SetFillColor(kolor)
         o.obj.SetLineColor(kolor)
-        o.obj.SetLineColorAlpha(kolor, alpha)
+        if o.dopt.rectangle == True:
+            o.obj.SetLineColorAlpha(kolor, 1.0)
+        else:
+            o.obj.SetLineColorAlpha(kolor, alpha)
 
         o.obj.SetMarkerColor(kolor)                           
         o.obj.SetMarkerColorAlpha(kolor, 0)
 
-        o.obj.SetFillColorAlpha(kolor, alpha)
-        o.obj.SetFillStyle(1001)
+        if o.dopt.rectangle == True:
+            o.obj.SetFillColorAlpha(kolor, 1.0)
+            o.obj.SetFillStyle(0000)
+        else:
+            o.obj.SetFillColorAlpha(kolor, alpha)
+            o.obj.SetFillStyle(1001)
 
     def has2D(self):
         has2D = False
