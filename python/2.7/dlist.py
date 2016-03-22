@@ -709,7 +709,8 @@ class dlist(debugable):
                     kolor = self.l[i-1].dopt.kolor
         if kolor < 0:
             kolor = 7
-            o.dopt.kolor = kolor
+
+        o.dopt.kolor = kolor
 
         alpha = 0.3
         if o.dopt.alpha > 0:
