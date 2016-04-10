@@ -1,3 +1,4 @@
+import os
 import sys
 import subprocess
 import shlex
@@ -544,3 +545,18 @@ def tchain_from_dir(tname, dname, pattern='*.root'):
         ch.AddFile(fn)    
     print '[i] tchain_from_dir: Nfiles:',ch.GetNtrees()
     return ch
+
+gLibsLoaded = False
+def rinterp(cline):
+    global gLibsLoaded
+    if gLibsLoaded == False:
+        sdir = os.path.join(os.getenv('ROOTSYS'), 'lib')
+        print >> sys.stderr, '[add ld path]', sdir
+        ROOT.gSystem.AddDynamicPath(sdir)
+        #slibs = ut.find_files(sdir, '*.so')
+        slibs = ['libGui']
+        for sil in slibs:
+            iload = ROOT.gSystem.Load(sil)
+            print >> sys.stderr, '[load]', sil, iload
+        gLibsLoaded = True
+    return ROOT.gInterpreter.ProcessLine(cline)
