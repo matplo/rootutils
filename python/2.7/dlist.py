@@ -719,7 +719,10 @@ class dlist(debugable):
         o.obj.SetFillColor(kolor)
         o.obj.SetLineColor(kolor)
         if o.dopt.rectangle == True:
-            o.obj.SetLineColorAlpha(kolor, alpha)
+            newalpha = alpha * 2.
+            if newalpha > 1.0:
+                newalpha = 1.0
+            o.obj.SetLineColorAlpha(kolor, newalpha)
         else:
             o.obj.SetLineColorAlpha(kolor, alpha)
 
