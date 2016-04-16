@@ -1097,6 +1097,11 @@ class ListStorage:
                 slegtitle = legtitle
             if legtitle == None:
                 slegtitle = ''
+            if ';single_pad' in legtitle:
+                slegtitle = legtitle
+                slegtitle = slegtitle.replace(';single_pad', '')
+                if i > 0:
+                    slegtitle = ' '
             self.tcanvas.cd(i+1)
             if condense == True:
                 l.set_font(43, 1.4)
