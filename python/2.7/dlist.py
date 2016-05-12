@@ -410,7 +410,7 @@ class dlist(debugable):
         f = ROOT.TFile(fname)
         if f:
             splits = hname.split('/')
-            print splits[0], splits[1]
+            #print splits[0], splits[1]
             hlist = f.Get(splits[0])
             h = hlist.FindObject(splits[1])
             if h:
