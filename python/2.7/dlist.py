@@ -1188,18 +1188,20 @@ def load_tlist(tlist, pattern=None, names_not_titles=True, draw_opt='HIST', hl =
         if to_load:
             if names_not_titles == True:
                 newname = "{}:{}".format(tlist.GetName(), obj.GetName())
-                hl.addh (obj, newname, draw_opt)
-                hl.addgr(obj, newname)
-                hl.addf (obj, newname, 'L')                
+                hl.add (obj, newname, draw_opt)
+                #hl.addh (obj, newname, draw_opt)
+                #hl.addgr(obj, newname)
+                #hl.addf (obj, newname, 'L')                
             else:
-                hl.addh(obj, draw_opt=draw_opt)
-                hl.addgr(obj)
-                hl.addf(obj, None, 'L')                
+                hl.add (obj, draw_opt=draw_opt)
+                #hl.addh(obj, draw_opt=draw_opt)
+                #hl.addgr(obj)
+                #hl.addf(obj, None, 'L')                
             #print '[i] add   :',obj.GetName()
         else:
             #print '[i] ignore:',obj.GetName()
             pass
-    return ol
+    return hl
 
 def load_file(fname='', pattern=None, names_not_titles=True, draw_opt='', xmin=None, xmax=None):
     if not fname:
