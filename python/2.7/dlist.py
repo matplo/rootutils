@@ -1056,6 +1056,9 @@ class ListStorage:
         self.lists.append(retl)
         return self.get(lname)
 
+    def get_list(self, lname):
+        return self.get(lname)
+
     def zoom_axis(self, which, xmin, xmax):
         for l in self.lists:
             l.zoom_axis(which, xmin, xmax)
