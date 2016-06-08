@@ -782,7 +782,11 @@ class dlist(debugable):
                 #tc.cd(i+1)
                 self.tcanvas.cd(i+1)
                 ROOT.gStyle.SetOptTitle(True)
-                o.obj.Draw('colz')
+                if len(o.dopt.stripped()) > 0:
+                    o.obj.Draw(o.dopt.stripped())
+                    #print o.obj.GetName(),o.dopt.stripped()
+                else:
+                    o.obj.Draw('colz')
                 ROOT.gPad.SetToolTipText(o.obj.GetTitle(), 100)
                 self.adjust_pad_margins(_right=0.17)
             else:
@@ -797,6 +801,18 @@ class dlist(debugable):
         self.pad_name = ROOT.gPad.GetName() # name is better
         self.get_pad_drawn();
         self.debug('[i] ' + self.name + ' drawing on ' + str(self.pad))
+
+    def set_log_multipad(self, axes='', flag=True):
+        l = self.tcanvas.GetListOfPrimitives()
+        for i in xrange(len(l)):
+            tp = self.tcanvas.cd(i+1)
+            if tp:
+                if 'z' in axes:
+                    tp.SetLogz(flag)
+                if 'y' in axes:
+                    tp.SetLogy(flag)
+                if 'x' in axes:
+                    tp.SetLogx(flag)
 
     def get_pad_drawn(self):
         self.pad = ROOT.gROOT.FindObject(self.pad_name);
@@ -861,8 +877,15 @@ class dlist(debugable):
             if logy:
                 self.pad.SetLogy()
             self.pad.Modified()
-            self.pad.Update()        
+            self.pad.Update()
         if self.tcanvas:
+            l = self.tcanvas.GetListOfPrimitives()
+            for i in xrange(len(l)):
+                tp = self.tcanvas.cd(i+1)
+                if tp:
+                    tp.Update()
+                    if logy:
+                        tp.SetLogy()
             self.tcanvas.Modified()
             self.tcanvas.Update()
 
