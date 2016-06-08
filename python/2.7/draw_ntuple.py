@@ -117,6 +117,7 @@ def h2d_from_ntuple(fname, ntname, var, cuts, bwidth, xlow, xhigh, ybwidth, ylow
     hname = hname.replace('*', 'x')
     hname = hname.replace('(', '.')
     hname = hname.replace(')', '.')
+    hname = hname.replace(':', '..')
     if len(modname) > 0:
         hname = modname
     if title==None:
