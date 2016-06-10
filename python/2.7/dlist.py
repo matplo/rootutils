@@ -983,6 +983,10 @@ class dlist(debugable):
                         newname = self.name + '-{}'.format(i)
             else:
                 newname = h.obj.GetName() + name_mod
+            if h.dopt.no_legend:
+                newname = newname + '_noleg'
+            if h.dopt.hidden:
+                newname = newname + '_hidden'
             try:
                 h.obj.Write(newname)
             except:
@@ -1062,6 +1066,10 @@ class ListStorage:
             return self.lists[i]
         else:
             return None
+
+    def reset_axis_titles(self, titlex=None, titley=None, titlez=None):
+        for hl in self.lists:
+            hl.reset_axis_titles(titlex, titley, titlez)
 
     def add_to_list(self, lname, obj, title, dopt):
         hl = self.get(lname)
