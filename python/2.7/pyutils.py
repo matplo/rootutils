@@ -10,6 +10,17 @@ import time
 import string
 import random
 
+def load_file_to_strings(fname):
+    outl = []
+    if fname != None:
+        if os.path.isfile(fname):
+            with open(fname) as f:
+                outl = [l.strip('\n') for l in f.readlines()]
+    else:
+        fname = sys.stdin
+        outl = [l.strip('\n') for l in f.readlines()]        
+    return outl
+
 def to_file_name(s):
         return "".join([x if x.isalnum() else "_" for x in s])
 
