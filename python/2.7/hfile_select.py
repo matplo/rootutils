@@ -139,9 +139,10 @@ def main():
 	cfile            = tutils.get_arg_with('-f')
 	if cfile == None:
 		cfile = '*.root'
-	hor            = tutils.get_arg_with('--hor')
-	hand            = tutils.get_arg_with('--hand')
+	hor              = tutils.get_arg_with('--hor')
+	hand             = tutils.get_arg_with('--hand')
 	ConfDB.verbosity = tutils.get_arg_with('--verbosity')
+	opts             = tutils.get_arg_with('--opts')
 
 	if ConfDB.verbosity == None:
 		ConfDB.verbosity = 0
@@ -154,10 +155,13 @@ def main():
 		hdb = HistNames(hor, fn)
 		for h in hdb.valid_names:
 			if has_and(h, hand):
-				print ':'.join([fn,h])
+				if opts != None:
+					print ':'.join([fn,h,opts])
+				else:
+					print ':'.join([fn,h])
 
 if __name__=="__main__":
 	if '--usage' in sys.argv:
-		print '[i] usage:',__file__,'[-f <path or string/filter>] [--dir <path>] [--hor <path or h filter>] [--hand <filter>]'
+		print '[i] usage:',__file__,'[-f <path or string/filter>] [--dir <path>] [--hor <path or h filter>] [--hand <filter>] [--opts <additional string to print>]'
 	else:
 		main()
