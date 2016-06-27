@@ -510,7 +510,7 @@ class dlist(debugable):
         for o in self.l:
             if o.obj.InheritsFrom('TH1') == False:
                 continue
-            for i in range(1, o.obj.GetNbinsX()):
+            for i in range(1, o.obj.GetNbinsX() + 1):
                 err = o.obj.GetBinError(i)
                 o.obj.SetBinError(i, err * val)
     
