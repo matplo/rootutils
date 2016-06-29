@@ -371,6 +371,7 @@ class dlist(debugable):
     def append(self, obj=ROOT.TObject, new_title = '', draw_opt = '', prep=False):
         newname_root = obj.GetName() + '_' + self.name.replace(' ', '_')
         newname = newname_root
+        newname = pyutils.to_file_name(newname)
         count = 1
         while self._check_name(newname) == True:
             newname = newname_root + '_' + str(count)
@@ -897,6 +898,7 @@ class dlist(debugable):
                 name = self.name + '-canvas'
             if title == None:
                 title = self.name + '-canvas'
+            name = pyutils.to_file_name(name)
             self.tcanvas = ROOT.TCanvas(name, title, w, h)
             self.tcanvas.cd()
             if split > 0:
