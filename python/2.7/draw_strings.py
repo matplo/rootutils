@@ -102,6 +102,94 @@ class DrawString(object):
 	def logz(self):
 		return self.is_arg('logz')
 
+class Comment(object):
+	def __init__(self, s):
+		self.s = s
+		self.box = self.get_box()
+		self.text = self.get_text()
+
+	def get_box(self):
+		x1 = 0.1
+		x2 = 0.9
+		y1 = 0.1
+		y2 = 0.9
+		if self.s == None:
+			return [x1, y1, x2, y2]
+		try:
+			x1 = atof(self.s.split(',')[0])
+			y1 = atof(self.s.split(',')[1])
+			x2 = atof(self.s.split(',')[2])
+			y2 = atof(self.s.split(',')[3])
+		except:
+			print '[w] trouble with comment position? x1,y1,x2,y2',self.s
+		return [x1, y1, x2, y2]
+
+	def get_settings(self, sitem):
+		retval = []
+		splits = self.s.split(sitem)
+		for n in xrange(1,len(splits)):
+			retval.append(self.filter_known_settings(splits[n]))
+		if len(retval) <= 0:
+			retval.append(None)
+		return retval
+
+	def filter_known_settings(self, s):
+		known = ['tx_size=', 'color=', 'font=', 'alpha=']
+		for k in known:
+			if k in s:
+				s=s.split(k)[0]
+		return s
+
+	def get_setting(self, sitem):		
+		setting = 0
+		if self.get_settings(sitem)[-1]:
+			setting = self.get_settings(sitem)[-1]
+		return setting
+
+	def get_text(self):
+		return self.get_settings('item=')
+
+	def get_text_size(self):		
+		if self.get_setting('tx_size='):
+			return atof(self.get_setting('tx_size='))
+		return 0.025
+
+	def get_color(self):		
+		if self.get_setting('color='):
+			return atoi(self.get_setting('color='))
+		return 1
+
+	def get_font(self):		
+		if self.get_setting('font='):
+			return self.get_setting('font=')
+		return 42
+
+	def get_alpha(self):		
+		if self.get_setting('alpha='):
+			return self.get_setting('alpha=')/100.
+		return 0
+
+	def legend(self):
+		tleg = None
+		if len(self.text) <=0:
+			print '[e] no text in comment tag'
+		else:
+			tleg = r.TLegend(self.box[0], self.box[1], self.box[2], self.box[3])
+			tleg.SetNColumns(1)
+			tleg.SetBorderSize(0)
+			tleg.SetFillColor(r.kWhite)
+			tleg.SetFillStyle(1001)
+			#tleg.SetFillColorAlpha(ROOT.kWhite, 0.9)
+			tleg.SetFillColorAlpha(r.kWhite, self.get_alpha())
+			tleg.SetTextAlign(12)
+			tleg.SetTextSize(self.get_text_size())
+			tleg.SetTextFont(self.get_font())
+			tleg.SetTextColor(self.get_color())
+		for s in self.text:
+			print s
+			tleg.AddEntry(0, s, '')
+		return tleg
+
 def legend_position(sleg):
 	x1 = None
 	x2 = None
@@ -245,7 +333,13 @@ def main():
 	if sleg == None:
 		sleg = get_tag_from_file('#legend',fname)
 	x1,y1,x2,y2 = legend_position(sleg)
-	hl.self_legend(title=stitle,x1=x1,x2=x2,y1=y1,y2=y2)
+	tx_size = None
+	try:
+		tx_size = atof(sleg.split('tx_size=')[1])
+	except:
+		pass
+	print tx_size
+	hl.self_legend(title=stitle,x1=x1,x2=x2,y1=y1,y2=y2,tx_size=tx_size)
 
 	#size of the window
 	x = 400
@@ -260,6 +354,13 @@ def main():
 		except:
 			print '[e] unable to understand the --geom argument',gs
 	hl.resize_window(x,y)
+
+	cs = get_tag_from_file('#comment', fname)
+	if cs:
+		tc = Comment(cs)
+		leg = tc.legend()
+		leg.Draw()
+		tu.gList.append(leg)
 
 	hl.update()
 
