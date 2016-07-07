@@ -248,7 +248,7 @@ class dlist(debugable):
     def set_font(self, fn=42, scale=1.):
         self.font = fn
         if self.font == 42:
-            self.axis_title_offset = [1.40, 1.40, 1.40] # y offset was 1.40 then 1.45
+            self.axis_title_offset = [1.40, 1.45, 1.40] # y offset was 1.40 then 1.45
             self.axis_title_size   = [0.05 * scale, 0.05 * scale, 0.05 * scale]
             self.axis_label_size   = [0.04 * scale, 0.04 * scale, 0.04 * scale]
             self.axis_label_offset = [0.02, 0.02, 0.02]
@@ -859,16 +859,16 @@ class dlist(debugable):
         #self.legend.SetFillColorAlpha(ROOT.kWhite, 0.9)
         self.legend.SetFillColorAlpha(ROOT.kWhite, 0)
         self.legend.SetTextAlign(12)
-        self.legend.SetTextSize(self.axis_title_size[0] * 0.5)
+        self.legend.SetTextSize(self.axis_title_size[0] * 0.5) # was 0.5
         self.legend.SetTextFont(self.font)
         self.legend.SetTextColor(1)
         if tx_size!=None:
-            if self.font == 42:
-                #tx_size=self.axis_title_size[0]
-                tx_size = self.axis_title_size[0] * 0.8 * tx_size #0.045
-            if self.font == 43:
-                tx_size = 14 * tx_size
-            #print tx_size,self.font
+            #if self.font == 42:
+            #    #tx_size=self.axis_title_size[0]
+            #    tx_size = self.axis_title_size[0] * 0.8 * tx_size #0.045
+            #if self.font == 43:
+            #    tx_size = 14 * tx_size
+            ##print tx_size,self.font
             self.legend.SetTextSize(tx_size)
         
         return self.legend
