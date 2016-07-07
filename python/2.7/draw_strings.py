@@ -212,8 +212,8 @@ def get_tag_from_file(tag, fname, default=None, split=None):
 	for l in clines:
 		if tag+' ' in l[:len(tag)+1]:
 			retval = l.replace(tag+' ','')
-	if split != None:
-		retval.split(split)
+	if split != None and retval != None:
+		retval = retval.split(split)
 	return retval
 
 def axis_range(sleg):
@@ -268,8 +268,10 @@ def main():
 			hl.rebin(atoi(rebin[0]))
 		if len(rebin) > 1:
 			if 'true' in rebin[1].lower():
+				print '[i] rebin with renorm...'
 				hl.rebin(atoi(rebin[0]), True)
 			else:
+				print '[i] rebin w/o renorm...'
 				hl.rebin(atoi(rebin[0]), False)
 
 	normalize = get_tag_from_file('#normalize', fname, None)
