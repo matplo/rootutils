@@ -118,12 +118,14 @@ def legend_position(sleg):
 		print '[w] trouble with legend position? x1,y1,x2,y2',sleg
 	return x1, y1, x2, y2
 
-def get_tag_from_file(tag, fname, default=None):
+def get_tag_from_file(tag, fname, default=None, split=None):
 	retval = default
 	clines = ut.load_file_to_strings(fname)
 	for l in clines:
 		if tag+' ' in l[:len(tag)+1]:
 			retval = l.replace(tag+' ','')
+	if split != None:
+		retval.split(split)
 	return retval
 
 def axis_range(sleg):
@@ -170,6 +172,17 @@ def main():
 	yt = get_tag_from_file('#y', fname, None)
 	zt = get_tag_from_file('#z', fname, None)
 	hl.reset_axis_titles(xt, yt, zt)
+
+	rebin = get_tag_from_file('#rebin', fname, None, ' ')
+	if rebin!=None:
+		print atoi(rebin[0])
+		if len(rebin) > 0:
+			hl.rebin(atoi(rebin[0]))
+		if len(rebin) > 1:
+			if 'true' in rebin[1].lower():
+				hl.rebin(atoi(rebin[0]), True)
+			else:
+				hl.rebin(atoi(rebin[0]), False)
 
 	normalize = get_tag_from_file('#normalize', fname, None)
 	if normalize == 'self':
