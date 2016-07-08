@@ -55,12 +55,17 @@ def make_unique_name(sbase, *namemods):
     newname = ut.to_file_name(newname)
     return newname
 
+class ObjectName(object):
+    def __init__(self, name):
+        self.name = name
+
 def unique_name(name):
     n = name
     i = 0
     while n in get_gList_names():
         n = '{}_{}'.format(name, i)
         i += 1
+    gList.append(ObjectName(n))
     return n
 
 def is_arg_set(arg=''):
