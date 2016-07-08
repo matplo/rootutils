@@ -186,11 +186,11 @@ class MetaFigure(object):
 			self.name = tu.make_unique_name(name)
 		else:
 			self.name = tu.make_unique_name('MetaFigure')
-
-		self.data    = []
-		self.hls     = dlist.ListStorage(self.name+'_storage')
-		self.hl      = self.hls.get_list(self.name+'_list')
-		self.last_ds = None
+		self.drawable = True
+		self.data     = []
+		self.hls      = dlist.ListStorage(self.name+'_storage')
+		self.hl       = self.hls.get_list(self.name+'_list')
+		self.last_ds  = None
 
 	def process_line(self, cline):
 		if len(cline) < 1:
@@ -245,6 +245,7 @@ class MetaFigure(object):
 	def draw(self):
 		if self.last_ds == None:
 			print '[e] nothing to draw for',self.name
+			self.drawable = False
 			return
 
 		self.hl.make_canvas()
@@ -359,7 +360,8 @@ class MetaFigure(object):
 		self.hl.update()
 
 	def pdf(self):
-		self.hl.pdf()
+		if self.drawable == True:
+			self.hl.pdf()
 
 class MetaDrawFile(object):
 	def __init__(self, fname=None):
