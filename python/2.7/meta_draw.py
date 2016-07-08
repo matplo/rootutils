@@ -39,8 +39,8 @@ class DrawString(object):
 		except:
 			pass
 
-	def get_arg(self, sarg):
-		s = self.opts.split(',')
+	def get_arg(self, sarg, sp = ','):
+		s = self.opts.split(sp)
 		for xs in s:
 			if sarg in xs:
 				return xs.replace(sarg, '')
@@ -54,7 +54,7 @@ class DrawString(object):
 		return False
 
 	def title(self):
-		st = self.get_arg('title=')
+		st = self.get_arg('title=', sp=':')
 		if st == None:
 			st = self.fname
 		return st
