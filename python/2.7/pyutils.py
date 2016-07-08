@@ -17,7 +17,7 @@ def load_file_to_strings(fname):
             with open(fname) as f:
                 outl = [l.strip('\n') for l in f.readlines()]
     else:
-        fname = sys.stdin
+        f = sys.stdin
         outl = [l.strip('\n') for l in f.readlines()]        
     return outl
 
