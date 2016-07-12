@@ -259,10 +259,7 @@ class dlist(debugable):
             self.axis_label_size   = [12 * scale, 12 * scale, 12 * scale] # for font 42 [0.04, 0.04, 0.04]
 
     def __getitem__(self, i):
-        if i < len(self.l) and i >= 0:
-            return self.l[i]
-        else:
-            return None
+        return self.l[i]
 
     def __len__(self):
         return len(self.l)
@@ -1064,10 +1061,7 @@ class ListStorage:
         self.legend_font_scale = 1.
 
     def __getitem__(self, i):
-        if i < len(self.lists) and i >= 0:
-            return self.lists[i]
-        else:
-            return None
+        return self.lists[i]
 
     def reset_axis_titles(self, titlex=None, titley=None, titlez=None):
         for hl in self.lists:
