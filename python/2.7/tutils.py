@@ -141,6 +141,8 @@ def setup_basic_root():
     #print ROOT.gStyle.GetErrorX()
     #ROOT.gStyle.SetErrorX(0) #not by default; use X1 to show the x-error with ol
 
+    ROOT.gStyle.SetEndErrorSize(0)
+
     global app
     app = ROOT.PyROOT.TPyROOTApplication.CreateApplication()
     
@@ -530,11 +532,28 @@ class DateHistogramRoot(object):
 
         return self.histogram
 
+def graph_from_h(h, xdelta):
+    if not h.InheritsFrom('TH1'):
+        return None
+    gr = ROOT.TGraphErrors(h.GetNbinsX())
+    for ib in xrange(1, h.GetNbinsX() + 1):
+        x = h.GetBinCenter(ib) + xdelta
+        y = h.GetBinContent(ib)
+        ex = h.GetBinWidth(ib)/2.
+        ey = h.GetBinError(ib)
+        gr.SetPoint(ib-1, x, y)
+        gr.SetPointError(ib-1, ex, ey)
+    gr.SetName(h.GetName())
+    gr.SetTitle(h.GetTitle())
+    return gr
+
 def shift_graph(gr, xdelta):
     npoints = gr.GetN()
     for i in range(0, npoints):
         xgr = gr.GetX()[i]
         gr.GetX()[i] = xgr + xdelta
+        #gr.SetPoint(i, xgr + xdelta, gr.GetY()[i])
+        #print i, xgr,'->',xgr + xdelta
 
 gTempCanvas = None
 def getTempCanvas():

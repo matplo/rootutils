@@ -248,6 +248,12 @@ class MetaFigure(object):
 			self.drawable = False
 			return
 
+		sxrange = self.get_tag('#xrange', None)
+		if sxrange != None:
+			x1, x2 = self.axis_range(sxrange)
+			self.hl.fix_x_range(x1, x2)
+			self.hl.zoom_axis(0, x1, x2)
+
 		self.hl.make_canvas()
 		self.hl.reset_axis_titles(self.last_ds.xt(), self.last_ds.yt(), self.last_ds.zt())
 		xt = self.get_tag('#x', None)
@@ -306,11 +312,6 @@ class MetaFigure(object):
 			logz=False
 
 		print 'logy is',logy
-
-		sxrange = self.get_tag('#xrange', None)
-		if sxrange != None:
-			x1, x2 = self.axis_range(sxrange)
-			self.hl.zoom_axis(0, x1, x2)
 
 		self.hl.draw(miny=miny,maxy=maxy,logy=logy)
 
