@@ -1,0 +1,16 @@
+figure: anything
+title: test title
+geometry: 	100 
+			200
+logy: true
+options: logz=false
+ala: ma kota
+h: fname1 hname1 dopt=+l hist opt=another option title=a title 1
+h: fname2 hname2 dopt=+s hist
+
+fit: fnamex hnamex dopt=l
+
+figure: this is the second one
+title: another title
+
+fit: fnamex2 hnamex2 dopt=l
