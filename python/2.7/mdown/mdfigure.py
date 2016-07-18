@@ -6,7 +6,7 @@ from string import atof,atoi
 
 class MDHist(object):
 	def __init__(self, text):
-		self.text = text
+		self.text = text.replace('\t', ' ')
 		self.fname = self.text.split(' ')[0]
 		self.hname = self.text.split(' ')[1]
 		#self.title = self.get('title')
@@ -18,7 +18,9 @@ class MDHist(object):
 		for s in si[1:]:
 			opttx = s.split('=')[0]
 			if len(opttx)>0:
-				retvals.append(opttx)
+				sopttx = opttx.split(' ')
+				del sopttx[-1]
+				retvals.append(' '.join(sopttx))
 		if len(retvals) < 1:
 			retvals.append(None)
 		return retvals[-1]
@@ -46,6 +48,7 @@ class MDFigure(object):
 		except:
 			return ['']
 		s = ' '.join(smeta)
+		s = s.replace('\t', ' ')
 		si = s.split(' ')
 		retvals = []
 		if n==None:

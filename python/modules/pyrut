@@ -8,3 +8,6 @@ set version 2.7
 setenv PYROOTUTILS $env(HOME)/devel/rootutils/python/2.7
 prepend-path PATH $env(HOME)/devel/rootutils/python/2.7
 prepend-path PYTHONPATH $env(HOME)/devel/rootutils/python/2.7
+prepend-path PATH $env(HOME)/devel/rootutils/python/2.7/mdown
+prepend-path PYTHONPATH $env(HOME)/devel/rootutils/python/2.7/mdown
+

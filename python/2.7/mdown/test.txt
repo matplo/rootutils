@@ -14,3 +14,6 @@ figure: this is the second one
 title: another title
 
 fit: fnamex2 hnamex2 dopt=l
+
+h: /Users/ploskon/devel/LK0jet/utils/pPb/s2f_cL2K_Pt_PtJE_JC02_ZNA_000_100.root hRatioV_Ptj10_Stat dopt=p +s0.1 title=pPb, ratio in jets
+h: /Users/ploskon/devel/LK0jet/utils/pPb/s2f_cL2K_Pt_PtJE_JC02_ZNA_000_100.root grErr_hRatioV_Ptj10_Stat dopt=p +s0.1 serror noleg -k title=grErr_ in jets pPb
