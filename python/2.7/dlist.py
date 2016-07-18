@@ -9,6 +9,7 @@ gDebug = False
 from dbgu import debug_utils as dbgu
 import pcanvas
 import pyutils
+from string import atof
 
 def check_andor_make_output_dir(sname, isfilename=False):
     sdir = sname
@@ -113,6 +114,7 @@ class draw_option(debugable):
         self.kolor       = self.get_style_from_opt('k')
         self.alpha       = self.get_style_from_opt('a') #alpha for fill
         self.lwidth      = self.get_style_from_opt('w')
+        self.shift       = self.get_number_from_opt('s')
         if self.lwidth == 0:
             self.lwidth = 2
         self.psize       = self.get_style_from_opt('m')
@@ -191,6 +193,18 @@ class draw_option(debugable):
         self.debug('::get_style_from_opt on {} returning {}'.format(what, val))
         self.strip = self.strip.replace('+{}{}'.format(what,str(val)),'')
         return val
+
+    def get_number_from_opt(self, what):
+        ts = self.s.split('+'+what)
+        if len(ts) < 2:
+            return 0.0
+        snum = ts[1].split(' ')
+        fnum = 0.0
+        try:
+            fnum = atof(snum[0])
+        except:
+            fnum = 0.0
+        return fnum
 
 def random_string(prefix='', ns = 30):
     lst = [random.choice(string.ascii_letters + string.digits) for n in xrange(ns)]
@@ -458,17 +472,34 @@ class dlist(debugable):
                     o.obj.GetZaxis().SetTitle(zt)
 
     def fix_x_range(self, xmin, xmax):
-        gr = ROOT.TGraph(2)
-        gr.SetPoint(0, xmin,  100)
-        gr.SetPoint(1, xmax,  200)
-        o = draw_object(gr, 'zoom_axis_obj', 'fake', 'noleg hidden p')
-        self.l.insert(0, o)
+        reset = False
+        for dobj in self.l:
+            if 'zoom_axis_obj' in dobj.name:
+                gr = dobj.obj
+                gr.SetPoint(0, xmin,  0)
+                gr.SetPoint(1, xmax,  0)
+                reset = True
+        if reset == False:
+            gr = ROOT.TGraph(2)
+            gr.SetPoint(0, xmin,  0)
+            gr.SetPoint(1, xmax,  0)
+            o = draw_object(gr, 'zoom_axis_obj', 'fake', 'noleg hidden p')
+            self.l.insert(0, o)
+            for oi in self.l:
+                oi.is_first = False
+            self.l[0].is_first = True
 
     def find_xlimits(self):
         xmin = 0
         xmax = 0
         for o in self.l:
             h = o.obj
+            if not h.InheritsFrom('TH1'):
+                if xmin > h.GetXaxis().GetXmin():
+                    xmin = h.GetXaxis().GetXmin()
+                if xmax > h.GetXaxis().GetXmax():
+                    xmax = h.GetXaxis().GetXmax()
+                continue
             for ix in range(1, h.GetNbinsX()+1):
                 if h.GetBinContent(ix) != 0:
                     if xmin > h.GetBinLowEdge(ix):
@@ -482,26 +513,28 @@ class dlist(debugable):
         for o in self.l:
             if which == 0:
                 ax = o.obj.GetXaxis()
-                if xmax == None:
-                    xlims = self.find_xlimits()
-                    self.zoom_axis(which, xlims[0], xlims[1])
-                    return
+                #if xmax == None:
+                #    xlims = self.find_xlimits()
+                #    if xlims[0] != None:
+                #        self.zoom_axis(which, xlims[0], xlims[1])
             if which == 1:
                 ax = o.obj.GetYaxis()
             if which == 2:
                 if o.obj.InheritsFrom('TH1'):
                     ax = o.obj.GetZaxis()
             if ax:
+                #print xmin,xmax
                 ibmin = ax.FindBin(xmin)
                 ibmax = ax.FindBin(xmax)
-                try:
-                    #print 'ibmin, ibmax, nbins:',ibmin, ibmax, o.obj.GetNbinsX()
-                    if ibmax > o.obj.GetNbinsX():
-                        ibmax = o.obj.GetNbinsX()
-                        #print 'reset axis max to:',ibmax
-                except:
-                    #print ibmin, ibmax
-                    pass
+                #try:
+                #    #print 'ibmin, ibmax, nbins:',ibmin, ibmax, o.obj.GetNbinsX()
+                #    if ibmax > o.obj.GetNbinsX():
+                #        ibmax = o.obj.GetNbinsX()
+                #        #print 'reset axis max to:',ibmax
+                #except:
+                #    #print ibmin, ibmax
+                #    pass
+                ##print xmin, xmax
                 ax.SetRange(ibmin, ibmax)
                 
     def scale_errors(self, val = 1.):
@@ -767,6 +800,14 @@ class dlist(debugable):
             tcname = 'used only in 2D case'
 
         for i,o in enumerate(self.l):
+            if o.dopt.shift != 0:
+                if o.obj.InheritsFrom('TGraph'):
+                    print 'TGraph shifting...',o.dopt.shift
+                    tu.shift_graph(o.obj, o.dopt.shift)
+                if o.obj.InheritsFrom('TH1'):
+                    print 'TH1 shifting...',o.dopt.shift
+                    o.obj = tu.graph_from_h(o.obj, o.dopt.shift)
+                o.dopt.shift = 0.0
             self.debug('::draw ' + o.name + ' ' + o.dopt.stripped())
             if o.dopt.is_error == False:
                 self._process_dopts(i)
