@@ -8,6 +8,8 @@ import sys
 import pyutils as ut
 import IPython
 
+import os
+
 from string import atof,atoi
 
 class DrawString(object):
@@ -362,6 +364,9 @@ class MetaFigure(object):
 		if self.drawable == True:
 			self.hl.pdf()
 
+	def add_option(self, opt):
+		self.data.append(opt)
+
 class MetaDrawFile(object):
 	def __init__(self, fname=None):
 		self.data = ut.load_file_to_strings(fname)
@@ -384,10 +389,20 @@ class MetaDrawFile(object):
 		for f in self.figures:
 			f.pdf()		
 
+	def add_option(self, opt):
+		for f in self.figures:
+			f.add_option(opt)
+
 if __name__ == '__main__':
 	tu.setup_basic_root()
 	fname = ut.get_arg_with('-f')
+	fn, fext = os.path.splitext(fname)
+	if fext == '.root':
+		import make_draw_files as mdf
+		fname = mdf.make_draw_file(fname)
 	mdf   = MetaDrawFile(fname)
+	if '--logy' in sys.argv:
+		mdf.add_option('#logy true')
 	mdf.draw()
 	if '--print' in sys.argv:
 		mdf.pdf()
