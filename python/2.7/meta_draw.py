@@ -294,8 +294,6 @@ class MetaFigure(object):
 			logy=True
 		if logy == None:
 			logy=self.last_ds.logy()
-		else:
-			logy=False
 		logx = self.get_tag('#logx', None)
 		if logx == 'true':
 			logx=True
