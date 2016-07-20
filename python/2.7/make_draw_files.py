@@ -16,6 +16,13 @@ def make_draw_file(fn):
 	f  = R.TFile(fn)
 	td = f.GetListOfKeys()
 	fdraw = fn+'.draw'
+	if os.path.isfile(fdraw):
+		print '[w] draw file exists:',fdraw
+		if '--force' not in sys.argv:
+			print '[w] override with --force'
+			return fdraw
+		else:
+			print '[w] overwriting...'
 	with open(fdraw, 'w') as fout:
 		print >> fout,'#figure'
 		print >> fout,'#geom 500x500'
