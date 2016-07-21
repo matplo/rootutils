@@ -244,7 +244,7 @@ class MetaFigure(object):
 			print '[w] trouble with x-range? x1,x2',sleg
 		return x1, x2
 
-	def draw(self):
+	def draw(self, no_canvas=False):
 		if self.last_ds == None:
 			print '[e] nothing to draw for',self.name
 			self.drawable = False
@@ -256,7 +256,11 @@ class MetaFigure(object):
 			self.hl.fix_x_range(x1, x2)
 			self.hl.zoom_axis(0, x1, x2)
 
-		self.hl.make_canvas()
+		if no_canvas == True:
+			print '[i] will draw in the current gPad=',r.gPad.GetName()
+		else:
+			self.hl.make_canvas()
+
 		self.hl.reset_axis_titles(self.last_ds.xt(), self.last_ds.yt(), self.last_ds.zt())
 		xt = self.get_tag('#x', None)
 		yt = self.get_tag('#y', None)
@@ -343,7 +347,8 @@ class MetaFigure(object):
 				y = atoi(gs.split('x')[1])
 			except:
 				print '[e] unable to understand the --geom argument',gs
-		self.hl.resize_window(x,y)
+		if no_canvas == False:
+			self.hl.resize_window(x,y)
 
 		cs = self.get_tag('#comment', None)
 		if cs != None:
