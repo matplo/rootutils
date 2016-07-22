@@ -257,7 +257,11 @@ class MetaFigure(object):
 			self.hl.zoom_axis(0, x1, x2)
 
 		if no_canvas == True:
-			print '[i] will draw in the current gPad=',r.gPad.GetName()
+			if r.gPad:
+				print '[i] will draw in the current gPad=',r.gPad.GetName()
+				self.hl.tcanvas = r.gPad
+			else:
+				print '[w] this will likely not work well... gPad is',r.gPad
 		else:
 			self.hl.make_canvas()
 

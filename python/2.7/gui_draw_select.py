@@ -33,40 +33,36 @@ class FileWatch(object):
 
 class FileView( r.TGMainFrame ):
     def __init__( self, parent, width, height, fname):
-        r.TGMainFrame.__init__( self, parent, width, height )
-        self.fname = fname
+        r.TGMainFrame.__init__( self, parent, width, height, r.kHorizontalFrame | r.kFitHeight | r.kFitWidth )
 
-class DrawMainFrame( r.TGMainFrame ):
-    def __init__( self, parent, width, height, fname, draw_figure=0):
-        r.TGMainFrame.__init__( self, parent, width, height )
+        self.width  = width
+        self.height = height
+        self.fname  = fname
 
-        self.fname = fname
-        self.draw_figure = draw_figure
+        self.SetWindowName( 'GUI draw file' )
 
-        self.mdf = meta_draw.MetaDrawFile(fname)
-        self.fwatch = FileWatch(fname)
+        self.SetLayoutManager(r.TGVerticalLayout(self));
+        self.Resize(width, height);
+
+        self.tabs = []
+        self.tab = r.TGTab(self);
+        self.AddFrame(self.tab, r.TGLayoutHints(r.kLHintsLeft | r.kLHintsTop | r.kLHintsExpandX | r.kLHintsExpandY));
 
         self.frameHint        = r.TGLayoutHints(r.kLHintsExpandX | r.kLHintsExpandY)
         self.frameHintEY      = r.TGLayoutHints(r.kLHintsExpandY)
         self.frameHintEX      = r.TGLayoutHints(r.kLHintsExpandX)
         self.buttonsFrameHint = r.TGLayoutHints(r.kLHintsExpandX)
-        self.buttonHint       = r.TGLayoutHints(r.kLHintsCenterX | r.kLHintsExpandX, 5,5,3,4)
+        self.buttonHint       = r.TGLayoutHints(r.kLHintsCenterX | r.kLHintsExpandX, 5,5,5,5)
 
-        self.canvasFrame = r.TGGroupFrame( self, 'drawing')
-        self.AddFrame(self.canvasFrame, self.frameHintEX )
-        tcname = '{}_Fig{}_canvas'.format(self.fname, self.draw_figure)
-        self.canvas     = r.TRootEmbeddedCanvas( tcname, self.canvasFrame, 600, 600 )
-        self.canvasFrame.AddFrame( self.canvas, self.frameHint )
-
-        self.buttonsFrame = r.TGGroupFrame( self, 'steering', r.kHorizontalFrame)
+        self.buttonsFrame = r.TGButtonGroup( self, 'steering', r.kHorizontalFrame)
         self.AddFrame( self.buttonsFrame, self.buttonsFrameHint )
 
-        self.drawButton   = r.TGTextButton( self.buttonsFrame, '&ReDraw', 10 )
+        self.drawButton   = r.TGTextButton( self.buttonsFrame, ' ReDraw ', 10 )
         self.drawDispatch = r.TPyDispatcher( self.draw )
         self.drawButton.Connect( 'Clicked()', "TPyDispatcher", self.drawDispatch, 'Dispatch()' )
         self.buttonsFrame.AddFrame( self.drawButton, self.buttonHint )
 
-        self.exitButton   = r.TGTextButton( self.buttonsFrame, '&Exit', 20 )
+        self.exitButton   = r.TGTextButton( self.buttonsFrame, ' &Quit ', 20 )
         #self.exitButton.Connect( 'Clicked()', "TPyROOTApplication", r.gApplication, 'Close()' )
         self.exitButton.SetCommand( 'TPython::Exec( "raise SystemExit" )' )
         self.buttonsFrame.AddFrame( self.exitButton, self.buttonHint )
@@ -75,34 +71,88 @@ class DrawMainFrame( r.TGMainFrame ):
         self.timer = r.TTimer()
         self.timer.Connect('Timeout()', "TPyDispatcher", self.timerDispatch, 'Dispatch()')
 
-        self.SetWindowName( 'GUI draw file' )
-        self.remap()
-
+        self.mdf = None
         self.draw()
-
+        self.fwatch = FileWatch(fname)
         self.timer.Start(1000, False);
 
-    def remap(self):
+        self.SetLayoutBroken(r.kFALSE);
+        self.SetMWMHints(r.kMWMDecorAll, r.kMWMFuncAll, r.kMWMInputModeless);
         self.MapSubwindows()
         self.Resize( self.GetDefaultSize() )
         self.MapWindow()
-        pass
+
+        self.draw()
+
+    def close(self):
+        self.CloseWindow()
+        r.gApplication.Close()
 
     def on_timer(self):
         if self.fwatch.changed():
-            del self.mdf
-            self.mdf = meta_draw.MetaDrawFile(fname)
             self.draw()
 
     def draw(self):
+        del self.mdf
+        self.mdf = meta_draw.MetaDrawFile(fname)
+        
+        #print 'N figures:',len(self.mdf.figures), 'N tabs:',len(self.tabs)
+        #if len(self.mdf.figures) != len(self.tabs):
+        #    self.tab.RemoveAll()
+        #    del self.tabs
+        #    self.tabs = []
+
+        for i,mf in enumerate(self.mdf.figures):
+            tcname = '{}_Fig{}_canvas'.format(self.fname, i)
+            if i >= len(self.tabs):
+                dframe = DrawFrame(self, self.width, self.height, tcname)
+                self.tab.AddTab(tcname, dframe)
+                self.tab.SetTab(self.tab.GetNumberOfTabs()-1, r.kFALSE)
+                self.tabs.append(dframe)
+                dframe.Layout()
+                dframe.MapSubwindows()
+            else:
+                self.tabs[i].draw(mf)
+
+class DrawFrame( r.TGCompositeFrame ):
+    def __init__( self, parent, width, height, name):
+        r.TGCompositeFrame.__init__( self, parent, width, height, r.kLHintsExpandX | r.kLHintsExpandY)
+        self.name = name
+
+        self.frameHint        = r.TGLayoutHints(r.kLHintsExpandX | r.kLHintsExpandY)
+        self.frameHintEY      = r.TGLayoutHints(r.kLHintsExpandY)
+        self.frameHintEX      = r.TGLayoutHints(r.kLHintsExpandX)
+        self.buttonsFrameHint = r.TGLayoutHints(r.kLHintsExpandX)
+        self.buttonHint       = r.TGLayoutHints(r.kLHintsCenterX | r.kLHintsExpandX, 5,5,3,4)
+
+        self.canvasFrame = r.TGGroupFrame( self, 'drawing')
+        self.AddFrame(self.canvasFrame, self.frameHint )
+        self.canvas     = r.TRootEmbeddedCanvas( self.name, self.canvasFrame, 50, 50 )
+        self.canvasFrame.AddFrame( self.canvas, self.frameHint )
+
+        self.buttonsFrame = r.TGButtonGroup( self, 'this tab actions', r.kHorizontalFrame)
+        self.AddFrame( self.buttonsFrame, self.buttonsFrameHint )
+        self.pdfButton   = r.TGTextButton( self.buttonsFrame, ' PDF ', 10 )
+        self.pdfDispatch = r.TPyDispatcher( self.pdf )
+        self.pdfButton.Connect( 'Clicked()', "TPyDispatcher", self.pdfDispatch, 'Dispatch()' )
+        self.buttonsFrame.AddFrame( self.pdfButton, self.buttonHint )
+
+        self.mf = None
+
+    def pdf(self):
+        #if self.mf:
+        #    self.mf.hl.pdf()
+        self.canvas.GetCanvas().Print(self.name+'.pdf', 'pdf')
+
+    def draw(self, mf):
+        self.mf = mf
         self.canvas.GetCanvas().cd()
         #consider here adding a handler for more that 1 figure in a draw file
-        self.mdf.figures[self.draw_figure].draw(no_canvas=True)
+        mf.draw(no_canvas=True)
         #except:
         #    print '[e] something went wrong with drawing...', self.fname, 'figure number:', self.draw_figure
-
-    def close(self):
-        r.gApplication.Close()
+        self.canvas.GetCanvas().Modified()
+        self.canvas.GetCanvas().Update()
 
 def setup_style():
     #r.gROOT.Reset()
@@ -120,12 +170,16 @@ def setup_style():
 if __name__ == '__main__':
     setup_style()
     fname = tutils.get_arg_with('-f')
+    if not fname:
+        fname = os.sys.argv[1]
+    if not os.path.isfile(fname):
+        fname = None
 
     if fname:
         fn, fext = os.path.splitext(fname)
         if fext == '.root':
             import make_draw_files as mdf
             fname = mdf.make_draw_file(fname)
-        window = DrawMainFrame( 0, 800, 400, fname, 0)
+        window = FileView( 0, 400, 400, fname)
         r.gApplication.Run()
 
