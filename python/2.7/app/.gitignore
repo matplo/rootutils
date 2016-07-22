@@ -1,2 +1,10 @@
 dist
 build
+meta_draw.py
+tutils.py
+pyutils.py
+dlist.py
+draw_utils.py
+pcanvas.py
+dbgu
+gui_draw_select.py
