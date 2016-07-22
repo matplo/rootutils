@@ -94,7 +94,7 @@ class FileView( r.TGMainFrame ):
 
     def draw(self):
         del self.mdf
-        self.mdf = meta_draw.MetaDrawFile(fname)
+        self.mdf = meta_draw.MetaDrawFile(self.fname)
         
         #print 'N figures:',len(self.mdf.figures), 'N tabs:',len(self.tabs)
         #if len(self.mdf.figures) != len(self.tabs):
@@ -168,11 +168,14 @@ def setup_style():
     r.gStyle.SetErrorX(0) #not by default; use X1 to show the x-error with ol
     r.gStyle.SetEndErrorSize(0)
 
-if __name__ == '__main__':
+def main():
     setup_style()
     fname = tutils.get_arg_with('-f')
     if not fname:
-        fname = os.sys.argv[1]
+        if len(sys.argv) > 1:
+            fname = sys.argv[1]
+        else:
+            return
     if not os.path.isfile(fname):
         fname = None
     if fname:
@@ -180,5 +183,9 @@ if __name__ == '__main__':
         if fext == '.root':
             import make_draw_files as mdf
             fname = mdf.make_draw_file(fname)
-        window = FileView( 0, 600, 600, fname)
+        window = FileView(0, 600, 600, fname)
+        window.RaiseWindow()
         r.gApplication.Run()
+
+if __name__ == '__main__':
+    main()
