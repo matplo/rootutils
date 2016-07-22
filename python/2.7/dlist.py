@@ -802,10 +802,10 @@ class dlist(debugable):
         for i,o in enumerate(self.l):
             if o.dopt.shift != 0:
                 if o.obj.InheritsFrom('TGraph'):
-                    print 'TGraph shifting...',o.dopt.shift
+                    #print 'TGraph shifting...',o.dopt.shift
                     tu.shift_graph(o.obj, o.dopt.shift)
                 if o.obj.InheritsFrom('TH1'):
-                    print 'TH1 shifting...',o.dopt.shift
+                    #print 'TH1 shifting...',o.dopt.shift
                     o.obj = tu.graph_from_h(o.obj, o.dopt.shift)
                 o.dopt.shift = 0.0
             self.debug('::draw ' + o.name + ' ' + o.dopt.stripped())

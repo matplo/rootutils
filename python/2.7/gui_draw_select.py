@@ -39,7 +39,7 @@ class FileView( r.TGMainFrame ):
         self.height = height
         self.fname  = fname
 
-        self.SetWindowName( 'GUI draw file' )
+        self.SetWindowName( self.fname )
 
         self.SetLayoutManager(r.TGVerticalLayout(self));
         self.Resize(width, height);
@@ -106,7 +106,8 @@ class FileView( r.TGMainFrame ):
             tcname = '{}_Fig{}_canvas'.format(self.fname, i)
             if i >= len(self.tabs):
                 dframe = DrawFrame(self, self.width, self.height, tcname)
-                self.tab.AddTab(tcname, dframe)
+                tabname = 'Fig {}'.format(i)
+                self.tab.AddTab(tabname, dframe)
                 self.tab.SetTab(self.tab.GetNumberOfTabs()-1, r.kFALSE)
                 self.tabs.append(dframe)
                 dframe.Layout()
@@ -174,12 +175,10 @@ if __name__ == '__main__':
         fname = os.sys.argv[1]
     if not os.path.isfile(fname):
         fname = None
-
     if fname:
         fn, fext = os.path.splitext(fname)
         if fext == '.root':
             import make_draw_files as mdf
             fname = mdf.make_draw_file(fname)
-        window = FileView( 0, 400, 400, fname)
+        window = FileView( 0, 600, 600, fname)
         r.gApplication.Run()
-

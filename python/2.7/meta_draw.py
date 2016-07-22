@@ -20,7 +20,7 @@ class DrawString(object):
 		self.dopt  = ''
 		self.opts  = ''
 		self.process()
-		print '[i] fname={} hname={} dopt={} opts={}'.format(self.fname, self.hname, self.dopt, self.opts)
+		#print '[i] fname={} hname={} dopt={} opts={}'.format(self.fname, self.hname, self.dopt, self.opts)
 
 	def process(self):
 		sargs = self.s.split(':')
@@ -178,7 +178,6 @@ class Comment(object):
 			tleg.SetTextFont(self.get_font())
 			tleg.SetTextColor(self.get_color())
 		for s in self.text:
-			print s
 			tleg.AddEntry(0, s, '')
 		return tleg
 
@@ -258,7 +257,7 @@ class MetaFigure(object):
 
 		if no_canvas == True:
 			if r.gPad:
-				print '[i] will draw in the current gPad=',r.gPad.GetName()
+				#print '[i] will draw in the current gPad=',r.gPad.GetName()
 				self.hl.tcanvas = r.gPad
 			else:
 				print '[w] this will likely not work well... gPad is',r.gPad
@@ -319,7 +318,7 @@ class MetaFigure(object):
 		else:
 			logz=False
 
-		print 'logy is',logy
+		#print 'logy is',logy
 
 		self.hl.draw(miny=miny,maxy=maxy,logy=logy)
 
