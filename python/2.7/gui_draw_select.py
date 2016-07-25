@@ -165,7 +165,7 @@ def setup_style():
     if not tutils.is_arg_set('--no-double-ticks'):
         r.gStyle.SetPadTickY(1)
         r.gStyle.SetPadTickX(1)
-    r.gStyle.SetErrorX(0) #not by default; use X1 to show the x-error with ol
+    #r.gStyle.SetErrorX(0) #not by default; use X1 to show the x-error with ol
     r.gStyle.SetEndErrorSize(0)
 
 def main():
