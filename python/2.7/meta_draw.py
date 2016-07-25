@@ -2,6 +2,7 @@
 
 import ROOT as r 
 import tutils as tu
+import draw_utils as du
 
 import dlist
 import sys
@@ -231,6 +232,38 @@ class MetaFigure(object):
 			retval = retval.split(split)
 		return retval
 
+	def get_tags(self, tag):
+		retvals = []
+		for l in self.data:
+			if tag+' ' in l[:len(tag)+1]:
+				retval = l.replace(tag+' ','')
+				retvals.append(retval)
+		return retvals
+
+	def draw_lines(self):
+		ts = self.get_tags('#line')
+		for t in ts:
+			args = ['0' for i in xrange(9)]
+			args[0] = '0'
+			args[1] = '0'
+			args[2] = '1'
+			args[3] = '1'
+			args[4] = '2 '#color
+			args[5] = '7 '#style
+			args[6] = '2 '#width
+			args[7] = '1.' #alpha
+			args[8] = 'brNDC'
+			nums = t.split(',')
+			try:
+				for i,n in enumerate(nums):
+					if len(n) > 0:
+						args[i] = n
+			except:
+				print '[w] trouble with line:',t
+		#du.draw_line(x1, y1, x2, y2, col=2, style=7, width=2, option='brNDC', alpha=0.3)
+			du.draw_line(	atof(args[0]), atof(args[1]), atof(args[2]), atof(args[3]),
+							atoi(args[4]), atoi(args[5]), atoi(args[6]), args[8], atof(args[7]));
+
 	def axis_range(self, sleg):
 		x1 = None
 		x2 = None
@@ -339,6 +372,9 @@ class MetaFigure(object):
 		except:
 			pass
 		self.hl.self_legend(title=stitle,x1=x1,x2=x2,y1=y1,y2=y2,tx_size=tx_size)
+
+		#line
+		self.draw_lines()
 
 		#size of the window
 		x = 400
