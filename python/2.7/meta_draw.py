@@ -389,12 +389,15 @@ class MetaFigure(object):
 		if no_canvas == False:
 			self.hl.resize_window(x,y)
 
-		cs = self.get_tag('#comment', None)
-		if cs != None:
-			tc = Comment(cs)
-			leg = tc.legend()
-			leg.Draw()
-			tu.gList.append(leg)
+		cs = self.get_tags('#comment')
+		for c in cs:
+			if c == None:
+				continue
+			if len(c) > 0:
+				tc = Comment(c)
+				leg = tc.legend()
+				leg.Draw()
+				tu.gList.append(leg)
 
 		sname = self.get_tag('#name', None)
 		if sname != None:
