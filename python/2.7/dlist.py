@@ -939,7 +939,7 @@ class dlist(debugable):
     def make_canvas(self, w=600, h=400, 
                     split=0, orientation=0, 
                     name=None, title=None):                
-        print 'make_canvad called'
+        #print 'make_canvas called'
         if self.tcanvas==None:
             if name == None:
                 name = self.name + '-canvas'
