@@ -450,6 +450,14 @@ class dlist(debugable):
                 draw_opt = 'hist'
                 if robj.InheritsFrom("TF1"):
                     draw_opt = 'l'
+            if robj.InheritsFrom('TH1') and 'graph' in draw_opt.split(' '):
+                if 'ex0' in draw_opt.split(' '):
+                    draw_opt = draw_opt.replace('ex0', '')
+                    xerror = False
+                else:
+                    xerror = True
+                robj = h_to_graph(robj, drop_zero_entries=True, xerror=xerror)
+                draw_opt = draw_opt.replace('graph',' ')
             cobj = self.append(robj, new_title, draw_opt, prep)
             if self.maxy < robj.GetMaximum():
                 self.maxy = robj.GetMaximum()
@@ -1187,9 +1195,9 @@ class ListStorage:
             if draw_legend:
                 if self.lx1 != None:
                     legend = l.self_legend(1, slegtitle, self.lx1, self.ly1, self.lx2, self.ly2, 
-                        tx_size=self.legend_font_scale, option=legoption)
+                        tx_size=self.legend_font_scale * 0.04, option=legoption)
                 else:
-                    legend = l.self_legend(ncols=1, title=slegtitle, tx_size=self.legend_font_scale, option=legoption)
+                    legend = l.self_legend(ncols=1, title=slegtitle, tx_size=self.legend_font_scale * 0.04, option=legoption)
             else:
                 if legtitle == 'self':
                     l.draw_comment(l.title, 0.05, 0, 0.9, 1., 1.) 
@@ -1693,3 +1701,26 @@ def make_list(name, xmin, xmax):
     gr.SetPoint(1, xmax,  0)
     hl.add(gr, 'fake', 'noleg hidden p')
     return hl
+
+def h_to_graph(h, drop_zero_entries=True, xerror=False):
+    x = []
+    y = []
+    ex = []
+    ey = []
+    for ib in range(1,h.GetNbinsX()+1):
+        if drop_zero_entries:
+            if h.GetBinContent(ib) <= 0:
+                #print 'dropped bin',ib
+                continue
+        x.append(h.GetBinCenter(ib))
+        y.append(h.GetBinContent(ib))
+        if xerror == True:
+            ex.append(h.GetBinCenter(ib) - h.GetBinLowEdge(ib))
+        else:
+            ex.append(0)
+        ey.append(h.GetBinError(ib))
+    name = h.GetName() + '_to_graph'
+    title = h.GetTitle()
+    gr = make_graph_xy(name, x, y, ex, ey)
+    gr.SetTitle(title)
+    return gr
