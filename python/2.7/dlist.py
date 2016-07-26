@@ -579,8 +579,6 @@ class dlist(debugable):
                     o.obj.SetPointError(i, o.obj.GetEX()[i], o.obj.GetEY()[i] * val)
 
     def scale_at_index(self, i=-1, val = 1.):
-        if i < 0:
-            return
         o = self.l[i]
         if o.obj.InheritsFrom('TH1') == True:
             o.obj.Sumw2()
@@ -860,6 +858,16 @@ class dlist(debugable):
                     tp.SetLogy(flag)
                 if 'x' in axes:
                     tp.SetLogx(flag)
+
+    def set_grid_multipad(self, axes='', flag=True):
+        l = self.tcanvas.GetListOfPrimitives()
+        for i in xrange(len(l)):
+            tp = self.tcanvas.cd(i+1)
+            if tp:
+                if 'y' in axes:
+                    tp.SetGridy(flag)
+                if 'x' in axes:
+                    tp.SetGridx(flag)
 
     def get_pad_drawn(self):
         self.pad = ROOT.gROOT.FindObject(self.pad_name);
