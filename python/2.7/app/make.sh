@@ -3,7 +3,7 @@
 date > rootsys.conf
 echo $ROOTSYS >> rootsys.conf
 
-for pys in meta_draw.py tutils.py pyutils.py dlist.py draw_utils.py pcanvas.py dbgu gui_draw_select.py
+for pys in meta_draw.py tutils.py pyutils.py dlist.py draw_utils.py pcanvas.py dbgu gui_draw_select.py eval_string.py
 do
 	cp -rv ../$pys .	
 done

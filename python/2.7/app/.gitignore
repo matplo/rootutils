@@ -12,3 +12,4 @@ rootsys.conf
 make.sh
 rootsys.conf
 .eggs
+eval_string.py

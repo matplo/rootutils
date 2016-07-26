@@ -12,6 +12,7 @@ import IPython
 import os
 
 from string import atof,atoi
+import eval_string
 
 class DrawString(object):
 	def __init__(self, s):
@@ -57,7 +58,7 @@ class DrawString(object):
 		return False
 
 	def title(self):
-		st = self.get_arg('title=', sp=':')
+		st = self.get_arg('title=', sp=',,')
 		if st == None:
 			st = self.fname
 		return st
@@ -94,6 +95,21 @@ class DrawString(object):
 
 	def logz(self):
 		return self.is_arg('logz')
+
+	def scale(self):
+		st = self.get_arg('scale=',',')
+		retval = None
+		if st == None:
+			return retval
+		try:
+			#retval = atof(st)
+			np = eval_string.NumericStringParser()
+			retval = np.eval(st)
+			#print st,retval
+		except:
+			retval = None
+			print '[w] scale not understood:',self.s
+		return retval
 
 class Comment(object):
 	def __init__(self, s):
@@ -202,6 +218,8 @@ class MetaFigure(object):
 			return
 		self.last_ds = DrawString(cline)
 		self.hl.add_from_file(self.last_ds.hname, self.last_ds.fname, self.last_ds.title(), self.last_ds.dopt)		
+		if self.last_ds.scale() != None:
+			self.hl.scale_at_index(-1, self.last_ds.scale())
 
 	def process_lines(self, clines):
 		for l in clines:
@@ -362,6 +380,11 @@ class MetaFigure(object):
 		if logz:
 			self.hl.set_log_multipad('z')
 
+		#setgridxy
+		self.hl.set_grid_multipad('xy', False)
+		grids = self.get_tag('#grid', None)
+		if grids != None:
+			self.hl.set_grid_multipad(grids)
 		#legend
 		stitle = self.get_tag('#title', '')
 		sleg = self.get_tag('#legend')
