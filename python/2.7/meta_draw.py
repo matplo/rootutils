@@ -243,10 +243,12 @@ class MetaFigure(object):
 			return
 		self.last_ds = DrawString(cline)
 		self.last_ds.fname = self.check_filepath(self.last_ds.fname)
-		self.hl.add_from_file(self.last_ds.hname, self.last_ds.fname, self.last_ds.title(), self.last_ds.dopt)		
-		if self.last_ds.scale() != None:
-			self.hl.scale_at_index(-1, self.last_ds.scale())
-
+		cobj = self.hl.add_from_file(self.last_ds.hname, self.last_ds.fname, self.last_ds.title(), self.last_ds.dopt)		
+		if cobj != None:
+			if self.last_ds.scale() != None:
+				self.hl.scale_at_index(-1, self.last_ds.scale())
+		else:
+			print '[w] failed to add',self.last_ds.hname,'from',self.last_ds.fname
 	def process_lines(self, clines):
 		for l in clines:
 			self.process_line(l)
@@ -408,6 +410,17 @@ class MetaFigure(object):
 
 		#print 'logy is',logy
 
+		if logy == True:
+			if miny != None:
+				if miny <= 0:
+					print '[w] overrdingin logy miny<=0',miny
+					logy=False
+			if maxy != None:
+				if maxy <= 0:
+					print '[w] overrdingin logy maxy<=0',maxy
+					logy=False
+
+		self.hl.set_log_multipad('xyz', False)
 		self.hl.draw(miny=miny,maxy=maxy,logy=logy)
 
 		if logy:
