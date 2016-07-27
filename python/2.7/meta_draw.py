@@ -199,16 +199,41 @@ class Comment(object):
 		return tleg
 
 class MetaFigure(object):
-	def __init__(self, name=None):
-		if name != None:
-			self.name = tu.make_unique_name(name)
+	def __init__(self, fname=''):
+		if fname:
+			self.name = tu.make_unique_name(fname)
 		else:
 			self.name = tu.make_unique_name('MetaFigure')
+		self.fname    = fname
 		self.drawable = True
 		self.data     = []
 		self.hls      = dlist.ListStorage(self.name+'_storage')
 		self.hl       = self.hls.get_list(self.name+'_list')
 		self.last_ds  = None
+
+	def check_filepath(self, path):
+		# if $ within the path -> expand it and continue testing
+		# if the path does not exist
+		# if this does not apply
+		# try to guess that it is a relative path wrt self.fname
+		test_path = path
+		if '$' in path:
+			#expand and try...
+			test_path = r.gSystem.ExpandPathName(path)
+		try:
+			f = open(test_path)
+			f.close()
+		except:
+			dname = os.path.dirname(os.path.abspath(self.fname))
+			test_path = os.path.join(dname, path)
+		try:
+			f = open(test_path)
+			f.close()
+		except:
+			test_path = path
+		if path != test_path:
+			print >> sys.stderr,'[w] file path adjusted:',path,'->',test_path
+		return test_path
 
 	def process_line(self, cline):
 		if len(cline) < 1:
@@ -217,6 +242,7 @@ class MetaFigure(object):
 		if cline[0] == '#':
 			return
 		self.last_ds = DrawString(cline)
+		self.last_ds.fname = self.check_filepath(self.last_ds.fname)
 		self.hl.add_from_file(self.last_ds.hname, self.last_ds.fname, self.last_ds.title(), self.last_ds.dopt)		
 		if self.last_ds.scale() != None:
 			self.hl.scale_at_index(-1, self.last_ds.scale())
@@ -294,11 +320,22 @@ class MetaFigure(object):
 			print '[w] trouble with x-range? x1,x2',sleg
 		return x1, x2
 
-	def draw(self, no_canvas=False):
-		if self.last_ds == None:
-			print '[e] nothing to draw for',self.name
-			self.drawable = False
-			return
+	def add_dummy(self):
+		gr = r.TGraph(2)
+		gr.SetPoint(0, -1,  1)
+		gr.SetPoint(1, +1,  1)
+		self.hl.add(gr, 'WARNING: LIST EMPTY!', 'hidden')
+
+	def draw(self, no_canvas=False, add_dummy=True):
+		if add_dummy == True:
+			if len(self.hl.l) < 1:
+				#self.add_dummy()
+				self.add_option('#comment -0.1,0.9,1.0,1.0,item=WARNING: empty drawing list... tx_size=0.06')
+		else:
+			if self.last_ds == None:
+				print '[e] nothing to draw for',self.name
+				self.drawable = False
+				return
 
 		sxrange = self.get_tag('#xrange', None)
 		if sxrange != None:
