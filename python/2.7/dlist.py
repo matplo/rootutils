@@ -314,53 +314,69 @@ class dlist(debugable):
                 return True
         return False
         
-    def find_miny(self, low=None):
-        miny = 1e12
+    def find_miny(self, low=None, logy=False):
+        miny = 1e18
         for h in self.l:
             if h.obj.InheritsFrom('TH1'):
                 for nb in range(1, h.obj.GetNbinsX()):
                     c = h.obj.GetBinContent(nb)
-                    if c!=0 and c <= miny:
-                        miny = c 
+                    if logy == False:
+                        if c!=0 and c <= miny:
+                            miny = c 
+                    else:
+                        if c > 0 and c <= miny:
+                            miny = c                         
             if h.obj.InheritsFrom('TGraph'):
                 for idx in range(h.obj.GetN()):
                     v = h.obj.GetY()[idx]
-                    if v < miny:
-                        miny = v                                               
+                    if logy == False:
+                        if v < miny:
+                            miny = v
+                    else:
+                        if v > 0 and v < miny:
+                            miny = v
         if low!=None:
             if miny < low:
                 miny == low
         return miny
 
-    def find_maxy(self):
-        maxy = -1e15
+    def find_maxy(self, logy=False):
+        maxy = -1e18
         for h in self.l:
             if h.obj.InheritsFrom('TH1'):
                 for nb in range(1, h.obj.GetNbinsX()):
                     c = h.obj.GetBinContent(nb)
-                    if c!=0 and c > maxy:
-                        maxy = c                
+                    if logy == False:
+                        if c!=0 and c > maxy:
+                            maxy = c                
+                    else:
+                        if c > 0 and c > maxy:
+                            maxy = c                                        
             if h.obj.InheritsFrom('TGraph'):
                 for idx in range(h.obj.GetN()):
                     v = h.obj.GetY()[idx]
-                    if v > maxy:
-                        maxy = v                        
+                    if logy == False:
+                        if v > maxy:
+                            maxy = v                        
+                    else:
+                        if v > 0 and v > maxy:
+                            maxy = v
         return maxy
     
     def adjust_maxima(self, miny=None, maxy=None, logy=False):
         if miny!=None:
             self.miny=miny
         else:
-            self.miny = self.find_miny()
+            self.miny = self.find_miny(logy=logy)
             if self.miny < 0:
                 self.miny = self.miny * 1.1
             else:
                 self.miny = self.miny * 0.9
             if logy==True:
-                self.miny=self.find_miny() * 0.5
+                self.miny=self.find_miny(logy=logy) * 0.5
             # self.miny, miny, maxy, logy
             if logy==True and self.miny <= 0:
-                miny=self.find_miny(0)
+                miny=self.find_miny(logy=logy)
                 self.miny = miny
                             
         if maxy!=None:
@@ -400,6 +416,7 @@ class dlist(debugable):
         else:            
             self.l.append(o)
         self.debug('::append ' + o.name + ' ' + o.dopt.s + 'prepend:' + str(prep) )
+        return o
    
     def add_from_file(self, hname = '', fname = '', new_title = '', draw_opt = ''):
         cobj = None
@@ -1133,7 +1150,7 @@ class ListStorage:
 
     def add_from_file(self, lname, hname, fname, htitle, dopt):
         hl = self.get(lname)
-        hl.add_from_file(hname, fname, htitle, dopt)
+        return hl.add_from_file(hname, fname, htitle, dopt)
 
     def get(self, lname):
         for l in self.lists:
