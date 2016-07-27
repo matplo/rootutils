@@ -431,7 +431,7 @@ class dlist(debugable):
         return cobj
 
     def add(self, obj=ROOT.TObject, new_title = '', draw_opt = '', prep=False):
-        if obj == None: return
+        if obj == None: return None
         cobj = None
         try:
             robj = obj.obj
@@ -579,6 +579,8 @@ class dlist(debugable):
                     o.obj.SetPointError(i, o.obj.GetEX()[i], o.obj.GetEY()[i] * val)
 
     def scale_at_index(self, i=-1, val = 1.):
+    	if len(self.l) < 1:
+    		return
         o = self.l[i]
         if o.obj.InheritsFrom('TH1') == True:
             o.obj.Sumw2()
