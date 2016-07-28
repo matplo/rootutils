@@ -444,7 +444,13 @@ class MetaFigure(object):
 			tx_size = atof(sleg.split('tx_size=')[1])
 		except:
 			pass
-		self.hl.self_legend(title=stitle,x1=x1,x2=x2,y1=y1,y2=y2,tx_size=tx_size)
+		leg_opt = 'brNDC'
+		try:			
+			leg_opt = leg_opt + ' +a' + sleg.split('alpha=')[1].split(' ')[0]
+		except:
+			leg_opt = 'brNDC'
+		print leg_opt
+		self.hl.self_legend(title=stitle,x1=x1,x2=x2,y1=y1,y2=y2,tx_size=tx_size,option=leg_opt)
 
 		#line
 		self.draw_lines()
