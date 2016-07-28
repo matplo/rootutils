@@ -102,6 +102,10 @@ class FileView( r.TGMainFrame ):
         #    del self.tabs
         #    self.tabs = []
 
+        # mem management dirty hack
+        del tutils.gList
+        tutils.gList = []
+
         for i,mf in enumerate(self.mdf.figures):
             tcname = '{}_Fig{}_canvas'.format(self.fname, i)
             if i >= len(self.tabs):
