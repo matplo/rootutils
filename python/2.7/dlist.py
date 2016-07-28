@@ -398,6 +398,10 @@ class dlist(debugable):
     def append(self, obj=ROOT.TObject, new_title = '', draw_opt = '', prep=False):
         newname_root = obj.GetName() + '_' + self.name.replace(' ', '_')
         newname = newname_root
+        if ' name=' in new_title:
+            splits = new_title.split(' name=')
+            new_title = splits[0]
+            newname   = splits[1]
         newname = pyutils.to_file_name(newname)
         count = 1
         while self._check_name(newname) == True:
@@ -929,8 +933,15 @@ class dlist(debugable):
         self.legend.SetBorderSize(0)
         self.legend.SetFillColor(ROOT.kWhite)
         self.legend.SetFillStyle(1001)
-        #self.legend.SetFillColorAlpha(ROOT.kWhite, 0.9)
-        self.legend.SetFillColorAlpha(ROOT.kWhite, 0)
+        if '+a' in option:
+            try:
+                salpha = option.split('+a')[1].split(' ')[0]
+                salpha = atof(salpha)/100.
+            except:
+                salpha = 0
+            self.legend.SetFillColorAlpha(ROOT.kWhite, salpha)
+        else:
+            self.legend.SetFillColorAlpha(ROOT.kWhite, 0)
         self.legend.SetTextAlign(12)
         self.legend.SetTextSize(self.axis_title_size[0] * 0.5) # was 0.5
         self.legend.SetTextFont(self.font)
@@ -1113,7 +1124,10 @@ class dlist(debugable):
             scale = 1.
             if scales != None:
                 scale = scales[i]
-            reth.obj.Add(h.obj, scale)
+            if reth.obj.InheritsFrom('TGraph') or h.obj.InheritsFrom('TGraph'):
+                add_graphs(reth.obj, h.obj)
+            else:
+                reth.obj.Add(h.obj, scale)
         return reth
 
     def pdf(self):
@@ -1121,7 +1135,15 @@ class dlist(debugable):
 
     def png(self):
         self.tcanvas.Print(pyutils.to_file_name(self.name)+'.png','.png')
-    
+
+def add_graphs(o1, o2):
+    print '[w] do not trust add_graphs with errors...'
+    if o1.InheritsFrom('TGraph') and o2.InheritsFrom('TGraph'):
+        x = o1.GetX()
+        y = o1.GetY()
+        for i in xrange(o1.GetN()):
+            y[i] = y[i] + o2.Eval(x[i], 0, 'S')
+
 class ListStorage:
     def __init__(self, name = None):
         if name == None:
