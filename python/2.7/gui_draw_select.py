@@ -103,8 +103,8 @@ class FileView( r.TGMainFrame ):
         #    self.tabs = []
 
         # mem management dirty hack
-        del tutils.gList
-        tutils.gList = []
+        #del tutils.gList
+        #tutils.gList = []
 
         for i,mf in enumerate(self.mdf.figures):
             tcname = '{}_Fig{}_canvas'.format(self.fname, i)
@@ -120,44 +120,80 @@ class FileView( r.TGMainFrame ):
                 self.tabs[i].draw(mf)
 
 class DrawFrame( r.TGCompositeFrame ):
-    def __init__( self, parent, width, height, name):
-        r.TGCompositeFrame.__init__( self, parent, width, height, r.kLHintsExpandX | r.kLHintsExpandY)
-        self.name = name
+	def __init__( self, parent, width, height, name):
+		r.TGCompositeFrame.__init__( self, parent, width, height, r.kLHintsExpandX | r.kLHintsExpandY)
+		self.name = name
 
-        self.frameHint        = r.TGLayoutHints(r.kLHintsExpandX | r.kLHintsExpandY)
-        self.frameHintEY      = r.TGLayoutHints(r.kLHintsExpandY)
-        self.frameHintEX      = r.TGLayoutHints(r.kLHintsExpandX)
-        self.buttonsFrameHint = r.TGLayoutHints(r.kLHintsExpandX)
-        self.buttonHint       = r.TGLayoutHints(r.kLHintsCenterX | r.kLHintsExpandX, 5,5,3,4)
+		self.frameHint        = r.TGLayoutHints(r.kLHintsExpandX | r.kLHintsExpandY)
+		self.frameHintEY      = r.TGLayoutHints(r.kLHintsExpandY)
+		self.frameHintEX      = r.TGLayoutHints(r.kLHintsExpandX)
+		self.buttonsFrameHint = r.TGLayoutHints(r.kLHintsExpandX)
+		self.buttonHint       = r.TGLayoutHints(r.kLHintsCenterX | r.kLHintsExpandX, 5,5,3,4)
 
-        self.canvasFrame = r.TGGroupFrame( self, 'drawing')
-        self.AddFrame(self.canvasFrame, self.frameHint )
-        self.canvas     = r.TRootEmbeddedCanvas( self.name, self.canvasFrame, 50, 50 )
-        self.canvasFrame.AddFrame( self.canvas, self.frameHint )
+		self.canvasFrame = r.TGGroupFrame( self, 'drawing')
+		self.AddFrame(self.canvasFrame, self.frameHint )
+		self.canvas     = r.TRootEmbeddedCanvas( self.name, self.canvasFrame, 50, 50 )
+		self.canvasFrame.AddFrame( self.canvas, self.frameHint )
 
-        self.buttonsFrame = r.TGButtonGroup( self, 'this tab actions', r.kHorizontalFrame)
-        self.AddFrame( self.buttonsFrame, self.buttonsFrameHint )
-        self.pdfButton   = r.TGTextButton( self.buttonsFrame, ' PDF ', 10 )
-        self.pdfDispatch = r.TPyDispatcher( self.pdf )
-        self.pdfButton.Connect( 'Clicked()', "TPyDispatcher", self.pdfDispatch, 'Dispatch()' )
-        self.buttonsFrame.AddFrame( self.pdfButton, self.buttonHint )
+		self.buttonsFrame = r.TGButtonGroup( self, 'this tab actions', r.kHorizontalFrame)
+		self.AddFrame( self.buttonsFrame, self.buttonsFrameHint )
 
-        self.mf = None
+		self.dumpFeaturesButton   = r.TGTextButton( self.buttonsFrame, ' Dump Features ', 10 )
+		self.dumpFeaturesDispatch = r.TPyDispatcher( self.dumpFeatures )
+		self.dumpFeaturesButton.Connect( 'Clicked()', "TPyDispatcher", self.dumpFeaturesDispatch, 'Dispatch()' )
+		self.buttonsFrame.AddFrame( self.dumpFeaturesButton, self.buttonHint )
 
-    def pdf(self):
-        #if self.mf:
-        #    self.mf.hl.pdf()
-        self.canvas.GetCanvas().Print(self.name+'.pdf', 'pdf')
+		self.pdfButton   = r.TGTextButton( self.buttonsFrame, ' PDF ', 10 )
+		self.pdfDispatch = r.TPyDispatcher( self.pdf )
+		self.pdfButton.Connect( 'Clicked()', "TPyDispatcher", self.pdfDispatch, 'Dispatch()' )
+		self.buttonsFrame.AddFrame( self.pdfButton, self.buttonHint )
 
-    def draw(self, mf):
-        self.mf = mf
-        self.canvas.GetCanvas().cd()
-        #consider here adding a handler for more that 1 figure in a draw file
-        mf.draw(no_canvas=True)
-        #except:
-        #    print '[e] something went wrong with drawing...', self.fname, 'figure number:', self.draw_figure
-        self.canvas.GetCanvas().Modified()
-        self.canvas.GetCanvas().Update()
+		self.mf = None
+
+	def pdf(self):
+		#if self.mf:
+		#    self.mf.hl.pdf()
+		self.canvas.GetCanvas().Print(self.name+'.pdf', 'pdf')
+
+	def dumpFeatures(self):
+		# NOTE:
+		tc = self.canvas.GetCanvas()
+		l = tc.GetListOfPrimitives()
+		for o in l:
+			if o.InheritsFrom('TGraph'):
+				continue
+			if o.InheritsFrom('TH1'):
+				continue
+			print o.GetName(), o.Class().GetName(),o.GetOption()
+			if o.Class().GetName() == 'TLegend':
+				# TLegend::GetListOfPrimitives() triggers a crash when clearing (redraw) the gPad/Canvas
+				# this is why we are unable to iterate on the TLegend items...
+				stype = '#legend'
+				items = ''
+				#l = o.GetListOfPrimitives()
+				l = []
+				if '#c' in o.GetOption().split():
+					stype = '#comment'
+					for p in l:
+						items = items + ' item={}'.format(p.GetLabel())
+				if '#l' in o.GetOption().split():
+					stype = '#legend'
+				lposs = '{},{},{},{},'.format(o.GetX1NDC(),o.GetY1NDC(),o.GetX2NDC(),o.GetY2NDC())
+				if len(items) == 0:
+					print stype,lposs,'tx_size=',o.GetTextSize()
+				else:
+					print stype,lposs,items,'tx_size=',o.GetTextSize()
+
+	def draw(self, mf):
+		self.mf = mf
+		self.canvas.GetCanvas().Clear()
+		self.canvas.GetCanvas().cd()
+		#consider here adding a handler for more that 1 figure in a draw file
+		mf.draw(no_canvas=True)
+		#except:
+		#    print '[e] something went wrong with drawing...', self.fname, 'figure number:', self.draw_figure
+		self.canvas.GetCanvas().Modified()
+		self.canvas.GetCanvas().Update()
 
 def setup_style():
     #r.gROOT.Reset()

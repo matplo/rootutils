@@ -116,6 +116,7 @@ class Comment(object):
 		self.s = s
 		self.box = self.get_box()
 		self.text = self.get_text()
+		self.tleg = None
 
 	def get_box(self):
 		x1 = 0.1
@@ -179,24 +180,26 @@ class Comment(object):
 		return 0
 
 	def legend(self):
-		tleg = None
+		self.tleg = None
 		if len(self.text) <=0:
 			print '[e] no text in comment tag'
 		else:
-			tleg = r.TLegend(self.box[0], self.box[1], self.box[2], self.box[3])
-			tleg.SetNColumns(1)
-			tleg.SetBorderSize(0)
-			tleg.SetFillColor(r.kWhite)
-			tleg.SetFillStyle(1001)
+			option = 'brNDC #c'
+			self.tleg = r.TLegend(self.box[0], self.box[1], self.box[2], self.box[3], '', option)
+			self.tleg.SetToolTipText('#comment')
+			self.tleg.SetNColumns(1)
+			self.tleg.SetBorderSize(0)
+			self.tleg.SetFillColor(r.kWhite)
+			self.tleg.SetFillStyle(1001)
 			#tleg.SetFillColorAlpha(ROOT.kWhite, 0.9)
-			tleg.SetFillColorAlpha(r.kWhite, self.get_alpha())
-			tleg.SetTextAlign(12)
-			tleg.SetTextSize(self.get_text_size())
-			tleg.SetTextFont(self.get_font())
-			tleg.SetTextColor(self.get_color())
+			self.tleg.SetFillColorAlpha(r.kWhite, self.get_alpha())
+			self.tleg.SetTextAlign(12)
+			self.tleg.SetTextSize(self.get_text_size())
+			self.tleg.SetTextFont(self.get_font())
+			self.tleg.SetTextColor(self.get_color())
 		for s in self.text:
-			tleg.AddEntry(0, s, '')
-		return tleg
+			self.tleg.AddEntry(0, s, '')
+		return self.tleg
 
 class MetaFigure(object):
 	def __init__(self, fname=''):
@@ -207,9 +210,11 @@ class MetaFigure(object):
 		self.fname    = fname
 		self.drawable = True
 		self.data     = []
-		self.hls      = dlist.ListStorage(self.name+'_storage')
-		self.hl       = self.hls.get_list(self.name+'_list')
+		#self.hls      = dlist.ListStorage(self.name+'_storage')
+		#self.hl       = self.hls.get_list(self.name+'_list')
+		self.hl        = dlist.dlist(self.name + '_list')
 		self.last_ds  = None
+		self.comments = []
 
 	def check_filepath(self, path):
 		# if $ within the path -> expand it and continue testing
@@ -408,8 +413,6 @@ class MetaFigure(object):
 		else:
 			logz=False
 
-		#print 'logy is',logy
-
 		if logy == True:
 			if miny != None:
 				if miny <= 0:
@@ -423,12 +426,18 @@ class MetaFigure(object):
 		self.hl.set_log_multipad('xyz', False)
 		self.hl.draw(miny=miny,maxy=maxy,logy=logy)
 
-		if logy:
+		if logy == True:
 			self.hl.set_log_multipad('y')
-		if logx:
+		else:
+			self.hl.set_log_multipad('y', False)			
+		if logx == True:
 			self.hl.set_log_multipad('x')
-		if logz:
+		else:
+			self.hl.set_log_multipad('x', False)			
+		if logz == True:
 			self.hl.set_log_multipad('z')
+		else:
+			self.hl.set_log_multipad('z', False)			
 
 		#setgridxy
 		self.hl.set_grid_multipad('xy', False)
@@ -476,7 +485,8 @@ class MetaFigure(object):
 				tc = Comment(c)
 				leg = tc.legend()
 				leg.Draw()
-				tu.gList.append(leg)
+				self.comments.append(tc)
+				#tu.gList.append(leg)
 
 		sname = self.get_tag('#name', None)
 		if sname != None:

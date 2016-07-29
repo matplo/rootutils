@@ -928,6 +928,7 @@ class dlist(debugable):
             x2 = 0.8 #0.88
         if y2==None:
             y2 = 0.87 #0.88 #used also 0.9            
+        option = option + ' #l'
         self.legend = ROOT.TLegend(x1, y1, x2, y2, title, option)
         #self.legend.SetHeader(title)
         self.legend.SetNColumns(ncols)
@@ -955,7 +956,7 @@ class dlist(debugable):
             #    tx_size = 14 * tx_size
             ##print tx_size,self.font
             self.legend.SetTextSize(tx_size)
-        
+        self.legend.SetToolTipText('#legend')
         return self.legend
 
     def update(self, logy=False):
