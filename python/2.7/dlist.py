@@ -804,12 +804,13 @@ class dlist(debugable):
                 has2D = True
         return has2D
 
-    def draw(self, option='', miny=None, maxy=None, logy=False, colopt='', adjust_pad=True):
+    def draw(self, option='', miny=None, maxy=None, logy=False, colopt='', adjust_pad=True, adjust_axis_attributes=True):
         if self.has2D() == False:
             self.adjust_maxima(miny=miny, maxy=maxy, logy=logy)
-        self.adjust_axis_attributes(0)
-        self.adjust_axis_attributes(1)
-        self.adjust_axis_attributes(2)
+        if adjust_axis_attributes == True:
+            self.adjust_axis_attributes(0)
+            self.adjust_axis_attributes(1)
+            self.adjust_axis_attributes(2)
         drawn = False
 
         gdopt = draw_option(option)
@@ -929,8 +930,8 @@ class dlist(debugable):
         if y2==None:
             y2 = 0.87 #0.88 #used also 0.9            
         option = option + ' #l'
-        self.legend = ROOT.TLegend(x1, y1, x2, y2, title, option)
-        #self.legend.SetHeader(title)
+        self.legend = ROOT.TLegend(x1, y1, x2, y2, '', option)
+        self.legend.SetHeader(title)
         self.legend.SetNColumns(ncols)
         self.legend.SetBorderSize(0)
         self.legend.SetFillColor(ROOT.kWhite)
@@ -945,16 +946,20 @@ class dlist(debugable):
         else:
             self.legend.SetFillColorAlpha(ROOT.kWhite, 0)
         self.legend.SetTextAlign(12)
-        self.legend.SetTextSize(self.axis_title_size[0] * 0.5) # was 0.5
         self.legend.SetTextFont(self.font)
         self.legend.SetTextColor(1)
+        #if tx_size!=None:
+        #    if self.font == 42:
+        #        #tx_size=self.axis_title_size[0]
+        #        _tx_size = self.axis_title_size[0] * 0.8 * tx_size #0.045
+        #    if self.font == 43:
+        #        _tx_size = 14 * tx_size
+        #        print tx_size,self.font
+        #    self.legend.SetTextSize(_tx_size)
+        #else:
+        #    print self.axis_title_size[0] * 0.5
+        self.legend.SetTextSize(self.axis_title_size[0] * 0.5) # was 0.5
         if tx_size!=None:
-            #if self.font == 42:
-            #    #tx_size=self.axis_title_size[0]
-            #    tx_size = self.axis_title_size[0] * 0.8 * tx_size #0.045
-            #if self.font == 43:
-            #    tx_size = 14 * tx_size
-            ##print tx_size,self.font
             self.legend.SetTextSize(tx_size)
         self.legend.SetToolTipText('#legend')
         return self.legend
