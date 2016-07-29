@@ -353,8 +353,9 @@ class dlist(debugable):
                         if c > 0 and c > maxy:
                             maxy = c                                        
             if h.obj.InheritsFrom('TGraph'):
+            	vy = h.obj.GetY()
                 for idx in range(h.obj.GetN()):
-                    v = h.obj.GetY()[idx]
+                    v = vy[idx]
                     if logy == False:
                         if v > maxy:
                             maxy = v                        
@@ -1136,13 +1137,28 @@ class dlist(debugable):
     def png(self):
         self.tcanvas.Print(pyutils.to_file_name(self.name)+'.png','.png')
 
-def add_graphs(o1, o2):
+def add_graphs(o1, o2, w=1.):
     print '[w] do not trust add_graphs with errors...'
     if o1.InheritsFrom('TGraph') and o2.InheritsFrom('TGraph'):
         x = o1.GetX()
         y = o1.GetY()
         for i in xrange(o1.GetN()):
-            y[i] = y[i] + o2.Eval(x[i], 0, 'S')
+            y[i] = y[i] + w * o2.Eval(x[i], 0, 'S')
+
+def divide_graphs(o1, o2, w=1.):
+    print '[w] do not trust add_graphs with errors...'
+    if o1.InheritsFrom('TGraph') and o2.InheritsFrom('TGraph'):
+        x = o1.GetX()
+        y = o1.GetY()
+        for i in xrange(o1.GetN()):
+        	try:
+	            y[i] = y[i] / (w * o2.Eval(x[i], 0, 'S'))
+	     	except:
+	     		y[i] = 0.
+	     	try:
+	     		o1.GetEY()[i] = o1.GetEY()[i] / (w * o2.Eval(x[i], 0, 'S'))
+	     	except:
+	     		pass
 
 class ListStorage:
     def __init__(self, name = None):
@@ -1210,7 +1226,7 @@ class ListStorage:
     def fix_x_range(self, xmin, xmax):
         for l in self.lists:
             l.fix_x_range(xmin, xmax)
-            print l
+            #print l
 
     def draw_all(self, option='', miny=None, maxy=None, logy=False, colopt='', legtitle='', orient=0, condense=False, draw_legend=True):
         legoption = 'brNDC'
@@ -1431,9 +1447,12 @@ def make_ratio(h1, h2):
     hr = h1.Clone(newname)
     hr.SetTitle(newtitle)
 
-    hr.SetDirectory(0)
-    hr.Divide(h2)
-    hl.add(hr)
+    if h1.InheritsFrom('TGraph') and h2.InheritsFrom('TGraph'):
+    	divide_graphs(hr, h2)
+    else:
+	    hr.SetDirectory(0)
+	    hr.Divide(h2)
+    hl.add(hr, newtitle, 'p')
 
     hl.reset_axis_titles(None, newtitle)
 

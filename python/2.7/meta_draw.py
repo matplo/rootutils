@@ -175,7 +175,7 @@ class Comment(object):
 
 	def get_alpha(self):		
 		if self.get_setting('alpha='):
-			return self.get_setting('alpha=')/100.
+			return atof(self.get_setting('alpha='))/100.
 		return 0
 
 	def legend(self):
@@ -362,7 +362,7 @@ class MetaFigure(object):
 
 		rebin = self.get_tag('#rebin', None, ' ')
 		if rebin!=None:
-			print atoi(rebin[0])
+			print '[i] rebin arg:',atoi(rebin[0])
 			if len(rebin) > 0:
 				self.hl.rebin(atoi(rebin[0]))
 			if len(rebin) > 1:
@@ -449,7 +449,7 @@ class MetaFigure(object):
 			leg_opt = leg_opt + ' +a' + sleg.split('alpha=')[1].split(' ')[0]
 		except:
 			leg_opt = 'brNDC'
-		print leg_opt
+		#print '[i] legend options:',leg_opt
 		self.hl.self_legend(title=stitle,x1=x1,x2=x2,y1=y1,y2=y2,tx_size=tx_size,option=leg_opt)
 
 		#line
