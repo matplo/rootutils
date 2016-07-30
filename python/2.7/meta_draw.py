@@ -359,7 +359,8 @@ class MetaFigure(object):
 		else:
 			self.hl.make_canvas()
 
-		self.hl.reset_axis_titles(self.last_ds.xt(), self.last_ds.yt(), self.last_ds.zt())
+		if self.last_ds :
+			self.hl.reset_axis_titles(self.last_ds.xt(), self.last_ds.yt(), self.last_ds.zt())
 		xt = self.get_tag('#x', None)
 		yt = self.get_tag('#y', None)
 		zt = self.get_tag('#z', None)
@@ -383,35 +384,39 @@ class MetaFigure(object):
 			self.hl.normalize_self()
 
 		miny = self.get_tag('#miny', None)
-		if miny == None:
-			miny=self.last_ds.miny()
-		else:
-			miny=atof(miny)
 		maxy = self.get_tag('#maxy', None)
-		if maxy == None:
-			maxy=self.last_ds.maxy()
-		else:
-			maxy=atof(maxy)
-
 		logy = self.get_tag('#logy', None)
 		if logy == 'true':
 			logy=True
-		if logy == None:
-			logy=self.last_ds.logy()
 		logx = self.get_tag('#logx', None)
 		if logx == 'true':
 			logx=True
-		if logx == None:
-			logx=self.last_ds.logx()
-		else:
-			logx=False
 		logz = self.get_tag('#logz', None)
 		if logz == 'true':
 			logz=True
-		if logz == None:
-			logz=self.last_ds.logz()
-		else:
-			logz=False
+
+		if self.last_ds :
+			if miny == None:
+				miny=self.last_ds.miny()
+			else:
+				miny=atof(miny)
+			if maxy == None:
+				maxy=self.last_ds.maxy()
+			else:
+				maxy=atof(maxy)
+
+			if logy == None:
+				logy=self.last_ds.logy()
+			else:
+				logy=False
+			if logx == None:
+				logx=self.last_ds.logx()
+			else:
+				logx=False
+			if logz == None:
+				logz=self.last_ds.logz()
+			else:
+				logz=False
 
 		if logy == True:
 			if miny != None:
