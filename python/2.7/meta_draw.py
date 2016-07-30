@@ -385,15 +385,21 @@ class MetaFigure(object):
 
 		miny = self.get_tag('#miny', None)
 		maxy = self.get_tag('#maxy', None)
-		logy = self.get_tag('#logy', None)
-		if logy == 'true':
-			logy=True
 		logx = self.get_tag('#logx', None)
-		if logx == 'true':
+		if logx == 'true' or logx == '1':
 			logx=True
+		else:
+			logx=False
+		logy = self.get_tag('#logy', None)
+		if logy == 'true' or logy == '1':
+			logy=True
+		else:
+			logy=False
 		logz = self.get_tag('#logz', None)
-		if logz == 'true':
+		if logz == 'true' or logz == '1':
 			logz=True
+		else:
+			logz=False
 
 		if self.last_ds :
 			if miny == None:
@@ -404,19 +410,12 @@ class MetaFigure(object):
 				maxy=self.last_ds.maxy()
 			else:
 				maxy=atof(maxy)
-
-			if logy == None:
+			if logy == False:
 				logy=self.last_ds.logy()
-			else:
-				logy=False
-			if logx == None:
+			if logx == False:
 				logx=self.last_ds.logx()
-			else:
-				logx=False
-			if logz == None:
+			if logz == False:
 				logz=self.last_ds.logz()
-			else:
-				logz=False
 
 		if logy == True:
 			if miny != None:
