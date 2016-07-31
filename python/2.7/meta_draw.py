@@ -281,7 +281,7 @@ class MetaFigure(object):
 			if tag+' ' in l[:len(tag)+1]:
 				retval = l.replace(tag+' ','')
 			else:
-				if tag in l[:len(tag)]:
+				if tag == l.strip():
 					retval = l.replace(tag,'')				
 		if split != None and retval != None:
 			retval = retval.split(split)
