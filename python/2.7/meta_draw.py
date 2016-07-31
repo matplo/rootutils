@@ -8,6 +8,7 @@ import dlist
 import sys
 import pyutils as ut
 import IPython
+import time
 
 import os
 
@@ -279,6 +280,9 @@ class MetaFigure(object):
 		for l in self.data:
 			if tag+' ' in l[:len(tag)+1]:
 				retval = l.replace(tag+' ','')
+			else:
+				if tag in l[:len(tag)]:
+					retval = l.replace(tag,'')				
 		if split != None and retval != None:
 			retval = retval.split(split)
 		return retval
@@ -480,6 +484,15 @@ class MetaFigure(object):
 				print '[e] unable to understand the --geom argument',gs
 		if no_canvas == False:
 			self.hl.resize_window(x,y)
+
+		ds = self.get_tag('#date')
+		if ds != None:
+			stime = time.strftime("%H:%M:%S %Z")
+			#sdate = time.strftime("%a, %d/%m/%Y")
+			sdate = time.strftime("%a %d/%m/%Y")
+			#sdate = time.strftime("%c")
+			#0.00352112676056,0.00196078431373,0.0774647887324,0.101960784314
+			self.add_option('#comment 0.0,0.0,0.05,0.05,item={} {} alpha=0.5 tx_size=0.02'.format(sdate, stime))
 
 		cs = self.get_tags('#comment')
 		for c in cs:
