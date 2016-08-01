@@ -1,5 +1,24 @@
 #!/bin/bash
 
+function remove_ignored()
+{
+	if [ -e .gitignore ]; then
+		toremove=`cat .gitignore`
+		echo "[i] removing stuff..."
+		for fn in $toremove
+		do
+			if [ "$1" == "$fn" ]; then
+				echo "[i] ignoring " $fn
+			else
+				rm -rfv $fn
+			fi
+		done
+		echo "[i] done."
+	fi
+}
+
+remove_ignored
+
 date > rootsys.conf
 #echo $ROOTSYS >> rootsys.conf
 rconfig=`which root-config`
@@ -41,3 +60,6 @@ if [ -d "$RSYS" ]; then
 else
 	echo "[e] root-config not found in path."
 fi
+
+#if built for deployment (not in-place) it is safe to:
+# remove_ignored dist rootsys.conf

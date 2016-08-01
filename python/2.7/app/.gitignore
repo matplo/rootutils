@@ -12,3 +12,4 @@ rootsys.conf
 rootsys.conf
 .eggs
 eval_string.py
+*.pyc

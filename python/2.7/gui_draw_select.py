@@ -8,6 +8,7 @@ import os
 import sys
 import meta_draw
 import hashlib
+import tempfile
 
 class FileWatch(object):
     def __init__(self, fname):
@@ -208,6 +209,12 @@ def setup_style():
     #r.gStyle.SetErrorX(0) #not by default; use X1 to show the x-error with ol
     r.gStyle.SetEndErrorSize(0)
 
+def make_temp_file():
+    ftemp = tempfile.mkstemp('.draw', 'tmp_', None, True)
+    os.write(ftemp[0],'#figure\n')
+    os.close(ftemp[0])
+    return ftemp[1]
+
 def main():
     setup_style()
     fname = tutils.get_arg_with('-f')
@@ -215,7 +222,7 @@ def main():
         if len(sys.argv) > 1:
             fname = sys.argv[1]
         else:
-            return
+            fname = make_temp_file()
     if not os.path.isfile(fname):
         fname = None
     if fname:
