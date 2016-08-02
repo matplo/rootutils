@@ -9,6 +9,7 @@ import sys
 import meta_draw
 import hashlib
 import tempfile
+import time
 
 class FileWatch(object):
 	def __init__(self, fname):
@@ -127,6 +128,7 @@ class FileView( r.TGMainFrame ):
 				dframe.Layout()
 				dframe.MapSubwindows()
 			else:
+				self.logfileFrame.flush()
 				self.tabs[i+1].draw(mf) #remember the log tab
 
 class LogFileFrame( r.TGCompositeFrame ):
@@ -168,6 +170,7 @@ class LogFileFrame( r.TGCompositeFrame ):
 		print '[i] log goes to:',self.logfilename
 		print sys.argv
 		self.initialized = True
+		self.lines_read = 0
 
 	def flush(self):
 		sys.stdout.flush()
@@ -187,8 +190,12 @@ class LogFileFrame( r.TGCompositeFrame ):
 		with open(self.logfilename, 'r') as f:
 			cl = f.readlines()
 		self.content.AddLineFast('[i] read log... lines:{}'.format(len(cl)))
-		for l in cl:
+		for i,l in enumerate(cl):
+			if i == self.lines_read:
+				self.content.AddLineFast('')
+				self.content.AddLineFast('- new content - {}'.format(time.strftime('%c')))
 			self.content.AddLineFast(l.strip())
+		self.lines_read = len(cl)
 		#if self.content.ReturnLineCount() > visible_lines:
 		#self.content.SetVsbPosition(self.content.ReturnLineCount());
 		self.content.Update()
@@ -267,6 +274,8 @@ class DrawFrame( r.TGCompositeFrame ):
 		print 
 
 	def draw(self, mf):
+		print
+		print '[i] DrawFrame {} drawing MetaFigure {}'.format(self.name,mf.name)
 		self.mf = mf
 		self.canvas.GetCanvas().Clear()
 		self.canvas.GetCanvas().cd()
