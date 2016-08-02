@@ -472,14 +472,18 @@ class dlist(debugable):
                 draw_opt = 'hist'
                 if robj.InheritsFrom("TF1"):
                     draw_opt = 'l'
+            if 'ex0' in draw_opt.split(' '):
+                draw_opt = draw_opt.replace('ex0', '')
+                xerror = False
+            else:
+                xerror = True
             if robj.InheritsFrom('TH1') and 'graph' in draw_opt.split(' '):
-                if 'ex0' in draw_opt.split(' '):
-                    draw_opt = draw_opt.replace('ex0', '')
-                    xerror = False
-                else:
-                    xerror = True
                 robj = h_to_graph(robj, drop_zero_entries=True, xerror=xerror)
                 draw_opt = draw_opt.replace('graph',' ')
+            else:
+                if xerror == False:
+                    if robj.InheritsFrom('TGraph'):
+                        scale_graph_errors(robj, 0, 0.0)
             cobj = self.append(robj, new_title, draw_opt, prep)
             if self.maxy < robj.GetMaximum():
                 self.maxy = robj.GetMaximum()
@@ -1804,3 +1808,19 @@ def h_to_graph(h, drop_zero_entries=True, xerror=False):
     gr = make_graph_xy(name, x, y, ex, ey)
     gr.SetTitle(title)
     return gr
+
+def scale_graph_errors(gr, axis, scale=1.):
+    if gr.InheritsFrom('TGraphErrors'):
+        for i in xrange(gr.GetN()):
+            if axis == 0:
+                gr.GetEX()[i] = gr.GetEX()[i] * scale
+            else:
+                gr.GetEY()[i] = gr.GetEY()[i] * scale
+    if gr.InheritsFrom('TGraphAsymmErrors'):
+        for i in xrange(gr.GetN()):
+            if axis == 0:
+                gr.GetEXlow()[i] = gr.GetEXlow()[i] * scale
+                gr.GetEXhigh()[i] = gr.GetEXhigh()[i] * scale
+            else:
+                gr.GetEYlow()[i] = gr.GetEYlow()[i] * scale
+                gr.GetEYhigh()[i] = gr.GetEYhigh()[i] * scale
