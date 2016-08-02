@@ -104,13 +104,16 @@ def graph(fname, write=False):
     else:
         hlname = fname
     hl = dlist.dlist(hlname)
-    xye  = [0, 1, 2, 3]
+    xye  = [0, 1, 2, 3, 4, 5]
     sxye = ut.get_arg_with('--xye')
     if sxye != None:
         sa = sxye.split(',')
         for i,s in enumerate(sa):
             xye[i] = int(s)            
-    gr = make_graph_from_file(fname, xye)
+    if ut.is_arg_set('--hep'):
+        gr = make_graph_from_hepfile(fname, xye, xe=None)
+    else:
+        gr = make_graph_from_file(fname, xye)
     stitle = ut.get_arg_with('--title')
     if stitle == None:
         stitle = hlname
@@ -131,8 +134,13 @@ def graph(fname, write=False):
     tu.gList.append(hl)
 
     if write==True:
-        hl.write_to_file(hl.name+'.root')
-    
+        stitle = ut.get_arg_with('--title')
+        if stitle == None:
+            hl.write_to_file(hl.name+'.root')
+        else:
+            stitle = ut.to_file_name(stitle)
+            hl.write_to_file(hl.name+'_'+stitle+'.root')
+
     return gr
 
 if __name__=="__main__":

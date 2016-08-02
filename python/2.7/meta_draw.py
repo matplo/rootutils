@@ -120,10 +120,10 @@ class Comment(object):
 		self.tleg = None
 
 	def get_box(self):
-		x1 = 0.1
-		x2 = 0.9
-		y1 = 0.1
-		y2 = 0.9
+		x1 = 0.2#0.1
+		x2 = 0.8#0.9
+		y1 = 0.9#0.1
+		y2 = 0.8#0.9
 		if self.s == None:
 			return [x1, y1, x2, y2]
 		try:
@@ -211,6 +211,7 @@ class MetaFigure(object):
 		self.fname    = fname
 		self.drawable = True
 		self.data     = []
+		self.options  = []
 		#self.hls      = dlist.ListStorage(self.name+'_storage')
 		#self.hl       = self.hls.get_list(self.name+'_list')
 		self.hl        = dlist.dlist(self.name + '_list')
@@ -518,6 +519,7 @@ class MetaFigure(object):
 			self.hl.pdf()
 
 	def add_option(self, opt):
+		self.options.append(opt)
 		self.data.append(opt)
 
 class MetaDrawFile(object):
@@ -533,6 +535,7 @@ class MetaDrawFile(object):
 					self.figures.append(fig)
 				continue
 			self.figures[-1].process_line(d)
+		self.options = []
 
 	def draw(self):
 		for f in self.figures:
@@ -545,17 +548,32 @@ class MetaDrawFile(object):
 	def add_option(self, opt):
 		for f in self.figures:
 			f.add_option(opt)
+		self.options.append(opt)
 
 if __name__ == '__main__':
 	tu.setup_basic_root()
 	fname = ut.get_arg_with('-f')
 	fn, fext = os.path.splitext(fname)
+	metafname = None
 	if fext == '.root':
-		import make_draw_files as mdf
-		fname = mdf.make_draw_file(fname)
-	mdf   = MetaDrawFile(fname)
+		import make_draw_files as makedf
+		metafname = makedf.make_draw_file(fname)
+	else:
+		metafname = fname
+	mdf   = MetaDrawFile(metafname)
 	if '--logy' in sys.argv:
 		mdf.add_option('#logy true')
+	if '--date' in sys.argv:
+		mdf.add_option('#date')
+	if '--comment' in sys.argv:
+		c = ut.get_arg_with('--comment')
+	else:
+		c = fname
+	mdf.add_option('#comment item={}'.format(c))
+	if fext == '.root':
+		print fname
+		metafname = makedf.make_draw_file(fname, mdf.options, force=True)
+		mdf   = MetaDrawFile(metafname)
 	mdf.draw()
 	if '--print' in sys.argv:
 		mdf.pdf()
