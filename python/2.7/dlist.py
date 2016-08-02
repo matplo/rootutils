@@ -599,6 +599,9 @@ class dlist(debugable):
             if o.obj.InheritsFrom('TGraphErrors') == True:
                 for i in range(o.obj.GetN()):
                     o.obj.SetPointError(i, o.obj.GetEX()[i], o.obj.GetEY()[i] * val)
+            if o.obj.InheritsFrom('TGraphAsymmErrors') == True:
+                for i in range(o.obj.GetN()):
+                    o.obj.SetPointError(i, o.obj.GetEXlow()[i], o.obj.GetEXhigh()[i], o.obj.GetEYlow()[i] * val, o.obj.GetEYhigh()[i] * val)
 
     def scale_at_index(self, i=-1, val = 1.):
     	if len(self.l) < 1:
@@ -613,6 +616,9 @@ class dlist(debugable):
         if o.obj.InheritsFrom('TGraphErrors') == True:
             for i in range(o.obj.GetN()):
                 o.obj.SetPointError(i, o.obj.GetEX()[i], o.obj.GetEY()[i] * val)
+        if o.obj.InheritsFrom('TGraphAsymmErrors') == True:
+            for i in range(o.obj.GetN()):
+                o.obj.SetPointError(i, o.obj.GetEXlow()[i], o.obj.GetEXhigh()[i], o.obj.GetEYlow()[i] * val, o.obj.GetEYhigh()[i] * val)
             
     def rebin(self, val = 2, norm = False):
         for o in self.l:
