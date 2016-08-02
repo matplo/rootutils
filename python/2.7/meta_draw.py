@@ -127,12 +127,21 @@ class Comment(object):
 		if self.s == None:
 			return [x1, y1, x2, y2]
 		try:
-			x1 = atof(self.s.split(',')[0])
-			y1 = atof(self.s.split(',')[1])
-			x2 = atof(self.s.split(',')[2])
-			y2 = atof(self.s.split(',')[3])
+			spos = self.s.split('#comment ')[0].split(' ')[0]
+			if '=' in spos:
+				spos = spos.split('=')[0]
 		except:
-			print '[w] trouble with comment position? x1,y1,x2,y2',self.s
+			print 'failed to get the box dimensions'
+			spos = None
+		if spos != None:
+			try:
+				x1 = atof(spos.split(',')[0])
+				y1 = atof(spos.split(',')[1])
+				x2 = atof(spos.split(',')[2])
+				y2 = atof(spos.split(',')[3])
+			except:
+				if ut.is_number(spos.split(',')[0]):
+					print '[w] trouble with comment position? x1,y1,x2,y2',self.s
 		return [x1, y1, x2, y2]
 
 	def get_settings(self, sitem):
