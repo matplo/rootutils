@@ -120,12 +120,16 @@ class Comment(object):
 		self.tleg = None
 
 	def get_box(self):
-		x1 = 0.2#0.1
-		x2 = 0.8#0.9
-		y1 = 0.9#0.1
-		y2 = 0.8#0.9
+		x1def = 0.2#0.1
+		x2def = 0.8#0.9
+		y1def = 0.9#0.1
+		y2def = 0.8#0.9
+		x1 = None
+		x2 = None
+		y1 = None
+		y2 = None
 		if self.s == None:
-			return [x1, y1, x2, y2]
+			return [x1def, y1def, x2def, y2def]
 		try:
 			spos = self.s.split('#comment ')[0].split(' ')[0]
 			if '=' in spos:
@@ -135,13 +139,17 @@ class Comment(object):
 			spos = None
 		if spos != None:
 			try:
-				x1 = atof(spos.split(',')[0])
-				y1 = atof(spos.split(',')[1])
-				x2 = atof(spos.split(',')[2])
-				y2 = atof(spos.split(',')[3])
+				x1 = ut.float_or_None(spos.split(',')[0])
+				y1 = ut.float_or_None(spos.split(',')[1])
+				x2 = ut.float_or_None(spos.split(',')[2])
+				y2 = ut.float_or_None(spos.split(',')[3])
 			except:
 				if ut.is_number(spos.split(',')[0]):
 					print '[w] trouble with comment position? x1,y1,x2,y2',self.s
+		if x1 == None: x1 = x1def
+		if x2 == None: x2 = x2def
+		if y1 == None: y1 = y1def
+		if y2 == None: y2 = y2def
 		return [x1, y1, x2, y2]
 
 	def get_settings(self, sitem):

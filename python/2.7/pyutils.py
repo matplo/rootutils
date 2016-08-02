@@ -41,6 +41,15 @@ def is_number(s):
             return False
     return True
 
+def float_or_None(s):
+    ss = str(s)
+    retval = None
+    try:
+        retval = float(ss)
+    except ValueError:
+        retval = None
+    return retval
+
 def strip_non_numbers(s):
     import re
     non_decimal = re.compile(r'[^\d.]+')
