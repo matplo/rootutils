@@ -965,7 +965,8 @@ class dlist(debugable):
 			y2 = 0.87 #0.88 #used also 0.9            
 		option = option + ' #l'
 		self.legend = ROOT.TLegend(x1, y1, x2, y2, '', option)
-		self.legend.SetHeader(title)
+		if len(title) > 0:
+			self.legend.SetHeader(title)
 		self.legend.SetNColumns(ncols)
 		self.legend.SetBorderSize(0)
 		self.legend.SetFillColor(ROOT.kWhite)
