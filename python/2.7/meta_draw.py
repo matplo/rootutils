@@ -359,7 +359,7 @@ class MetaFigure(object):
 		if add_dummy == True:
 			if len(self.hl.l) < 1:
 				#self.add_dummy()
-				self.add_option('#comment -0.1,0.9,1.0,1.0,item=WARNING: empty drawing list... tx_size=0.06')
+				self.add_option('#comment -0.1,0.4,1.0,0.6,item=WARNING: empty drawing list... tx_size=0.06')
 		else:
 			if self.last_ds == None:
 				print '[e] nothing to draw for',self.name
@@ -470,21 +470,31 @@ class MetaFigure(object):
 		grids = self.get_tag('#grid', None)
 		if grids != None:
 			self.hl.set_grid_multipad(grids)
+
+		sfigtitle = self.get_tag('#title', '')
+		if len(sfigtitle) > 0:
+			self.add_option('#comment -0.1,0.9,1.0,1.0,item={} tx_size=0.06'.format(sfigtitle))
+
 		#legend
-		stitle = self.get_tag('#title', '')
 		sleg = self.get_tag('#legend')
 		x1,y1,x2,y2 = self.legend_position(sleg)
-		tx_size = None
+		tx_size = 0.025
 		try:
-			tx_size = atof(sleg.split('tx_size=')[1])
+			tx_size = atof(sleg.split('tx_size=')[1].split(' ')[0])
 		except:
 			pass
 		leg_opt = 'brNDC'
 		try:			
-			leg_opt = leg_opt + ' +a' + sleg.split('alpha=')[1].split(' ')[0]
+			if 'alpha=' in sleg:
+				leg_opt = leg_opt + ' +a' + sleg.split('alpha=')[1].split(' ')[0]
 		except:
 			leg_opt = 'brNDC'
 		#print '[i] legend options:',leg_opt
+		stitle = ''
+		try:
+			stitle = sleg.split('title=')[1].split(',,')[0]
+		except:
+			pass
 		self.hl.self_legend(title=stitle,x1=x1,x2=x2,y1=y1,y2=y2,tx_size=tx_size,option=leg_opt)
 
 		#line
@@ -535,6 +545,10 @@ class MetaFigure(object):
 		if self.drawable == True:
 			self.hl.pdf()
 
+	def png(self):
+		if self.drawable == True:
+			self.hl.png()
+
 	def add_option(self, opt):
 		self.options.append(opt)
 		self.data.append(opt)
@@ -561,6 +575,10 @@ class MetaDrawFile(object):
 	def pdf(self):
 		for f in self.figures:
 			f.pdf()		
+
+	def png(self):
+		for f in self.figures:
+			f.png()		
 
 	def add_option(self, opt):
 		for f in self.figures:
