@@ -159,14 +159,14 @@ class LogFileFrame( r.TGCompositeFrame ):
 		self.logfile = open(self.logfilename, 'w')
 		self.logfile_fd = self.logfile.fileno()
 		self.keep_stdout_fd = sys.stdout.fileno()
-		self.keep_stderr_fd = sys.stderr.fileno()
+		#self.keep_stderr_fd = sys.stderr.fileno()
 		self.keep_stdout = sys.stdout
-		self.keep_stderr = sys.stderr
+		#self.keep_stderr = sys.stderr
 		sys.stdout = self.logfile
-		sys.stderr = self.logfile
+		#sys.stderr = self.logfile
 		#deep
 		os.dup2(self.logfile_fd, 1)
-		os.dup2(self.logfile_fd, 2)
+		#os.dup2(self.logfile_fd, 2)
 		print '[i] log goes to:',self.logfilename
 		print sys.argv
 		self.initialized = True
@@ -174,14 +174,14 @@ class LogFileFrame( r.TGCompositeFrame ):
 
 	def flush(self):
 		sys.stdout.flush()
-		sys.stderr.flush()
+		#sys.stderr.flush()
 
 	def __del__(self):
 		if self.initialized:
 			sys.stdout = self.keep_stdout
 			sys.stderr = self.keep_stderr
 			os.dup2(self.keep_stdout_fd, 1)
-			os.dup2(self.keep_stderr_fd, 2)
+			#os.dup2(self.keep_stderr_fd, 2)
 			self.logfile.close()
 		print 'LogFileFrame closed.', self.logfilename
 
@@ -234,12 +234,22 @@ class DrawFrame( r.TGCompositeFrame ):
 		self.pdfButton.Connect( 'Clicked()', "TPyDispatcher", self.pdfDispatch, 'Dispatch()' )
 		self.buttonsFrame.AddFrame( self.pdfButton, self.buttonHint )
 
+		self.pngButton   = r.TGTextButton( self.buttonsFrame, ' PNG ', 10 )
+		self.pngDispatch = r.TPyDispatcher( self.png )
+		self.pngButton.Connect( 'Clicked()', "TPyDispatcher", self.pngDispatch, 'Dispatch()' )
+		self.buttonsFrame.AddFrame( self.pngButton, self.buttonHint )
+
 		self.mf = None
 
 	def pdf(self):
 		#if self.mf:
 		#    self.mf.hl.pdf()
 		self.canvas.GetCanvas().Print(self.name+'.pdf', 'pdf')
+
+	def png(self):
+		#if self.mf:
+		#    self.mf.hl.png()
+		self.canvas.GetCanvas().Print(self.name+'.png', 'png')
 
 	def dumpFeatures(self):
 		# NOTE:
