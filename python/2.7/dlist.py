@@ -506,17 +506,33 @@ class dlist(debugable):
 					o.obj.GetZaxis().SetTitle(zt)
 
 	def fix_x_range(self, xmin, xmax):
+		try:
+			xminf = atof(xmin)
+		except:
+			xminf = -1.
+		try:
+			xmaxf = atof(xmax)
+		except:
+			xmaxf = 1.
 		reset = False
+		print self.l[0].obj.GetXaxis().GetTitle()
+		print self.l[0].obj.GetYaxis().GetTitle()
 		for dobj in self.l:
 			if 'zoom_axis_obj' in dobj.name:
 				gr = dobj.obj
-				gr.SetPoint(0, xmin,  0)
-				gr.SetPoint(1, xmax,  0)
+				gr.SetPoint(0, xminf,  0)
+				gr.SetPoint(1, xmaxf,  0)
+				if len(self.l) > 0:
+					gr.GetXaxis().SetTitle(self.l[0].obj.GetYaxis().GetTitle())
+					gr.GetYaxis().SetTitle(self.l[0].obj.GetXaxis().GetTitle())
 				reset = True
 		if reset == False:
 			gr = ROOT.TGraph(2)
-			gr.SetPoint(0, xmin,  0)
-			gr.SetPoint(1, xmax,  0)
+			gr.SetPoint(0, xminf,  0)
+			gr.SetPoint(1, xmaxf,  0)
+			if len(self.l) > 0:
+				gr.GetXaxis().SetTitle(self.l[0].obj.GetXaxis().GetTitle())
+				gr.GetYaxis().SetTitle(self.l[0].obj.GetYaxis().GetTitle())
 			o = draw_object(gr, 'zoom_axis_obj', 'fake', 'noleg hidden p')
 			self.l.insert(0, o)
 			for oi in self.l:
@@ -543,6 +559,14 @@ class dlist(debugable):
 		return [xmin - xmin*0.1, xmax + xmax*0.1]
 
 	def zoom_axis(self, which, xmin, xmax):
+		try:
+			xminf = atof(xmin)
+		except:
+			xminf = -1.
+		try:
+			xmaxf = atof(xmax)
+		except:
+			xmaxf = 1.
 		ax = None            
 		for o in self.l:
 			if which == 0:
@@ -558,8 +582,8 @@ class dlist(debugable):
 					ax = o.obj.GetZaxis()
 			if ax:
 				#print xmin,xmax
-				ibmin = ax.FindBin(xmin)
-				ibmax = ax.FindBin(xmax)
+				ibmin = ax.FindBin(xminf)
+				ibmax = ax.FindBin(xmaxf)
 				#try:
 				#    #print 'ibmin, ibmax, nbins:',ibmin, ibmax, o.obj.GetNbinsX()
 				#    if ibmax > o.obj.GetNbinsX():
@@ -1132,19 +1156,25 @@ class dlist(debugable):
 		
 	def sum(self, scales=None):
 		reth = None
+		isummed = 0
 		for i,h in enumerate(self.l):
-			if i == 0:
+			if h.dopt.hidden or h.obj.GetTitle() == 'fake':
+				continue
+			if isummed == 0:
 				reth = draw_object(h.obj,self.name + '-sum', h.name + '-sum')
 				if scales != None:
 					reth.Scale(scales[i])
+				isummed += 1
 				continue
 			scale = 1.
 			if scales != None:
 				scale = scales[i]
 			if reth.obj.InheritsFrom('TGraph') or h.obj.InheritsFrom('TGraph'):
 				add_graphs(reth.obj, h.obj)
+				isummed += 1
 			else:
 				reth.obj.Add(h.obj, scale)
+				isummed += 1
 		return reth
 
 	def pdf(self):
@@ -1712,7 +1742,10 @@ def make_graph_xy(name, x, y, xe = [], ye = []):
 		for v in ye:
 			yef.append(float(v))
 	yae = array('f', yef)
-	gr = ROOT.TGraphErrors(len(xf), xa, ya, xae, yae)
+	if len(ye) == 0 and len(xe) == 0:
+		gr = ROOT.TGraph(len(xf), xa, ya)
+	else:
+		gr = ROOT.TGraphErrors(len(xf), xa, ya, xae, yae)
 	gr.SetName(name)
 	return gr
 
