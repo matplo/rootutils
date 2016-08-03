@@ -515,8 +515,6 @@ class dlist(debugable):
 		except:
 			xmaxf = 1.
 		reset = False
-		print self.l[0].obj.GetXaxis().GetTitle()
-		print self.l[0].obj.GetYaxis().GetTitle()
 		for dobj in self.l:
 			if 'zoom_axis_obj' in dobj.name:
 				gr = dobj.obj

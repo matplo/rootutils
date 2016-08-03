@@ -162,40 +162,53 @@ class Comment(object):
 		return retval
 
 	def filter_known_settings(self, s):
-		known = ['tx_size=', 'color=', 'font=', 'alpha=']
+		known = ['tx_size=', 'color=', 'font=', 'alpha=', 'align=', 'bgc=']
 		for k in known:
 			if k in s:
 				s=s.split(k)[0]
 		return s
 
-	def get_setting(self, sitem):		
+	def get_setting(self, sitem, separator=''):		
 		setting = 0
 		if self.get_settings(sitem)[-1]:
-			setting = self.get_settings(sitem)[-1]
+			if separator == '':
+				setting = self.get_settings(sitem)[-1]
+			else:
+				setting = self.get_settings(sitem)[-1].split(separator)[0]
 		return setting
 
 	def get_text(self):
 		return self.get_settings('item=')
 
 	def get_text_size(self):		
-		if self.get_setting('tx_size='):
-			return atof(self.get_setting('tx_size='))
+		if self.get_setting('tx_size=', ' '):
+			return atof(self.get_setting('tx_size=', ' '))
 		return 0.025
 
 	def get_color(self):		
-		if self.get_setting('color='):
-			return atoi(self.get_setting('color='))
+		if self.get_setting('color=', ' '):
+			return atoi(self.get_setting('color=', ' '))
 		return 1
 
+	def get_bg_color(self):		
+		if self.get_setting('bgc=', ' '):
+			return atoi(self.get_setting('bgc=', ' '))
+		return r.kWhite
+
 	def get_font(self):		
-		if self.get_setting('font='):
-			return self.get_setting('font=')
+		if self.get_setting(' font=', ' '):
+			return self.get_setting('font=', ' ')
 		return 42
 
 	def get_alpha(self):		
-		if self.get_setting('alpha='):
-			return atof(self.get_setting('alpha='))/100.
+		if self.get_setting('alpha=', ' '):
+			return atof(self.get_setting('alpha=', ' '))/100.
 		return 0
+
+	def get_alignment(self):		
+		if self.get_setting('align=', ' '):
+			return atoi(self.get_setting('align=', ' '))
+		return 12
 
 	def legend(self):
 		self.tleg = None
@@ -207,11 +220,13 @@ class Comment(object):
 			self.tleg.SetToolTipText('#comment')
 			self.tleg.SetNColumns(1)
 			self.tleg.SetBorderSize(0)
-			self.tleg.SetFillColor(r.kWhite)
+			self.tleg.SetFillColor(self.get_bg_color())
 			self.tleg.SetFillStyle(1001)
 			#tleg.SetFillColorAlpha(ROOT.kWhite, 0.9)
-			self.tleg.SetFillColorAlpha(r.kWhite, self.get_alpha())
-			self.tleg.SetTextAlign(12)
+			print '------>',self.get_bg_color()
+			self.tleg.SetFillColorAlpha(self.get_bg_color(), 
+										self.get_alpha())
+			self.tleg.SetTextAlign(self.get_alignment())
 			self.tleg.SetTextSize(self.get_text_size())
 			self.tleg.SetTextFont(self.get_font())
 			self.tleg.SetTextColor(self.get_color())
@@ -473,7 +488,7 @@ class MetaFigure(object):
 
 		sfigtitle = self.get_tag('#title', '')
 		if len(sfigtitle) > 0:
-			self.add_option('#comment -0.1,0.9,1.0,1.0,item={} tx_size=0.06'.format(sfigtitle))
+			self.add_option('#comment -0.1,0.9,1.0,1.0, tx_size=0.06 align=22 item={}'.format(sfigtitle))
 
 		#legend
 		sleg = self.get_tag('#legend')
