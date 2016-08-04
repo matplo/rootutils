@@ -424,6 +424,13 @@ class dlist(debugable):
 		return o
    
 	def add_from_file(self, hname = '', fname = '', new_title = '', draw_opt = ''):
+		fn, fext = os.path.splitext(hname)
+		if fext == '.root':
+			if os.path.isfile(hname) and not os.path.isfile(fname):
+				print '[w] correcting possible swap between hname({}) and fname({}) args...'.format(hname, fname)
+				stmp = hname
+				hname = fname
+				fname = stmp
 		cobj = None
 		f = ROOT.TFile(fname)
 		if f:
