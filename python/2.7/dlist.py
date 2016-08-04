@@ -661,6 +661,28 @@ class dlist(debugable):
 		for i in xrange(len(self.l)):
 			self.scale_1ox_at_index(i)
 
+	def scale_1x_at_index(self, i=-1):
+		if len(self.l) < 1:
+			return
+		o = self.l[i]
+		if o.obj.InheritsFrom('TH1') == True:
+			o.obj.Sumw2()
+			#o.obj.Scale(val)
+			print '[e] ::scale_1x_at_index NOT implemented for histograms!'
+		if o.obj.InheritsFrom('TGraph') == True:
+			for i in range(o.obj.GetN()):
+				o.obj.SetPoint(i, o.obj.GetX()[i], o.obj.GetY()[i] * o.obj.GetX()[i])
+		if o.obj.InheritsFrom('TGraphErrors') == True:
+			for i in range(o.obj.GetN()):
+				o.obj.SetPointError(i, o.obj.GetEX()[i], o.obj.GetEY()[i] * o.obj.GetX()[i])
+		if o.obj.InheritsFrom('TGraphAsymmErrors') == True:
+			for i in range(o.obj.GetN()):
+				o.obj.SetPointError(i, o.obj.GetEXlow()[i], o.obj.GetEXhigh()[i], o.obj.GetEYlow()[i] * o.obj.GetX()[i], o.obj.GetEYhigh()[i] * o.obj.GetX()[i])
+
+	def scale_1x_at_index_any(self):
+		for i in xrange(len(self.l)):
+			self.scale_1x_at_index(i)
+
 	def scale_at_index(self, i=-1, val = 1.):
 		if len(self.l) < 1:
 			return
@@ -1353,6 +1375,53 @@ class ListStorage:
 					l.draw_comment(l.title, 0.05, 0, 0.9, 1., 1.) 
 			l.update(logy=logy)
 		self.adjust_pads()
+
+	def draw_mpad(self, logy=False, legtitle = []):
+		ncol = 1
+		nrow = 1
+		while ncol * nrow < len(self.lists):
+			if ncol * nrow < len(self.lists):
+				ncol = ncol + 1
+			if ncol * nrow < len(self.lists):
+				nrow = nrow + 1
+		remap = []
+		for n in xrange(ncol * nrow):
+			if n < ncol:
+				remap.append(n*2+1)
+			else:
+				remap.append((n-ncol)*2)
+		print remap
+		import canvas2
+		self.tcanvas = canvas2.CanvasSplit('yields-condensed', ncol, nrow, None, int(850*1.2), int(600*1.2))
+		for i in xrange(len(self.lists)):
+			hl = self.lists[i]
+			hl.set_font(42)
+			tp = self.tcanvas.cd(remap[i])
+			self.tcanvas.adjust_axis(hl, scaleTSize=1.2, scaleLSize=1.2)
+			hl.draw(logy=True, miny=1.1e-9,maxy=2e-3,adjust_pad=False, adjust_axis_attributes=False)
+			tp.SetLogy(logy)
+			xf = self.tcanvas.get_axis_factor(0)
+			yf = self.tcanvas.get_axis_factor(1)			
+			#leg = hl.self_legend(1, '', x1=10, x2=18, y1=1e-6, y2=5.e-4, option='br')
+			leg = hl.self_legend(1, '', self.lx1, self.ly1, self.lx2, self.ly2, option='br')
+			for i,st in enumerate(legtitle):
+				if i == 0: continue
+				leg.AddEntry(0, st, '')
+			pad_width  = ROOT.gPad.XtoPixel(ROOT.gPad.GetX2())
+			pad_height = ROOT.gPad.YtoPixel(ROOT.gPad.GetY1())
+			#print pad_width, pad_height
+			pxlsize = 16.
+			if pad_width < pad_height:
+				#charheight = textsize*pad_width;
+				textsize = pxlsize / pad_width
+			else:
+				#charheight = textsize*pad_height;
+				textsize = pxlsize / pad_height
+			fsize = 1
+			#print xf, yf, xf * yf, fsize, textsize
+			leg.SetTextSize(textsize)
+			leg.Draw()
+		self.tcanvas.tc.Update()
 
 	def adjust_pads(self):
 		for i,hl in enumerate(self.lists):
