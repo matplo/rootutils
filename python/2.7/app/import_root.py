@@ -3,6 +3,9 @@
 import os
 import sys
 
+def atry(verbose = True):
+	return try_importing_root(verbose)
+	
 def try_importing_root_nofind():
 	try:
 		import ROOT

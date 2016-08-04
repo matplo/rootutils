@@ -276,7 +276,7 @@ class DrawFrame( r.TGCompositeFrame ):
 						items = items + ' item={}'.format(p.GetLabel())
 				if '#l' in o.GetOption().split():
 					stype = '#legend'
-				lposs = '{},{},{},{},'.format(o.GetX1NDC(),o.GetY1NDC(),o.GetX2NDC(),o.GetY2NDC())
+				lposs = '{:.3},{:.3},{:.3},{:.3},'.format(o.GetX1NDC(),o.GetY1NDC(),o.GetX2NDC(),o.GetY2NDC())
 				if len(items) == 0:
 					print stype,lposs,'tx_size=',o.GetTextSize()
 				else:
