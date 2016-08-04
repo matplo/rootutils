@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-import ROOT as r 
 import tutils as tu
+import ROOT as r 
 import numpy as np
 from StringIO import StringIO
 import dlist
@@ -118,6 +118,9 @@ def graph(fname, write=False):
     if stitle == None:
         stitle = hlname
     hl.add(gr, stitle, 'P')
+    sname = ut.get_arg_with('--name')
+    if sname != None:
+        hl.l[-1].obj.SetName(sname)
     hl.make_canvas()
     logy = ut.is_arg_set('--logy')
     hl.draw(logy=logy)
@@ -138,7 +141,7 @@ def graph(fname, write=False):
         if stitle == None:
             hl.write_to_file(hl.name+'.root')
         else:
-            stitle = ut.to_file_name(stitle)
+            stitle = ut.to_file_name(stitle.split(';')[0])
             hl.write_to_file(hl.name+'_'+stitle+'.root')
 
     return gr
