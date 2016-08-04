@@ -530,12 +530,19 @@ class MetaFigure(object):
 
 		ds = self.get_tag('#date')
 		if ds != None:
-			stime = time.strftime("%H:%M:%S %Z")
-			#sdate = time.strftime("%a, %d/%m/%Y")
-			sdate = time.strftime("%a %d/%m/%Y")
-			#sdate = time.strftime("%c")
-			#0.00352112676056,0.00196078431373,0.0774647887324,0.101960784314
-			self.add_option('#comment 0.0,0.0,0.05,0.05,item={} {} alpha=0.5 tx_size=0.02'.format(sdate, stime))
+			try:
+				st = ds.replace('#date', '').strip()
+			except:
+				pass
+			if len(st) > 0:
+				self.add_option('#comment 0.0,0.0,0.05,0.05,item={} alpha=0.5 tx_size=0.02'.format(st))
+			else:
+				stime = time.strftime("%H:%M:%S %Z")
+				#sdate = time.strftime("%a, %d/%m/%Y")
+				sdate = time.strftime("%a %d/%m/%Y")
+				#sdate = time.strftime("%c")
+				#0.00352112676056,0.00196078431373,0.0774647887324,0.101960784314
+				self.add_option('#comment 0.0,0.0,0.05,0.05,item={} {} alpha=0.5 tx_size=0.02'.format(sdate, stime))
 
 		cs = self.get_tags('#comment')
 		for c in cs:
