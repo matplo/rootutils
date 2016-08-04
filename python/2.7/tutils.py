@@ -7,6 +7,9 @@ import time
 import pyutils as ut
 import datetime
 import array
+
+import import_root
+import_root.atry(verbose=False)
 import ROOT
 
 sub_p = None
