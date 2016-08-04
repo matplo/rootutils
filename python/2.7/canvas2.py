@@ -31,6 +31,10 @@ class CanvasSplit(object):
       self.setup()
       self.test()
 
+   def cd_remapped_23(self, i):
+      remap = [1, 3, 5, 0, 2, 4]
+      return self.cd(remap[i])
+
    def cd(self, i):
       if len(self.pads) > 0:
          self.pads[i].cd()
@@ -38,6 +42,7 @@ class CanvasSplit(object):
          self.tc.cd()
       self.xFactor = self.pads[0].GetAbsWNDC()/r.gPad.GetAbsWNDC()
       self.yFactor = self.pads[0].GetAbsHNDC()/r.gPad.GetAbsHNDC()
+      return r.gPad
 
    def setup(self):
       # Setup Pad layout:
@@ -96,7 +101,7 @@ class CanvasSplit(object):
             name = 'pad_{}_{}'.format(i,j)
             #pad = r.gROOT.FindObject(name)
             pad = r.TPad(name,name,hposl,vposd,hposr,vposu)
-            print '[i] creating a pad',name
+            #print '[i] creating a pad',name
             pad.SetLeftMargin(hmarl)
             pad.SetRightMargin(hmarr)
             pad.SetBottomMargin(vmard)
@@ -109,7 +114,7 @@ class CanvasSplit(object):
             pad.Draw()
 
             self.pads.append(pad)
-            print '[i] pad setup done',name
+            #print '[i] pad setup done',name
 
    def test(self):
       pass

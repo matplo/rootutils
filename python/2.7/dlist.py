@@ -636,6 +636,31 @@ class dlist(debugable):
 				for i in range(o.obj.GetN()):
 					o.obj.SetPointError(i, o.obj.GetEXlow()[i], o.obj.GetEXhigh()[i], o.obj.GetEYlow()[i] * val, o.obj.GetEYhigh()[i] * val)
 
+	def scale_1ox_at_index(self, i=-1):
+		if len(self.l) < 1:
+			return
+		o = self.l[i]
+		if o.obj.InheritsFrom('TH1') == True:
+			o.obj.Sumw2()
+			#o.obj.Scale(val)
+			print '[e] ::scale_1ox_at_index NOT implemented for histograms!'
+		if o.obj.InheritsFrom('TGraph') == True:
+			for i in range(o.obj.GetN()):
+				if o.obj.GetX()[i] != 0:
+					o.obj.SetPoint(i, o.obj.GetX()[i], o.obj.GetY()[i] / o.obj.GetX()[i])
+		if o.obj.InheritsFrom('TGraphErrors') == True:
+			for i in range(o.obj.GetN()):
+				if o.obj.GetX()[i] != 0:
+					o.obj.SetPointError(i, o.obj.GetEX()[i], o.obj.GetEY()[i] / o.obj.GetX()[i])
+		if o.obj.InheritsFrom('TGraphAsymmErrors') == True:
+			for i in range(o.obj.GetN()):
+				if o.obj.GetX()[i] != 0:
+					o.obj.SetPointError(i, o.obj.GetEXlow()[i], o.obj.GetEXhigh()[i], o.obj.GetEYlow()[i] / o.obj.GetX()[i], o.obj.GetEYhigh()[i] / o.obj.GetX()[i])
+
+	def scale_1ox_at_index_any(self):
+		for i in xrange(len(self.l)):
+			self.scale_1ox_at_index(i)
+
 	def scale_at_index(self, i=-1, val = 1.):
 		if len(self.l) < 1:
 			return
@@ -845,14 +870,17 @@ class dlist(debugable):
 
 	def draw(self, option='', miny=None, maxy=None, logy=False, colopt='', adjust_pad=True, adjust_axis_attributes=True):
 		if self.has2D() == False:
-			self.adjust_maxima(miny=miny, maxy=maxy, logy=logy)
+			if miny == -1 and maxy == -1:
+				pass
+			else:	
+				self.adjust_maxima(miny=miny, maxy=maxy, logy=logy)			
 		if adjust_axis_attributes == True:
 			self.adjust_axis_attributes(0)
 			self.adjust_axis_attributes(1)
 			self.adjust_axis_attributes(2)
 		drawn = False
 
-		gdopt = draw_option(option)
+		#gdopt = draw_option(option) unused!
 		self.style.reset()
 		
 		if self.has2D():
@@ -883,6 +911,7 @@ class dlist(debugable):
 				self._process_dopts(i)
 			#errors
 			extra_opt = []
+			extra_opt.append(option)
 			if o.dopt.is_error:
 				extra_opt.append('E2')
 				self._process_serror_dopts(i)
@@ -910,6 +939,10 @@ class dlist(debugable):
 		self.pad_name = ROOT.gPad.GetName() # name is better
 		self.get_pad_drawn();
 		self.debug('[i] ' + self.name + ' drawing on ' + str(self.pad))
+
+	def draw_bare(self, option=''):
+		for i,o in enumerate(self.l):
+			o.obj.Draw(option)
 
 	def set_log_multipad(self, axes='', flag=True):
 		l = self.tcanvas.GetListOfPrimitives()
