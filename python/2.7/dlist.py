@@ -1250,7 +1250,16 @@ def add_graphs(o1, o2, w=1.):
 		x = o1.GetX()
 		y = o1.GetY()
 		for i in xrange(o1.GetN()):
+			if o1.InheritsFrom('TGraphErrors'):
+				xe = o1.GetEX()[i]
+				ye = o1.GetEY()[i]
+				fractionE = ye / y[i]
 			y[i] = y[i] + w * o2.Eval(x[i], 0, 'S')
+			if o1.InheritsFrom('TGraphErrors'):
+				ye = y[i] * fractionE
+			o1.SetPoint(i, x[i], y[i])
+			if o1.InheritsFrom('TGraphErrors'):
+				o1.SetPointError(i, xe, ye)
 
 def divide_graphs(o1, o2, w=1.):
 	print '[w] do not trust add_graphs with errors...'
@@ -1376,7 +1385,7 @@ class ListStorage:
 			l.update(logy=logy)
 		self.adjust_pads()
 
-	def draw_mpad(self, logy=False, legtitle = []):
+	def draw_mpad(self, miny=None, maxy=None, logy=False, legtitle = []):
 		ncol = 1
 		nrow = 1
 		while ncol * nrow < len(self.lists):
@@ -1392,13 +1401,14 @@ class ListStorage:
 				remap.append((n-ncol)*2)
 		print remap
 		import canvas2
-		self.tcanvas = canvas2.CanvasSplit('yields-condensed', ncol, nrow, None, int(850*1.2), int(600*1.2))
+		tcname = '{}-canvas-condensed'.format(self.name)
+		self.tcanvas = canvas2.CanvasSplit(tcname, ncol, nrow, None, int(850*1.2), int(600*1.2))
 		for i in xrange(len(self.lists)):
 			hl = self.lists[i]
 			hl.set_font(42)
 			tp = self.tcanvas.cd(remap[i])
 			self.tcanvas.adjust_axis(hl, scaleTSize=1.2, scaleLSize=1.2)
-			hl.draw(logy=True, miny=1.1e-9,maxy=2e-3,adjust_pad=False, adjust_axis_attributes=False)
+			hl.draw(logy=True, miny=miny,maxy=maxy,adjust_pad=False, adjust_axis_attributes=False)
 			tp.SetLogy(logy)
 			xf = self.tcanvas.get_axis_factor(0)
 			yf = self.tcanvas.get_axis_factor(1)			
