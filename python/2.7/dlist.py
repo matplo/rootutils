@@ -708,7 +708,7 @@ class dlist(debugable):
 				o.obj.Sumw2()
 			o.obj.Rebin(val)
 			if norm == True:
-				o.obj.Scale(1./val)
+				o.obj.Scale(1./(val*1.))
 				
 	def adjust_pad_margins(self, _left=0.17, _right=0.05, _top=0.1, _bottom=0.17+0.03):
 		du.adjust_pad_margins(_left, _right, _top, _bottom)

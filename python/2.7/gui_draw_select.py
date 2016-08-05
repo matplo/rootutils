@@ -53,18 +53,18 @@ class FileView( r.TGMainFrame ):
 		self.frameHint        = r.TGLayoutHints(r.kLHintsExpandX | r.kLHintsExpandY)
 		self.frameHintEY      = r.TGLayoutHints(r.kLHintsExpandY)
 		self.frameHintEX      = r.TGLayoutHints(r.kLHintsExpandX)
-		self.buttonsFrameHint = r.TGLayoutHints(r.kLHintsExpandX)
-		self.buttonHint       = r.TGLayoutHints(r.kLHintsCenterX | r.kLHintsExpandX, 5,5,5,5)
+		self.buttonsFrameHint = r.TGLayoutHints(r.kLHintsNormal |r.kLHintsCenterX | r.kLHintsExpandX)
+		self.buttonHint       = r.TGLayoutHints(r.kLHintsNormal |r.kLHintsCenterX | r.kLHintsExpandX, 1,1,1,1)
 
 		self.buttonsFrame = r.TGButtonGroup( self, 'steering', r.kHorizontalFrame)
 		self.AddFrame( self.buttonsFrame, self.buttonsFrameHint )
 
-		self.drawButton   = r.TGTextButton( self.buttonsFrame, ' ReDraw ', 10 )
+		self.drawButton   = r.TGTextButton( self.buttonsFrame, ' ReDraw ' )
 		self.drawDispatch = r.TPyDispatcher( self.draw )
 		self.drawButton.Connect( 'Clicked()', "TPyDispatcher", self.drawDispatch, 'Dispatch()' )
 		self.buttonsFrame.AddFrame( self.drawButton, self.buttonHint )
 
-		self.exitButton   = r.TGTextButton( self.buttonsFrame, ' &Quit ', 20 )
+		self.exitButton   = r.TGTextButton( self.buttonsFrame, ' &Quit ' )
 		#self.exitButton.Connect( 'Clicked()', "TPyROOTApplication", r.gApplication, 'Close()' )
 		self.exitButton.SetCommand( 'TPython::Exec( "raise SystemExit" )' )
 		self.buttonsFrame.AddFrame( self.exitButton, self.buttonHint )
@@ -78,6 +78,11 @@ class FileView( r.TGMainFrame ):
 		self.tab.SetTab(self.tab.GetNumberOfTabs()-1, r.kFALSE)
 		self.tabs.append(self.logfileFrame)
 		self.flogwatch = FileWatch(self.logfileFrame.logfilename)
+
+		self.canvasFrame = UtilCanvasFrame(self, self.width, self.height, 'UtilCanvas')
+		self.tab.AddTab('utils', self.canvasFrame)
+		self.tab.SetTab(self.tab.GetNumberOfTabs()-1, r.kFALSE)
+		self.tabs.append(self.canvasFrame)
 
 		self.mdf = None
 		self.draw()
@@ -119,7 +124,7 @@ class FileView( r.TGMainFrame ):
 
 		for i,mf in enumerate(self.mdf.figures):
 			tcname = '{}_Fig{}_canvas'.format(self.fname, i)
-			if i >= len(self.tabs) - 1: #remember the log tab
+			if i >= len(self.tabs) - 2: #remember the log and util tab
 				dframe = DrawFrame(self, self.width, self.height, tcname)
 				tabname = 'Fig {}'.format(i)
 				self.tab.AddTab(tabname, dframe)
@@ -129,7 +134,7 @@ class FileView( r.TGMainFrame ):
 				dframe.MapSubwindows()
 			else:
 				self.logfileFrame.flush()
-				self.tabs[i+1].draw(mf) #remember the log tab
+				self.tabs[i+2].draw(mf) #remember the log and util tab
 
 class LogFileFrame( r.TGCompositeFrame ):
 	def __init__( self, parent, width, height, name, logfilename=None):
@@ -205,6 +210,103 @@ class LogFileFrame( r.TGCompositeFrame ):
 #	def __init__( self, parent, main, title, msg):
 #		r.TGMsgBox.__init__( self, parent, main, title, msg)
 
+class CanvasFrame( r.TGCompositeFrame ):
+	def __init__( self, parent, width, height, name):
+		r.TGCompositeFrame.__init__( self, parent, width, height, r.kLHintsExpandX | r.kLHintsExpandY)
+		self.name = name
+
+		self.frameHint        = r.TGLayoutHints(r.kLHintsExpandX | r.kLHintsExpandY)
+		self.frameHintEY      = r.TGLayoutHints(r.kLHintsExpandY)
+		self.frameHintEX      = r.TGLayoutHints(r.kLHintsExpandX)
+		self.buttonsFrameHint = r.TGLayoutHints(r.kLHintsExpandX)
+		self.buttonHint       = r.TGLayoutHints(r.kLHintsCenterX | r.kLHintsExpandX, 5,5,3,4)
+
+		self.canvasFrame = r.TGGroupFrame( self, 'drawing')
+		self.AddFrame(self.canvasFrame, self.frameHint )
+		self.canvas     = r.TRootEmbeddedCanvas( self.name, self.canvasFrame, 50, 50 )
+		self.canvasFrame.AddFrame( self.canvas, self.frameHint )
+
+		self.tcanvas = self.canvas.GetCanvas()
+
+class UtilCanvasFrame( r.TGCompositeFrame ):
+	def __init__( self, parent, width, height, name):
+		r.TGCompositeFrame.__init__( self, parent, width, height, r.kLHintsExpandX | r.kLHintsExpandY)
+		self.name = name
+
+		self.frameHint        = r.TGLayoutHints(r.kLHintsExpandX | r.kLHintsExpandY)
+		self.frameHintEY      = r.TGLayoutHints(r.kLHintsExpandY)
+		self.frameHintEX      = r.TGLayoutHints(r.kLHintsExpandX)
+		self.buttonsFrameHint = r.TGLayoutHints(r.kLHintsExpandX)
+		self.buttonHint       = r.TGLayoutHints(r.kLHintsCenterX | r.kLHintsExpandX, 5,5,3,4)
+
+		self.canvasFrame = r.TGGroupFrame( self, 'drawing')
+		self.AddFrame(self.canvasFrame, self.frameHint )
+		self.canvas     = r.TRootEmbeddedCanvas( self.name, self.canvasFrame, 50, 50 )
+		self.canvasFrame.AddFrame( self.canvas, self.frameHint )
+
+		self.tcanvas = self.canvas.GetCanvas()
+
+		self.buttonsFrame = r.TGButtonGroup( self, 'tools', r.kHorizontalFrame)
+		self.AddFrame( self.buttonsFrame, self.buttonsFrameHint )
+
+		self.tcw = None
+		self.colorWheelButton   = r.TGTextButton( self.buttonsFrame, 'CWheel' )
+		self.colorWheelDispatch = r.TPyDispatcher( self.colorWheel )
+		self.colorWheelButton.Connect( 'Clicked()', "TPyDispatcher", self.colorWheelDispatch, 'Dispatch()' )
+		self.buttonsFrame.AddFrame( self.colorWheelButton, self.buttonHint )
+
+		self.colorTableButton   = r.TGTextButton( self.buttonsFrame, 'Colors' )
+		self.colorTableDispatch = r.TPyDispatcher( self.colorTable )
+		self.colorTableButton.Connect( 'Clicked()', "TPyDispatcher", self.colorTableDispatch, 'Dispatch()' )
+		self.buttonsFrame.AddFrame( self.colorTableButton, self.buttonHint )
+
+		self.markerTableImage = None
+		self.markerTableButton   = r.TGTextButton( self.buttonsFrame, 'Markers' )
+		self.markerTableDispatch = r.TPyDispatcher( self.markerTable )
+		self.markerTableButton.Connect( 'Clicked()', "TPyDispatcher", self.markerTableDispatch, 'Dispatch()' )
+		self.buttonsFrame.AddFrame( self.markerTableButton, self.buttonHint )
+
+		self.lineTableImage = None
+		self.lineTableButton   = r.TGTextButton( self.buttonsFrame, 'Lines' )
+		self.lineTableDispatch = r.TPyDispatcher( self.lineTable )
+		self.lineTableButton.Connect( 'Clicked()', "TPyDispatcher", self.lineTableDispatch, 'Dispatch()' )
+		self.buttonsFrame.AddFrame( self.lineTableButton, self.buttonHint )
+
+	def colorWheel(self):
+		self.tcanvas.cd()
+		self.tcanvas.Clear()		
+		if self.tcw == None:
+			self.tcw = r.TColorWheel()
+		self.tcw.SetCanvas(self.tcanvas)
+		self.tcw.Draw()
+		self.tcanvas.Update()
+
+	def colorTable(self):
+		self.tcanvas.cd()
+		self.tcanvas.Clear()		
+		self.tcanvas.DrawColorTable()
+		self.tcanvas.Update()
+
+	def markerTable(self):
+		self.tcanvas.cd()
+		self.tcanvas.Clear()		
+		self.tcanvas.SetFillColor(r.kWhite)
+		if self.markerTableImage == None:
+			imgpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'pict1_TAttMarker_002.png')
+			self.markerTableImage = r.TImage.Open(imgpath);
+		self.markerTableImage.Draw()
+		self.tcanvas.Update()
+
+	def lineTable(self):
+		self.tcanvas.cd()
+		self.tcanvas.Clear()		
+		self.tcanvas.SetFillColor(r.kWhite)
+		if self.lineTableImage == None:
+			imgpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'pict1_TAttLine_003.png')
+			self.lineTableImage = r.TImage.Open(imgpath);
+		self.lineTableImage.Draw()
+		self.tcanvas.Update()
+
 class DrawFrame( r.TGCompositeFrame ):
 	def __init__( self, parent, width, height, name):
 		r.TGCompositeFrame.__init__( self, parent, width, height, r.kLHintsExpandX | r.kLHintsExpandY)
@@ -221,7 +323,7 @@ class DrawFrame( r.TGCompositeFrame ):
 		self.canvas     = r.TRootEmbeddedCanvas( self.name, self.canvasFrame, 50, 50 )
 		self.canvasFrame.AddFrame( self.canvas, self.frameHint )
 
-		self.buttonsFrame = r.TGButtonGroup( self, 'this tab actions', r.kHorizontalFrame)
+		self.buttonsFrame = r.TGButtonGroup( self, 'actions', r.kHorizontalFrame)
 		self.AddFrame( self.buttonsFrame, self.buttonsFrameHint )
 
 		self.dumpFeaturesButton   = r.TGTextButton( self.buttonsFrame, ' Dump Features ', 10 )
@@ -293,7 +395,7 @@ class DrawFrame( r.TGCompositeFrame ):
 		mf.draw(no_canvas=True, add_dummy=True)
 		#except:
 		#    print '[e] something went wrong with drawing...', self.fname, 'figure number:', self.draw_figure
-		self.canvas.GetCanvas().Modified()
+		#self.canvas.GetCanvas().Modified()
 		self.canvas.GetCanvas().Update()
 
 def setup_style():

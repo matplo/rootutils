@@ -8,9 +8,9 @@ Usage:
 from setuptools import setup
 
 APP = ['gdraw.py']
-DATA_FILES = ['rootsys.conf']
+DATA_FILES = ['rootsys.conf', 'data']
 OPTIONS = {'argv_emulation': True,
- 'iconfile': '/Users/ploskon/devel/rootutils/python/2.7/app/compare_pp_pPb_L2K_pt_draw__list_canvas.icns'}
+ 'iconfile': '/Users/ploskon/devel/rootutils/python/2.7/app/data/compare_pp_pPb_L2K_pt_draw__list_canvas.icns'}
 
 setup(
     app=APP,
