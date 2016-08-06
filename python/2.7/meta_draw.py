@@ -112,6 +112,20 @@ class DrawString(object):
 			print '[w] scale not understood:',self.s
 		return retval
 
+	def trim(self):
+		st = self.get_arg('trim=',',')
+		if st == None:
+			return st
+		args = []
+		for s in st.split(' '):
+			np = eval_string.NumericStringParser()
+			try:
+				val = np.eval(s)
+			except:
+				val = None
+			args.append(val)
+		return args
+
 class Comment(object):
 	def __init__(self, s):
 		self.s = s
@@ -286,8 +300,11 @@ class MetaFigure(object):
 		if cobj != None:
 			if self.last_ds.scale() != None:
 				self.hl.scale_at_index(-1, self.last_ds.scale())
+			if self.last_ds.trim() != None:
+				self.hl.trim_at_index(-1, self.last_ds.trim()[0], self.last_ds.trim()[1])
 		else:
 			print '[w] failed to add',self.last_ds.hname,'from',self.last_ds.fname
+
 	def process_lines(self, clines):
 		for l in clines:
 			self.process_line(l)

@@ -204,6 +204,7 @@ class draw_option(debugable):
 			fnum = atof(snum[0])
 		except:
 			fnum = 0.0
+		self.strip = self.strip.replace('+{}{}'.format(what,str(snum[0])),'')
 		return fnum
 
 def random_string(prefix='', ns = 30):
@@ -699,6 +700,44 @@ class dlist(debugable):
 		if o.obj.InheritsFrom('TGraphAsymmErrors') == True:
 			for i in range(o.obj.GetN()):
 				o.obj.SetPointError(i, o.obj.GetEXlow()[i], o.obj.GetEXhigh()[i], o.obj.GetEYlow()[i] * val, o.obj.GetEYhigh()[i] * val)
+
+	def trim_graph_range(self, gr, xmin, xmax):
+		n = gr.GetN()
+		x = gr.GetX()
+		if n < 1:
+			return False
+		if xmin == None:
+			xmin = gr.GetX()[0]
+		if xmax == None:
+			xmin = gr.GetX()[n-1]
+		for i in range(n):
+			if (x[i] < xmin) or (x[i] > xmax):
+				gr.RemovePoint(i)
+				return self.trim_graph_range(gr, xmin, xmax)
+		return False
+
+	def trim_histogram_range(self, gr, xmin, xmax):
+		ibmax = gr.GetNbinsX() + 1
+		if xmin == None:
+			xmin = gr.GetBinLowEdge(1)
+		if xmax == None:
+			xmax = gr.GetBinCenter(ibmax) + gr.GetBinWidth(ibmax)
+		for ibin in xrange(ibmax):
+			xc = gr.GetBinCenter(ibin)
+			if (xc < xmin) or (xc > xmax):
+				gr.SetBinContent(ibin, 0.)
+				gr.SetBinError(ibin, 0.)
+				gr.SetBinWeight(ibin, 0.)
+		return False
+
+	def trim_at_index(self, i=-1, xlow=None, xhigh=None):
+		if len(self.l) < 1:
+			return
+		o = self.l[i]
+		if o.obj.InheritsFrom('TH1') == True:
+			self.trim_histogram_range(o.obj, xlow, xhigh)
+		if o.obj.InheritsFrom('TGraph') == True:
+			self.trim_graph_range(o.obj, xlow, xhigh)
 			
 	def rebin(self, val = 2, norm = False):
 		for o in self.l:
