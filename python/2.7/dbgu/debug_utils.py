@@ -58,20 +58,22 @@ class Inspector:
     def table_members_basic(self, truncate=50, skip='__'):
         members = inspect.getmembers(self.a)
         retval = [ ['type','name','value'] ]
-        for name,value in members:
-            if inspect.ismethod(value) == False:
-                if skip == '__' and name[0:2] != '__':
-                    t = type(getattr(self.a, name))
-                    if truncate > 0 and len(str(value)) > truncate:
-                        value = str(value)[:truncate]+'...'
-                    retval.append([t, name, value])
+        if len(members) > 0:
+            for name,value in members:
+                if inspect.ismethod(value) == False:
+                    if skip == '__' and name[0:2] != '__':
+                        t = type(getattr(self.a, name))
+                        if truncate > 0 and len(str(value)) > truncate:
+                            value = str(value)[:truncate]+'...'
+                        retval.append([t, name, value])
         return tabulate(retval, headers='firstrow')
     
     def table_members_all(self, skip='__'):
         members = inspect.getmembers(self.a)
         retval = [ ['type','name','value'] ]
-        for name,value in members:
-            if skip == '__' and name[0:2] != '__':
-                t = type(getattr(self.a, name))
-                retval.append([t, name, value])
+        if len(members) > 0:
+            for name,value in members:
+                if skip == '__' and name[0:2] != '__':
+                    t = type(getattr(self.a, name))
+                    retval.append([t, name, value])
         return tabulate(retval, headers='firstrow')
