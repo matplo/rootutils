@@ -25,7 +25,7 @@ def check_andor_make_output_dir(sname, isfilename=False):
 class debugable(object):
 	def __init__(self):
 		pass
-	
+
 	def debug(self, msg):
 		global gDebug
 		if gDebug == True:
@@ -36,7 +36,7 @@ class style_iterator(debugable):
 	good_markers = [ -1, 20, 24, 21, 25, 33, 27, 28, 34, 29, 30, 20, 24, 21, 25, 27, 33, 28, 34, 29, 30]
 	#good_lines   = [ -1,  1,  2,  3,  5,  8,  6,  7,  4,  9, 10]
 	good_lines   = [ -1,  1,  2,  3,  5,  7,  9,  6, 8, 4, 10, 1,  2,  3,  5,  7,  9,  6, 8, 4, 10]
-	
+
 	def __init__(self, reset_idx = 0):
 		self.reset_index = reset_idx
 		self.reset()
@@ -45,11 +45,11 @@ class style_iterator(debugable):
 		self.reset_index = idx
 
 	def reset(self):
-		self.color_idx  = self.reset_index  
-		self.line_idx   = self.reset_index  
-		self.marker_idx = self.reset_index  
+		self.color_idx  = self.reset_index
+		self.line_idx   = self.reset_index
+		self.marker_idx = self.reset_index
 		self.line_width = 2
-		
+
 	def colorize(self, force_color=None):
 		self.color_idx = 0
 		for o in self.l:
@@ -57,7 +57,7 @@ class style_iterator(debugable):
 			if icol == None:
 				icol = self.next_color()
 			o.SetLineColor(icol)
-		
+
 	def lineize(self, force_line=None):
 		self.line_idx = 0
 		for o in self.l:
@@ -68,7 +68,7 @@ class style_iterator(debugable):
 			o.SetLineColor(1)
 			o.SetLineWidth(self.line_width)
 			self.debug('::lineize set line style {} for {}'.format(imark, o.GetName()))
-			
+
 	def markerize(self, force_marker=None):
 		self.marker_idx = 0
 		scale = 1.
@@ -103,7 +103,7 @@ class style_iterator(debugable):
 		self.next_line();
 
 class draw_option(debugable):
-		
+
 	def __init__(self, stro = ''):
 		self.s = stro.lower()
 		self.strip = self.s
@@ -129,16 +129,16 @@ class draw_option(debugable):
 		self.is_error        = self.has(['serror'], strip=True)
 		self.no_legend       = self.has(['noleg'],  strip=True)
 		self.hidden          = self.has(['hidden'], strip=True)
-		self.rectangle       = self.has(['rect'], strip=True)        
+		self.rectangle       = self.has(['rect'], strip=True)
 		self.last_kolor      = self.has(['-k'])
 		self.last_line       = self.has(['-l'])
 
 	def stripped(self):
 		return self.strip
-	
+
 	def check_black_white(self):
 		return self.has(['bw'])
-	
+
 	def check_use_line(self):
 		marks = ['hist', 'l', 'c']
 		return self.has(marks)
@@ -146,11 +146,11 @@ class draw_option(debugable):
 	def check_use_line_legend(self):
 		marks = ['-']
 		return not self.has(marks)
-	
+
 	def check_use_marker(self):
 		marks = ['p']
 		return self.has(marks)
-	
+
 	def legend_option(self):
 		ret = ''
 		if self.no_legend:
@@ -175,11 +175,11 @@ class draw_option(debugable):
 					if strip == True:
 						self.strip = self.strip.replace(e, '')
 		return ret
-				
+
 	def get_style_from_opt(self, what): #what can be l or p or f
 		ts = self.s.split('+')
 		#self.debug('::get_style_from_opt ' + str(ts))
-		val = 0       
+		val = 0
 		for t in ts:
 			tt = t.split(' ')[0]
 			if len(tt) <= 0:
@@ -209,7 +209,7 @@ class draw_option(debugable):
 
 def random_string(prefix='', ns = 30):
 	lst = [random.choice(string.ascii_letters + string.digits) for n in xrange(ns)]
-	return str(prefix)+''.join(lst) 
+	return str(prefix)+''.join(lst)
 
 class draw_object(debugable):
 	def __init__(self, robj, name = None, new_title = None, dopts=''):
@@ -222,10 +222,10 @@ class draw_object(debugable):
 		if new_title:
 			self.obj.SetTitle(new_title)
 		if self.obj.GetTitle() == '':
-			self.obj.SetTitle(self.name)        
+			self.obj.SetTitle(self.name)
 		self.dopt = draw_option(dopts)
 		self.is_first = False
-		
+
 	def draw(self, extra_opt=''):
 		sdopt = self.dopt.stripped() + ' ' + extra_opt
 		if 'draw!' in extra_opt.lower():
@@ -237,7 +237,7 @@ class draw_object(debugable):
 			self.obj.Draw(sdopt)
 		else:
 			self.obj.Draw(sdopt + ' same')
-			 
+
 class dlist(debugable):
 	def __init__(self, name='hl'):
 		self.name              = name
@@ -278,7 +278,7 @@ class dlist(debugable):
 
 	def __len__(self):
 		return len(self.l)
-		
+
 	def __str__(self):
 		ret = []
 		ret.append('[i] dlist named: {} titled: {}'.format(self.name, self.title))
@@ -294,7 +294,7 @@ class dlist(debugable):
 	def copy(self, l):
 		for h in l.l:
 			self.add(h.obj, h.obj.GetTitle(), h.dopt.s)
-			
+
 	def last(self):
 		if len(self.l) > 0:
 			return self.l[-1]
@@ -307,14 +307,14 @@ class dlist(debugable):
 		if self.pattern != None:
 			if not self.pattern in o.name:
 				return False
-		return True        
-		
+		return True
+
 	def _check_name(self, name):
 		for o in self.l:
 			if o.name == name:
 				return True
 		return False
-		
+
 	def find_miny(self, low=None, logy=False):
 		miny = 1e18
 		for h in self.l:
@@ -323,10 +323,10 @@ class dlist(debugable):
 					c = h.obj.GetBinContent(nb)
 					if logy == False:
 						if c!=0 and c <= miny:
-							miny = c 
+							miny = c
 					else:
 						if c > 0 and c <= miny:
-							miny = c                         
+							miny = c
 			if h.obj.InheritsFrom('TGraph'):
 				for idx in range(h.obj.GetN()):
 					v = h.obj.GetY()[idx]
@@ -349,22 +349,22 @@ class dlist(debugable):
 					c = h.obj.GetBinContent(nb)
 					if logy == False:
 						if c!=0 and c > maxy:
-							maxy = c                
+							maxy = c
 					else:
 						if c > 0 and c > maxy:
-							maxy = c                                        
+							maxy = c
 			if h.obj.InheritsFrom('TGraph'):
 				vy = h.obj.GetY()
 				for idx in range(h.obj.GetN()):
 					v = vy[idx]
 					if logy == False:
 						if v > maxy:
-							maxy = v                        
+							maxy = v
 					else:
 						if v > 0 and v > maxy:
 							maxy = v
 		return maxy
-	
+
 	def adjust_maxima(self, miny=None, maxy=None, logy=False):
 		if miny!=None:
 			self.miny=miny
@@ -380,7 +380,7 @@ class dlist(debugable):
 			if logy==True and self.miny <= 0:
 				miny=self.find_miny(logy=logy)
 				self.miny = miny
-							
+
 		if maxy!=None:
 			self.maxy=maxy
 		else:
@@ -419,11 +419,11 @@ class dlist(debugable):
 			o.is_first = True
 		if prep == True:
 			self.l.insert(0, o)
-		else:            
+		else:
 			self.l.append(o)
 		self.debug('::append ' + o.name + ' ' + o.dopt.s + 'prepend:' + str(prep) )
 		return o
-   
+
 	def add_from_file(self, hname = '', fname = '', new_title = '', draw_opt = ''):
 		fn, fext = os.path.splitext(hname)
 		if fext == '.root':
@@ -442,7 +442,7 @@ class dlist(debugable):
 			else:
 				f.Close()
 				try:
-					cobj = self.add_from_hashlist(hname, fname, new_title, draw_opt)                
+					cobj = self.add_from_hashlist(hname, fname, new_title, draw_opt)
 				except:
 					pass
 		return cobj
@@ -468,7 +468,7 @@ class dlist(debugable):
 		except:
 			robj = obj
 		if robj.InheritsFrom('TH2'):
-			cobj = self.append(robj, new_title, draw_opt)            
+			cobj = self.append(robj, new_title, draw_opt)
 			if draw_opt == '':
 				draw_opt = 'colz'
 			return cobj
@@ -497,8 +497,8 @@ class dlist(debugable):
 				self.maxy = robj.GetMaximum()
 			if self.miny < robj.GetMinimum():
 				self.miny = robj.GetMinimum()
-		return cobj    
-		
+		return cobj
+
 	def add_list(self, hl):
 		for l in hl.l:
 			self.add(l.obj, l.obj.GetTitle(), l.dopt.s)
@@ -573,7 +573,7 @@ class dlist(debugable):
 			xmaxf = atof(xmax)
 		except:
 			xmaxf = 1.
-		ax = None            
+		ax = None
 		for o in self.l:
 			if which == 0:
 				ax = o.obj.GetXaxis()
@@ -600,7 +600,7 @@ class dlist(debugable):
 				#    pass
 				##print xmin, xmax
 				ax.SetRange(ibmin, ibmax)
-				
+
 	def scale_errors(self, val = 1.):
 		for o in self.l:
 			if o.obj.InheritsFrom('TH1') == False:
@@ -608,7 +608,7 @@ class dlist(debugable):
 			for i in range(1, o.obj.GetNbinsX() + 1):
 				err = o.obj.GetBinError(i)
 				o.obj.SetBinError(i, err * val)
-	
+
 	def scale(self, val = 1.):
 		for o in self.l:
 			if o.obj.InheritsFrom('TH1') == False:
@@ -738,7 +738,7 @@ class dlist(debugable):
 			self.trim_histogram_range(o.obj, xlow, xhigh)
 		if o.obj.InheritsFrom('TGraph') == True:
 			self.trim_graph_range(o.obj, xlow, xhigh)
-			
+
 	def rebin(self, val = 2, norm = False):
 		for o in self.l:
 			if o.obj.InheritsFrom('TH1') == False:
@@ -748,10 +748,10 @@ class dlist(debugable):
 			o.obj.Rebin(val)
 			if norm == True:
 				o.obj.Scale(1./(val*1.))
-				
+
 	def adjust_pad_margins(self, _left=0.17, _right=0.05, _top=0.1, _bottom=0.17+0.03):
 		du.adjust_pad_margins(_left, _right, _top, _bottom)
-		
+
 	def adjust_axis_attributes(self, which, title_size=-1, label_size = -1, title_offset=-1):
 		ax = None
 
@@ -777,7 +777,7 @@ class dlist(debugable):
 				ax.SetLabelFont  (self.font)
 				ax.SetLabelSize  (self.axis_label_size[which])
 				ax.SetLabelOffset(self.axis_label_offset[which])
-	
+
 	def adjust_to_pad(self, pad):
 		if pad == self.pad:
 			#print '[i] nothing to adjust:',pad, self.pad
@@ -805,10 +805,10 @@ class dlist(debugable):
 			o.obj.SetFillColorAlpha(kolor, 0.0)
 			o.obj.SetLineColor(kolor)
 			o.obj.SetLineColorAlpha(kolor, 0.0)
-			o.obj.SetMarkerColor(kolor)                           
+			o.obj.SetMarkerColor(kolor)
 			o.obj.SetMarkerColorAlpha(kolor, 0)
 			o.obj.SetFillStyle(1001)
-			o.obj.SetMarkerColor(kolor)   
+			o.obj.SetMarkerColor(kolor)
 			o.obj.SetMarkerSize(-1)
 			o.obj.SetMarkerStyle(-1)
 			return
@@ -828,7 +828,7 @@ class dlist(debugable):
 		#width
 		if o.dopt.lwidth > 0:
 			o.obj.SetLineWidth(o.dopt.lwidth)
-		#marker                    
+		#marker
 		if o.dopt.pstyle > 0:
 			o.obj.SetMarkerStyle(o.dopt.pstyle)
 		else:
@@ -837,12 +837,12 @@ class dlist(debugable):
 		mscale = 1.
 		#if o.obj.GetMarkerStyle() >= 27 and o.obj.GetMarkerStyle() != 28: mscale = 1.4
 		if o.obj.GetMarkerStyle() >= 27: mscale = 1.4
-		o.obj.SetMarkerSize(o.dopt.psize * mscale)            
+		o.obj.SetMarkerSize(o.dopt.psize * mscale)
 		#fill
 		if o.dopt.fstyle > 0:
 				o.obj.SetFillStyle(o.dopt.fstyle)
 		else:
-			o.obj.SetFillStyle(0000)                
+			o.obj.SetFillStyle(0000)
 			o.obj.SetFillColor(0)
 		#kolor
 		kolor = -1
@@ -859,7 +859,7 @@ class dlist(debugable):
 
 		o.obj.SetFillColor(kolor)
 		o.obj.SetLineColor(kolor)
-		o.obj.SetMarkerColor(kolor)                                
+		o.obj.SetMarkerColor(kolor)
 
 		alpha = 1.0
 		if o.dopt.alpha > 0:
@@ -912,7 +912,7 @@ class dlist(debugable):
 		else:
 			o.obj.SetLineColorAlpha(kolor, alpha)
 
-		o.obj.SetMarkerColor(kolor)                           
+		o.obj.SetMarkerColor(kolor)
 		o.obj.SetMarkerColorAlpha(kolor, 0)
 
 		if o.dopt.rectangle == True:
@@ -933,8 +933,8 @@ class dlist(debugable):
 		if self.has2D() == False:
 			if miny == -1 and maxy == -1:
 				pass
-			else:	
-				self.adjust_maxima(miny=miny, maxy=maxy, logy=logy)			
+			else:
+				self.adjust_maxima(miny=miny, maxy=maxy, logy=logy)
 		if adjust_axis_attributes == True:
 			self.adjust_axis_attributes(0)
 			self.adjust_axis_attributes(1)
@@ -943,7 +943,7 @@ class dlist(debugable):
 
 		#gdopt = draw_option(option) unused!
 		self.style.reset()
-		
+
 		if self.has2D():
 			#self.tcanvas = ROOT.gPad
 			if not self.tcanvas:
@@ -1061,7 +1061,7 @@ class dlist(debugable):
 		if x2==None:
 			x2 = 0.8 #0.88
 		if y2==None:
-			y2 = 0.87 #0.88 #used also 0.9            
+			y2 = 0.87 #0.88 #used also 0.9
 		option = option + ' #l'
 		self.legend = ROOT.TLegend(x1, y1, x2, y2, '', option)
 		if len(title) > 0:
@@ -1115,9 +1115,9 @@ class dlist(debugable):
 			self.tcanvas.Modified()
 			self.tcanvas.Update()
 
-	def make_canvas(self, w=600, h=400, 
-					split=0, orientation=0, 
-					name=None, title=None):                
+	def make_canvas(self, w=600, h=400,
+					split=0, orientation=0,
+					name=None, title=None):
 		#print 'make_canvas called'
 		if self.tcanvas==None:
 			if name == None:
@@ -1131,7 +1131,7 @@ class dlist(debugable):
 				du.split_gPad(split, orientation)
 			tu.gList.append(self.tcanvas)
 		return self.tcanvas
-	
+
 	def destroy_canvas(self):
 		if self.tcanvas != None:
 			self.tcanvas.Destructor()
@@ -1182,7 +1182,7 @@ class dlist(debugable):
 						h.obj.GetYaxis().SetTitle(ytitle)
 			else:
 				print '[w] normalize not defined for non histogram...'
-				
+
 	def write_to_file(self, fname=None, opt='RECREATE', name_mod=''):
 		if fname==None:
 			fname = './' + pyutils.to_file_name(self.name) + '.root'
@@ -1201,12 +1201,12 @@ class dlist(debugable):
 		for i,h in enumerate(self.l):
 			if 'mod:' in name_mod or 'modn:' in name_mod:
 				smod = name_mod.replace('mod:', '')
-				smod = name_mod.replace('modn:', '')                    
+				smod = name_mod.replace('modn:', '')
 				if len(smod) > 0:
 					newname = self.name + '-{}-'.format(i) + smod
 				else:
 					if 'modn:' in name_mod:
-						newname =  'o_{}'.format(i)                            
+						newname =  'o_{}'.format(i)
 					else:
 						newname = self.name + '-{}'.format(i)
 			else:
@@ -1253,7 +1253,7 @@ class dlist(debugable):
 
 	def draw_comment(self, comment = '', font_size=None, x1 = 0.0, y1 = 0.9, x2 = 0.99, y2 = 0.99):
 		du.draw_comment(comment, font_size, x1, y1, x2, y2)
-		
+
 	def sum(self, scales=None):
 		reth = None
 		isummed = 0
@@ -1414,13 +1414,13 @@ class ListStorage:
 				l.draw(logy=logy, option=option, miny=miny, maxy=maxy, colopt=colopt, adjust_pad=False)
 			if draw_legend:
 				if self.lx1 != None:
-					legend = l.self_legend(1, slegtitle, self.lx1, self.ly1, self.lx2, self.ly2, 
+					legend = l.self_legend(1, slegtitle, self.lx1, self.ly1, self.lx2, self.ly2,
 						tx_size=self.legend_font_scale * 0.04, option=legoption)
 				else:
 					legend = l.self_legend(ncols=1, title=slegtitle, tx_size=self.legend_font_scale * 0.04, option=legoption)
 			else:
 				if legtitle == 'self':
-					l.draw_comment(l.title, 0.05, 0, 0.9, 1., 1.) 
+					l.draw_comment(l.title, 0.05, 0, 0.9, 1., 1.)
 			l.update(logy=logy)
 		self.adjust_pads()
 
@@ -1450,7 +1450,7 @@ class ListStorage:
 			hl.draw(logy=True, miny=miny,maxy=maxy,adjust_pad=False, adjust_axis_attributes=False)
 			tp.SetLogy(logy)
 			xf = self.tcanvas.get_axis_factor(0)
-			yf = self.tcanvas.get_axis_factor(1)			
+			yf = self.tcanvas.get_axis_factor(1)
 			#leg = hl.self_legend(1, '', x1=10, x2=18, y1=1e-6, y2=5.e-4, option='br')
 			leg = hl.self_legend(1, '', self.lx1, self.ly1, self.lx2, self.ly2, option='br')
 			for i,st in enumerate(legtitle):
@@ -1539,12 +1539,12 @@ def load_tlist(tlist, pattern=None, names_not_titles=True, draw_opt='HIST', hl =
 				hl.add (obj, newname, draw_opt)
 				#hl.addh (obj, newname, draw_opt)
 				#hl.addgr(obj, newname)
-				#hl.addf (obj, newname, 'L')                
+				#hl.addf (obj, newname, 'L')
 			else:
 				hl.add (obj, draw_opt=draw_opt)
 				#hl.addh(obj, draw_opt=draw_opt)
 				#hl.addgr(obj)
-				#hl.addf(obj, None, 'L')                
+				#hl.addf(obj, None, 'L')
 			#print '[i] add   :',obj.GetName()
 		else:
 			#print '[i] ignore:',obj.GetName()
@@ -1573,7 +1573,7 @@ def load_file(fname='', pattern=None, names_not_titles=True, draw_opt='', xmin=N
 	lkeys = fin.GetListOfKeys()
 	for key in lkeys:
 		if key.GetClassName() == "TList":
-			load_tlist(key.ReadObj(), pattern, names_not_titles, draw_opt, hl)                
+			load_tlist(key.ReadObj(), pattern, names_not_titles, draw_opt, hl)
 		to_load=False
 		if pattern:
 			if pattern in key.GetName():
@@ -1589,7 +1589,7 @@ def load_file(fname='', pattern=None, names_not_titles=True, draw_opt='', xmin=N
 				hl.add(obj, obj.GetName(), draw_opt)
 				hl.last().obj.SetName(key.GetName())
 			else:
-				hl.add(obj, '', draw_opt=draw_opt)                    
+				hl.add(obj, '', draw_opt=draw_opt)
 				hl.last().obj.SetName(key.GetName())
 			#print '[i] add   :',key.GetName()
 		else:
@@ -1632,7 +1632,7 @@ def show_file(fname='', logy=False, pattern=None, draw_opt='p', names_not_titles
 	exs = ' '.join(sys.argv)
 	exs = exs.replace(sys.argv[0], 'show_file:')
 	fnsize = float(1.5/len(exs))
-	du.draw_comment(exs, fnsize, 0, 0.9, 1., 1.) 
+	du.draw_comment(exs, fnsize, 0, 0.9, 1., 1.)
 	# ::draw_comment was ol method at some point
 
 	hl.tcanvas.cd(2)
@@ -1669,7 +1669,7 @@ def scale_errors(h, val):
 def reset_errors(h, herr, relative=False):
 	for i in range(1, h.GetNbinsX()):
 		if h.GetBinContent(i) == 0 and h.GetBinError(i) == 0:
-			continue            
+			continue
 		err = herr.GetBinError(i)
 		if relative == True:
 			if herr.GetBinContent(i) != 0:
@@ -1758,7 +1758,7 @@ def filter_single_entries_h2d(h, href=None, thr=10):
 			if href.GetBinContent(ib, iby) < thr:
 				h.SetBinContent(ib, iby, 0)
 				h.SetBinError(ib, iby, 0)
-	
+
 def filter_single_entries(hl, hlref, thr=10):
 	for ih in range(len(hl.l)):
 		h    = hl.l[ih].obj
@@ -1790,7 +1790,7 @@ def get_projection_axis(hname, h2d, axis, ixmin=0, ixmax=105):
 		ixmaxb = h2d.GetYaxis().FindBin(ixmax)
 		if ixmaxb > h2d.GetYaxis().GetNbins():
 			imaxb = h2d.GetYaxis().GetNbins()
-		hproj = h2d.ProjectionX(hname, ixminb, ixmaxb)        
+		hproj = h2d.ProjectionX(hname, ixminb, ixmaxb)
 	return hproj
 
 def get_projectionY(hname, h2d, ixmin=0, ixmax=105):
@@ -1812,8 +1812,8 @@ def get_projections_axis_bins(hname, fname, htitle, opt, axis, pTs):
 		if axis == 1:
 			hn     = '{}-py-{}-{}'.format(hname, pTmin, pTmax)
 		else:
-			hn     = '{}-px-{}-{}'.format(hname, pTmin, pTmax)            
-		hp = get_projection_axis(hn, h2d, axis, pTmin, pTmax)            
+			hn     = '{}-px-{}-{}'.format(hname, pTmin, pTmax)
+		hp = get_projection_axis(hn, h2d, axis, pTmin, pTmax)
 		hp.Sumw2()
 		hl.append(hp, htitlepy, 'P L HIST')
 	return hl
@@ -1833,11 +1833,11 @@ def get_projections_axis(hname, fname, htitle, pTmin, pTmax, step, opt='P L HIST
 		if axis == 1:
 			hn     = '{}-py-{}-{}'.format(hname, pT, pT + step)
 		else:
-			hn     = '{}-px-{}-{}'.format(hname, pT, pT + step)            
-		hp = get_projection_axis(hn, h2d, axis, pT, pT + step)            
+			hn     = '{}-px-{}-{}'.format(hname, pT, pT + step)
+		hp = get_projection_axis(hn, h2d, axis, pT, pT + step)
 		hp.Sumw2()
 		hl.append(hp, htitlepy, 'P L HIST')
-		pT = pT + step            
+		pT = pT + step
 	return hl
 
 def get_projections_axis_lowcut(hname, fname, htitle, pTmin, pTmax, step, opt='P L HIST', axis = 1, pTs=None):
@@ -1858,11 +1858,11 @@ def get_projections_axis_lowcut(hname, fname, htitle, pTmin, pTmax, step, opt='P
 		if axis == 1:
 			hn     = '{}-py-{}-{}'.format(hname, pT, Amax)
 		else:
-			hn     = '{}-px-{}-{}'.format(hname, pT, Amax)            
-		hp = get_projection_axis(hn, h2d, axis, pT, Amax)            
+			hn     = '{}-px-{}-{}'.format(hname, pT, Amax)
+		hp = get_projection_axis(hn, h2d, axis, pT, Amax)
 		hp.Sumw2()
 		hl.append(hp, htitlepy, 'P L HIST')
-		pT = pT + step            
+		pT = pT + step
 	return hl
 
 def get_projections(hname, fname, htitle, pTmin, pTmax, step, opt='P L HIST', pTs=None):
@@ -1882,7 +1882,7 @@ def make_graph_xy(name, x, y, xe = [], ye = []):
 	for v in x:
 		xf.append(float(v))
 	for v in y:
-		yf.append(float(v))                  
+		yf.append(float(v))
 	xa = array('f', xf)
 	ya = array('f', yf)
 	if len(xe) == 0:
@@ -1922,7 +1922,7 @@ def make_graph(name, data):
 			ye.append(ix[3])
 		except:
 			pass
-		
+
 	return make_graph_xy(name, x, y, xe, ye)
 
 def make_graph_ae_xy(name, x, y, xlow = [], xhigh = [], ylow = [], yhigh = []):
