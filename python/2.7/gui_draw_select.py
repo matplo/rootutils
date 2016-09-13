@@ -106,12 +106,12 @@ class FileView( r.TGMainFrame ):
 		if self.flogwatch.changed():
 			self.logfileFrame.draw()
 		if self.fwatch.changed():
-			self.draw()			
+			self.draw()
 
 	def draw(self):
 		del self.mdf
 		self.mdf = meta_draw.MetaDrawFile(self.fname)
-		
+
 		#print 'N figures:',len(self.mdf.figures), 'N tabs:',len(self.tabs)
 		#if len(self.mdf.figures) != len(self.tabs):
 		#    self.tab.RemoveAll()
@@ -274,7 +274,7 @@ class UtilCanvasFrame( r.TGCompositeFrame ):
 
 	def colorWheel(self):
 		self.tcanvas.cd()
-		self.tcanvas.Clear()		
+		self.tcanvas.Clear()
 		if self.tcw == None:
 			self.tcw = r.TColorWheel()
 		self.tcw.SetCanvas(self.tcanvas)
@@ -283,13 +283,13 @@ class UtilCanvasFrame( r.TGCompositeFrame ):
 
 	def colorTable(self):
 		self.tcanvas.cd()
-		self.tcanvas.Clear()		
+		self.tcanvas.Clear()
 		self.tcanvas.DrawColorTable()
 		self.tcanvas.Update()
 
 	def markerTable(self):
 		self.tcanvas.cd()
-		self.tcanvas.Clear()		
+		self.tcanvas.Clear()
 		self.tcanvas.SetFillColor(r.kWhite)
 		if self.markerTableImage == None:
 			imgpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'pict1_TAttMarker_002.png')
@@ -299,7 +299,7 @@ class UtilCanvasFrame( r.TGCompositeFrame ):
 
 	def lineTable(self):
 		self.tcanvas.cd()
-		self.tcanvas.Clear()		
+		self.tcanvas.Clear()
 		self.tcanvas.SetFillColor(r.kWhite)
 		if self.lineTableImage == None:
 			imgpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'pict1_TAttLine_003.png')
@@ -383,7 +383,7 @@ class DrawFrame( r.TGCompositeFrame ):
 					print stype,lposs,'tx_size=',o.GetTextSize()
 				else:
 					print stype,lposs,items,'tx_size=',o.GetTextSize()
-		print 
+		print
 
 	def draw(self, mf):
 		print
