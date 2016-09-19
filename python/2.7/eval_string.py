@@ -26,7 +26,7 @@ class NumericStringParser(object):
     def pushFirst(self, strg, loc, toks ):
         self.exprStack.append( toks[0] )
     def pushUMinus(self, strg, loc, toks ):
-        if toks and toks[0]=='-': 
+        if toks and toks[0]=='-':
             self.exprStack.append( 'unary -' )
     def __init__(self):
         """
@@ -41,10 +41,10 @@ class NumericStringParser(object):
         """
         point = Literal( "." )
         e     = CaselessLiteral( "E" )
-        fnumber = Combine( Word( "+-"+nums, nums ) + 
+        fnumber = Combine( Word( "+-"+nums, nums ) +
                            Optional( point + Optional( Word( nums ) ) ) +
                            Optional( e + Word( "+-"+nums, nums ) ) )
-        ident = Word(alphas, alphas+nums+"_$")       
+        ident = Word(alphas, alphas+nums+"_$")
         plus  = Literal( "+" )
         minus = Literal( "-" )
         mult  = Literal( "*" )
@@ -55,12 +55,14 @@ class NumericStringParser(object):
         multop = mult | div
         expop = Literal( "^" )
         pi    = CaselessLiteral( "PI" )
+        strue = CaselessLiteral( "true" )
+        sfalse= CaselessLiteral( "false" )
         expr = Forward()
         atom = ((Optional(oneOf("- +")) +
-                 (pi|e|fnumber|ident+lpar+expr+rpar).setParseAction(self.pushFirst))
+                 (sfalse|strue|pi|e|fnumber|ident+lpar+expr+rpar).setParseAction(self.pushFirst))
                 | Optional(oneOf("- +")) + Group(lpar+expr+rpar)
-                ).setParseAction(self.pushUMinus)       
-        # by defining exponentiation as "atom [ ^ factor ]..." instead of 
+                ).setParseAction(self.pushUMinus)
+        # by defining exponentiation as "atom [ ^ factor ]..." instead of
         # "atom [ ^ atom ]...", we get right-to-left exponents, instead of left-to-right
         # that is, 2^3^2 = 2^(3^2), not (2^3)^2.
         factor = Forward()
@@ -69,7 +71,7 @@ class NumericStringParser(object):
         expr << term + ZeroOrMore( ( addop + term ).setParseAction( self.pushFirst ) )
         # addop_term = ( addop + term ).setParseAction( self.pushFirst )
         # general_term = term + ZeroOrMore( addop_term ) | OneOrMore( addop_term)
-        # expr <<  general_term       
+        # expr <<  general_term
         self.bnf = expr
         # map operator symbols to corresponding arithmetic operations
         epsilon = 1e-12
@@ -95,6 +97,10 @@ class NumericStringParser(object):
             return self.opn[op]( op1, op2 )
         elif op == "PI":
             return math.pi # 3.1415926535
+        elif op.lower() == "false":
+            return 0
+        elif op.lower() == "true":
+            return 1
         elif op == "E":
             return math.e  # 2.718281828
         elif op in self.fn:
