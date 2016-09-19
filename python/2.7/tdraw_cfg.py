@@ -5,6 +5,7 @@ import ROOT as r
 import IPython
 import argparse
 import os
+import fnmatch
 import sys
 
 from configobj import ConfigObj
@@ -17,8 +18,28 @@ def dump_example():
 libs =
 
 [histogram]
+	input_dir =
+	active = True
 	output_file = default_output.root
 	input_file = job3/Tree_AnalysisResults.root
+	tree_name = t
+	varexp = muons.Phi()
+	selection =
+	option = e
+	nentries =
+	firstentry =
+	x = -PI,PI
+	nbinsx = 100
+	x_title = '#varphi (rad)'
+	y_title = counts
+	title = muons phi
+	name = muons_phi
+
+[histogram from dir]
+	active = True
+	output_file = +_output
+	input_file = Tree_AnalysisResults.root
+	input_dir = .
 	tree_name = t
 	varexp = muons.Phi()
 	selection =
@@ -45,54 +66,94 @@ def get_value(s):
 		print >> sys.stderr, '[e] unable to convert to a value:',s
 	return retval
 
-def analyze_from_file(fname):
+def find_files(rootdir='.', pattern='*'):
+    return [os.path.join(rootdir, filename)
+            for rootdir, dirnames, filenames in os.walk(rootdir)
+            for filename in filenames
+            if fnmatch.fnmatch(filename, pattern)]
+
+def quick_check_section(s, sname):
+	once_per_section = 0
+	opts= ['active', 'output_file', 'input_file', 'input_dir', 'tree_name', 'varexp', 'selection', 'option', 'nentries', 'firstentry', 'x', 'nbinsx', 'x_title', 'y_title', 'title', 'name']
+	retval = True
+	for o in opts:
+		try:
+			s[o]
+		except:
+			print >> sys.stderr, '[e] option [',o,'] missing in section [',sname,']'
+			if once_per_section == 0:
+				once_per_section = 1
+				print '    note: some options can be blank but present anyhow'
+			retval = False
+	return retval
+
+def tdraw_from_file(fname):
 	if fname == None:
 		return
-	print '[i] using file:', fname
-	config = ConfigObj(fname)
-
+	print '[i] config file:', fname
+	config = ConfigObj(fname, raise_errors = True)
 	for s in config.sections:
 		if s == 'options':
 			continue
-		fin = r.TFile(config[s]['input_file'])
-		if not fin:
+		if quick_check_section(config[s], s) == False:
 			continue
+		if get_value(config[s]['active']) == 0:
+			continue
+		print '[i] section [',s,']'
+		input_fname = config[s]['input_file']
 		foutname = config[s]['output_file']
 		if not foutname:
-			foutname = 'default_out.root'
-		fout = r.TFile(foutname, 'UPDATE')
-		print '    processing:', config[s]['name'], ';'.join([config[s]['title'], config[s]['x_title'], config[s]['y_title']])
-		hstring = 'htmp({0},{1},{2})'.format(int(get_value(config[s]['nbinsx'])), get_value(config[s]['x'][0]), get_value(config[s]['x'][1]))
-		t = fin.Get(config[s]['tree_name'])
-		if t:
-			nentries = config[s]['nentries']
-			if not nentries:
-				nentries = '1000000000'
-			firstentry = config[s]['firstentry']
-			if not firstentry:
-				firstentry = '0'
-			t.Draw(config[s]['varexp'] + '>>{}'.format(hstring), config[s]['selection'], config[s]['option'], int(get_value(nentries)), int(get_value(firstentry)))
-			hout = r.gDirectory.Get('htmp')
-			hout.SetDirectory(0)
-			hout.SetName(config[s]['name'])
-			hout.SetTitle(config[s]['title'])
-			hout.GetXaxis().SetTitle(config[s]['x_title'])
-			hout.GetYaxis().SetTitle(config[s]['y_title'])
-		fout.cd()
-		hout.Write()
-		fout.Purge()
-		fout.Close()
-		fin.Close()
+			foutname = '+out'
+		sdir = config[s]['input_dir']
+		if sdir:
+			input_files = find_files(sdir, pattern=input_fname)
+			print '    sdir is:',sdir
+		else:
+			input_files = [input_fname]
+		for fn in input_files:
+			print '    processing file:',fn
+			if foutname[0] == '+':
+				sfoutname = fn.replace('.root', foutname[1:] + '.root')
+			else:
+				sfoutname = foutname
+			print '    output:',sfoutname
+			fin = r.TFile(fn)
+			if not fin:
+				continue
+			print '    tdraw:', config[s]['name'], ';'.join([config[s]['title'], config[s]['x_title'], config[s]['y_title']])
+			hstring = 'htmp({0},{1},{2})'.format(int(get_value(config[s]['nbinsx'])), get_value(config[s]['x'][0]), get_value(config[s]['x'][1]))
+			t = fin.Get(config[s]['tree_name'])
+			if t:
+				nentries = config[s]['nentries']
+				if not nentries:
+					nentries = '1000000000'
+				firstentry = config[s]['firstentry']
+				if not firstentry:
+					firstentry = '0'
+				t.Draw(config[s]['varexp'] + '>>{}'.format(hstring), config[s]['selection'], config[s]['option'], int(get_value(nentries)), int(get_value(firstentry)))
+				hout = r.gDirectory.Get('htmp')
+				hout.SetDirectory(0)
+				hout.SetName(config[s]['name'])
+				hout.SetTitle(config[s]['title'])
+				hout.GetXaxis().SetTitle(config[s]['x_title'])
+				hout.GetYaxis().SetTitle(config[s]['y_title'])
+			fout = r.TFile(sfoutname, 'UPDATE')
+			fout.cd()
+			hout.Write()
+			fout.Purge()
+			fout.Close()
+			fin.Close()
+	print '    done.'
 
 if __name__=="__main__":
-	parser = argparse.ArgumentParser(description='generate/read config files for LBL TB', prog=os.path.basename(__file__))
+	parser = argparse.ArgumentParser(description='execute tdraw based on the config file', prog=os.path.basename(__file__))
 	#parser.add_argument('-w', '--write', help='dump the contents', action='store_true')
 	#parser.add_argument('-f', '--fname', help='file name to operate on', type=str)
 	#parser.add_argument('-r', '--read', help='read a file', type=str)
 	#parser.add_argument('-b', '--batch', help='batchmode - do not end with IPython prompt', action='store_true')
 	parser.add_argument('-i', '--ipython', help='end with IPython prompt', action='store_true')
 	parser.add_argument('-g', '--example', help='dump an example file and exit', action='store_true')
-	parser.add_argument('fname', nargs='?')
+	parser.add_argument('fname', type=str, nargs='*')
 
 	args = parser.parse_args()
 
@@ -102,8 +163,10 @@ if __name__=="__main__":
 
 	tutils.setup_basic_root()
 	if args.fname:
+		tc = r.TCanvas('ctmp', 'ctmp')
 		for fn in args.fname:
-			analyze_from_file(fn)
+			tc.cd()
+			tdraw_from_file(fn)
 
 	if args.ipython:
 		IPython.embed()
