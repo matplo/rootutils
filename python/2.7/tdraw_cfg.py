@@ -12,6 +12,8 @@ from configobj import ConfigObj
 
 import eval_string
 
+from tqdm import tqdm
+
 def dump_example():
 	sexample = '''
 [options]
@@ -47,7 +49,7 @@ libs =
 	nentries =
 	firstentry =
 	x = -PI,PI
-	nbinsx = 100
+	nbinsx = 2*PI*11
 	x_title = '#varphi (rad)'
 	y_title = counts
 	title = muons phi
@@ -87,9 +89,13 @@ def quick_check_section(s, sname):
 			retval = False
 	return retval
 
-def tdraw_from_file(fname):
+def tdraw_from_file(fname, recreate=False):
+	smode = 'UPDATE'
+	if recreate == True:
+		smode = 'RECREATE'
 	if fname == None:
 		return
+	print '[i] file write mode is:',smode
 	print '[i] config file:', fname
 	config = ConfigObj(fname, raise_errors = True)
 	for s in config.sections:
@@ -110,17 +116,23 @@ def tdraw_from_file(fname):
 			print '    sdir is:',sdir
 		else:
 			input_files = [input_fname]
-		for fn in input_files:
-			print '    processing file:',fn
+		print '    tdraw:', config[s]['name'], ';'.join([config[s]['title'], config[s]['x_title'], config[s]['y_title']])
+		pbar = tqdm(input_files)
+		for fn in pbar:
+			# pbar.set_description('    processing file: %s' % fn)
+			nchars = 0
+			sfn = fn
+			if len(fn) > 40:
+				sfn = fn[:18] + '..' + fn[len(fn)-20:]
+			pbar.set_description('    {} : {}'.format(s, sfn))
 			if foutname[0] == '+':
 				sfoutname = fn.replace('.root', foutname[1:] + '.root')
 			else:
 				sfoutname = foutname
-			print '    output:',sfoutname
+			#print '    output:',sfoutname
 			fin = r.TFile(fn)
 			if not fin:
 				continue
-			print '    tdraw:', config[s]['name'], ';'.join([config[s]['title'], config[s]['x_title'], config[s]['y_title']])
 			hstring = 'htmp({0},{1},{2})'.format(int(get_value(config[s]['nbinsx'])), get_value(config[s]['x'][0]), get_value(config[s]['x'][1]))
 			t = fin.Get(config[s]['tree_name'])
 			if t:
@@ -137,7 +149,7 @@ def tdraw_from_file(fname):
 				hout.SetTitle(config[s]['title'])
 				hout.GetXaxis().SetTitle(config[s]['x_title'])
 				hout.GetYaxis().SetTitle(config[s]['y_title'])
-			fout = r.TFile(sfoutname, 'UPDATE')
+			fout = r.TFile(sfoutname, smode)
 			fout.cd()
 			hout.Write()
 			fout.Purge()
@@ -153,6 +165,7 @@ if __name__=="__main__":
 	#parser.add_argument('-b', '--batch', help='batchmode - do not end with IPython prompt', action='store_true')
 	parser.add_argument('-i', '--ipython', help='end with IPython prompt', action='store_true')
 	parser.add_argument('-g', '--example', help='dump an example file and exit', action='store_true')
+	parser.add_argument('--recreate', help='write files with "recreate" instead of "update"', action='store_true')
 	parser.add_argument('fname', type=str, nargs='*')
 
 	args = parser.parse_args()
@@ -166,7 +179,7 @@ if __name__=="__main__":
 		tc = r.TCanvas('ctmp', 'ctmp')
 		for fn in args.fname:
 			tc.cd()
-			tdraw_from_file(fn)
+			tdraw_from_file(fn, args.recreate)
 
 	if args.ipython:
 		IPython.embed()
