@@ -39,12 +39,11 @@ def make_draw_file(fn, extra_opts=[], force=False):
 			if k.ReadObj().InheritsFrom('TList'):
 				pass
 			else:
-				ctit = o.GetTitle()
+				ctit = k.GetTitle()
 				if len(ctit) < 1:
-					ctit = o.GetName()
+					ctit = k.GetName()
 				print >> fout,os.path.abspath(fn),'		:'+k.GetName(),':p',':','title='+ctit
 		print >> fout, ''
-	with open(fdraw, 'w') as fout:
 		for k in td:
 			if k.ReadObj().InheritsFrom('TList'):
 				print_preamb(fout, fdraw)
@@ -57,7 +56,7 @@ def make_draw_file(fn, extra_opts=[], force=False):
 						ctit = o.GetName()
 					print >> fout,os.path.abspath(fn),'		:'+k.GetName()+'/'+o.GetName(),':p',':','title='+ctit
 		print >> fout, ''
-	return fdraw	
+	return fdraw
 
 def make_draw_file_dlist(fn, extra_opts=[], force=False):
 	l = dlist.load_file(fn)
@@ -80,7 +79,7 @@ def make_draw_file_dlist(fn, extra_opts=[], force=False):
 			o = obj.obj
 			print >> fout,os.path.abspath(fn),'		:'+o.GetName(),':p',':','title='+o.GetTitle()
 		print >> fout, ''
-	return fdraw	
+	return fdraw
 
 
 
