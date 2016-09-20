@@ -100,6 +100,19 @@ def tdraw_from_file(fname, recreate=False):
 	config = ConfigObj(fname, raise_errors = True)
 	for s in config.sections:
 		if s == 'options':
+			try:
+				slibs = config[s]['libs']
+				if type(slibs) == list:
+					for slib in slibs:
+						sexplib = r.gSystem.ExpandPathName(slib.strip())
+						print '[i] loading',sexplib
+						r.gSystem.Load(sexplib)
+				else:
+					sexplib = r.gSystem.ExpandPathName(slibs)
+					print '[i] loading',sexplib
+					r.gSystem.Load(sexplib)
+			except:
+				pass
 			continue
 		if quick_check_section(config[s], s) == False:
 			continue
@@ -136,6 +149,7 @@ def tdraw_from_file(fname, recreate=False):
 			hstring = 'htmp({0},{1},{2})'.format(int(get_value(config[s]['nbinsx'])), get_value(config[s]['x'][0]), get_value(config[s]['x'][1]))
 			t = fin.Get(config[s]['tree_name'])
 			if t:
+				#t.MakeClass('Correlations')
 				nentries = config[s]['nentries']
 				if not nentries:
 					nentries = '1000000000'
