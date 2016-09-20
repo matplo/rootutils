@@ -1,8 +1,8 @@
 import os
 import sys
+import tutils as tu
 import ROOT
 import draw_utils as du
-import tutils as tu
 from array import array
 gDebug = False
 #needs a fix: the import below depends on where the module is...
