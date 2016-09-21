@@ -131,7 +131,7 @@ class CanvasSplit(object):
          lfactor = 1.0
       return lfactor
 
-   def adjust_axis(self, lh, scaleTSize = 1.0, scaleLSize = 1.0):
+   def adjust_axis(self, lh, scaleTSize = 1.0, scaleLSize = 1.0, scaleTOffset = 1.0):
       for h in lh:
          try:
             h = h.obj
@@ -141,12 +141,12 @@ class CanvasSplit(object):
             if i == 0:
                axis = h.GetXaxis()
                lfactor = self.yFactor * 0.06 / self.xFactor
-               title_offset = 2 * scaleTSize
+               title_offset = 2 * scaleTSize * scaleTOffset
                tsize = 16
             else:
                axis = h.GetYaxis()
                lfactor = self.xFactor * 0.04 / self.yFactor
-               title_offset = 2 * scaleTSize
+               title_offset = 1.9 * scaleTSize * scaleTOffset
                tsize = 18
             axis.SetTickLength(lfactor)
             axis.SetLabelFont(43)
