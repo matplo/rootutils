@@ -239,6 +239,8 @@ class draw_object(debugable):
 			self.obj.Draw(sdopt + ' same')
 
 class dlist(debugable):
+	enable_eps = False
+
 	def __init__(self, name='hl'):
 		self.name              = name
 		self.title             = name
@@ -1279,6 +1281,8 @@ class dlist(debugable):
 
 	def pdf(self):
 		self.tcanvas.Print(pyutils.to_file_name(self.name)+'.pdf','.pdf')
+		if dlist.enable_eps:
+			self.tcanvas.Print(pyutils.to_file_name(self.name)+'.eps','.eps')
 
 	def png(self):
 		self.tcanvas.Print(pyutils.to_file_name(self.name)+'.png','.png')

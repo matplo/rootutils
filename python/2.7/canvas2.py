@@ -6,6 +6,9 @@ import tutils as tu
 
 # based on $ROOTSYS/tutorials/graphics/canvas2.C
 
+def to_file_name(s):
+    return "".join([x if x.isalnum() else "_" for x in s])
+
 class CanvasSplit(object):
    def __init__(self, name, nx, ny, title=None, w=600, h=400):
       self.name = name
@@ -165,6 +168,11 @@ class CanvasSplit(object):
       self.htest.SetTitle(r.gPad.GetName())
       self.adjust_axis([self.htest])
       self.htest.DrawCopy()
+
+   def pdf(self, eps=False):
+        self.tc.Print(to_file_name(self.name)+'.pdf','.pdf')
+        if eps:
+           self.tc.Print(to_file_name(self.name)+'.eps','.eps')
 
 def main():
    c = CanvasSplit('test', 3, 2)
