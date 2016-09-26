@@ -89,8 +89,79 @@ def quick_check_section(s, sname):
 			retval = False
 	return retval
 
+class TDrawEntry(object):
+	def __init__(self, section):
+		self.section    = section
+
+		self.title      = self.setting('title', section, False)
+		self.active     = self.setting('active', section, True, True)
+		self.input_dir  = self.setting('input_dir', section, False)
+		self.input_file = self.setting('input_file', section, False)
+		self.tree_name  = self.setting('tree_name', section, False)
+		self.varexp     = self.setting('varexp', section, False)
+		self.selection  = self.setting('selection', section, False)
+		self.option     = self.setting('option', section, False)
+		self.nentries   = self.setting('nentries', section, True)
+		self.firstentry = self.setting('firstentry', section, True)
+		self.x          = get_value(self.setting('x', section, False)[0]), get_value(self.setting('x', section, False)[1])
+		self.nbinsx     = self.setting('nbinsx', section, True)
+		self.x_title    = self.setting('x_title', section, False)
+		self.y_title    = self.setting('y_title', section, False)
+		self.title      = self.setting('title', section, False)
+		self.name       = section.name
+
+	def __repr__(self):
+		return ' '.join([self.name, self.title, self.active, self.input_dir, self.input_file, self.tree_name, self.varexp, self.selection, self.nentries, self.firstentry, str(self.x), self.nbinsx, self.x_title, self.y_title, self.title, self.option])
+
+	def setting(self, what, section, as_value = False, default=None):
+		retval = None
+		try:
+			retval = section[what]
+		except:
+			# check the parent whether setting exists
+			retval = None
+		if retval is None:
+			retval = self.setting(what, section.parent, as_value)
+		if retval is None:
+			retval = default
+		if retval is None:
+			retval = ''
+			if as_value:
+				retval = 0
+		return retval
+
+class TDrawConfig(object):
+	def __init__(self, fname, opts=None):
+		self.config = ConfigObj(fname, raise_errors=True)
+		self.recreate = False
+		self.clean = True
+		if opts:
+			self.recreate = opts.recreate
+			self.clean = opts.clean
+		self.cleaned_files = []
+		self.entries = []
+		self.process()
+
+	def process_section(self, section):
+		if len(section.sections):
+			for s in section.sections:
+				self.process_section(section[s])
+		else:
+			tde = TDrawEntry(section)
+			self.entries.append(tde)
+
+	def process(self):
+		for s in self.config.sections:
+			if s == 'options':
+				continue
+			self.process_section(self.config[s])
+
+	def __repr__(self):
+		return '\n'.join(['[i] {} {}'.format(i, str(s)) for i,s in enumerate(self.entries)])
+
+
 def tdraw_from_file(fname, recreate=False, clean_first=False):
-	cleaned = False
+	cleaned = []
 	smode = 'UPDATE'
 	if recreate == True:
 		smode = 'RECREATE'
@@ -164,10 +235,14 @@ def tdraw_from_file(fname, recreate=False, clean_first=False):
 				hout.SetTitle(config[s]['title'])
 				hout.GetXaxis().SetTitle(config[s]['x_title'])
 				hout.GetYaxis().SetTitle(config[s]['y_title'])
-			if clean_first == True and cleaned == False:
-				fout = r.TFile(sfoutname, 'recreate')
-				fout.Close()
-				cleaned = True
+			if clean_first == True:
+				if sfoutname in cleaned:
+					pass
+				else:
+					print '[i] clean',sfoutname,'requested'
+					fout = r.TFile(sfoutname, 'recreate')
+					fout.Close()
+					cleaned.append(sfoutname)
 			fout = r.TFile(sfoutname, smode)
 			fout.cd()
 			hout.Write()
@@ -187,6 +262,7 @@ if __name__=="__main__":
 	parser.add_argument('--recreate', help='write files with "recreate" instead of "update"', action='store_true')
 	parser.add_argument('--clean', help='remove output file - once before start...', action='store_true')
 	parser.add_argument('fname', type=str, nargs='*')
+	parser.add_argument('--new', help='new implementation', action='store_true')
 
 	args = parser.parse_args()
 
@@ -199,8 +275,11 @@ if __name__=="__main__":
 		tc = r.TCanvas('ctmp', 'ctmp')
 		for fn in args.fname:
 			tc.cd()
-			tdraw_from_file(fn, args.recreate, args.clean)
+			if args.new:
+				cfg = TDrawConfig(fn, args)
+				print cfg
+			else:
+				tdraw_from_file(fn, args.recreate, args.clean)
 
 	if args.ipython:
 		IPython.embed()
-
