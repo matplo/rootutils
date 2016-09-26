@@ -89,7 +89,8 @@ def quick_check_section(s, sname):
 			retval = False
 	return retval
 
-def tdraw_from_file(fname, recreate=False):
+def tdraw_from_file(fname, recreate=False, clean_first=False):
+	cleaned = False
 	smode = 'UPDATE'
 	if recreate == True:
 		smode = 'RECREATE'
@@ -163,6 +164,10 @@ def tdraw_from_file(fname, recreate=False):
 				hout.SetTitle(config[s]['title'])
 				hout.GetXaxis().SetTitle(config[s]['x_title'])
 				hout.GetYaxis().SetTitle(config[s]['y_title'])
+			if clean_first == True and cleaned == False:
+				fout = r.TFile(sfoutname, 'recreate')
+				fout.Close()
+				cleaned = True
 			fout = r.TFile(sfoutname, smode)
 			fout.cd()
 			hout.Write()
@@ -180,6 +185,7 @@ if __name__=="__main__":
 	parser.add_argument('-i', '--ipython', help='end with IPython prompt', action='store_true')
 	parser.add_argument('-g', '--example', help='dump an example file and exit', action='store_true')
 	parser.add_argument('--recreate', help='write files with "recreate" instead of "update"', action='store_true')
+	parser.add_argument('--clean', help='remove output file - once before start...', action='store_true')
 	parser.add_argument('fname', type=str, nargs='*')
 
 	args = parser.parse_args()
@@ -193,7 +199,7 @@ if __name__=="__main__":
 		tc = r.TCanvas('ctmp', 'ctmp')
 		for fn in args.fname:
 			tc.cd()
-			tdraw_from_file(fn, args.recreate)
+			tdraw_from_file(fn, args.recreate, args.clean)
 
 	if args.ipython:
 		IPython.embed()
