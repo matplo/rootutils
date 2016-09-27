@@ -24,6 +24,7 @@ def dump_example():
 libs =
 
 [histogram]
+	# will draw only if varexp defined (here or in the parent tree)
 	input_dir =
 	active = True
 	output_file = default_output.root
@@ -41,7 +42,19 @@ libs =
 	title = muons phi
 	name = muons_phi
 
-[histogram from dir]
+[[another]]
+	selection = (pt>10)
+
+[[another1]]
+	selection = +(pt<20)
+
+[special]
+	# this will copy all the features of the [another]
+	# but change only the one specified here (note: copy IS RECURSIVE - will copy tree of sections)
+	copy = another
+	nbinsx = 20
+
+[histogram_from_dir]
 	active = True
 	output_file = +_output
 	input_file = Tree_AnalysisResults.root
@@ -106,10 +119,28 @@ def quick_check_section(s, sname):
 			retval = False
 	return retval
 
+def section_has_setting(what, section, recursive=True):
+	retval = None
+	try:
+		retval = section[what]
+	except:
+		# check the parent whether setting exists
+		retval = None
+	if retval is None and recursive is True:
+		if section.parent.name:
+			retval = section_has_setting(what, section.parent, recursive)
+	return retval
+
 class TDrawEntry(object):
 	def __init__(self, section):
-		self.section    = section
+		self.fields      = ['name', 'title', 'active', 'input_dir',
+							'input_file', 'tree_name', 'varexp',
+							'selection', 'nentries', 'firstentry',
+							'x', 'nbinsx', 'x_title', 'y_title',
+							'option', 'output_file']
 
+		self.section     = section
+		self.parents     = self.get_parents()
 		self.title       = self.setting('title', section, '')
 		self.active      = self.setting('active', section, True)
 		self.input_dir   = self.setting('input_dir', section, '')
@@ -127,18 +158,29 @@ class TDrawEntry(object):
 		self.title       = self.setting('title', section, '')
 		self.name        = self.make_name(section)  # section.name
 		self.x           = []
-
+		self.selection   = self.get_selection(section)
 		self.x.append(get_value(self.setting('x', section, [-1, 1])[0]))
 		self.x.append(get_value(self.setting('x', section, [-1, 1])[1]))
-		if len(self.selection) > 1:
-			if self.selection[0] == '+':
-				self.selection = self.setting('selection', section.parent, '(1)') + ' && ' + self.selection[1:]
+
 		if not self.title:
 			#self.title = self.name
 			if len(self.selection) > 1:
 				self.title = '{} w/ {}'.format(self.varexp, self.selection)
 			else:
 				self.title = '{}'.format(self.varexp)
+
+	def get_selection(self, section):
+		sel = self.setting('selection', section, '')
+		if len(sel) > 0:
+			if sel[0] == '+':
+				if len(sel) > 1:
+					if len(self.get_selection(section.parent)) > 0:
+						sel = self.get_selection(section.parent) + ' && ' + sel[1:]
+					else:
+						sel = sel[1:]
+				else:
+					sel = self.get_selection(section.parent)
+		return sel
 
 	def is_iterable(self, o):
 		retval = False
@@ -159,6 +201,15 @@ class TDrawEntry(object):
 		if retval is None:
 			if section.parent.name:
 				retval = self._setting(what, section.parent)
+		return retval
+
+	def _setting_self(self, what, section):
+		retval = None
+		try:
+			retval = section[what]
+		except:
+			# check the parent whether setting exists
+			retval = None
 		return retval
 
 	def setting(self, what, section, vdefault):
@@ -206,17 +257,35 @@ class TDrawEntry(object):
 		name.reverse()
 		return '_'.join(name)
 
+	def get_parents(self):
+		s = self.section
+		name = [self.section.name]
+		while s:
+			if s.parent.name:
+				name.append(s.parent.name)
+			else:
+				break
+			s = s.parent
+		name.reverse()
+		return ' '.join(name)
+
 	def row_full(self):
 		return [self.name, self.title, self.active, self.input_dir, self.input_file, self.tree_name, self.varexp, self.selection, self.nentries, self.firstentry, str(self.x), self.nbinsx, self.x_title, self.y_title, self.option, self.output_file]
 
 	def row_head_full(self):
 		return ['name', 'title', 'active', 'input_dir', 'input_file', 'tree_name', 'varexp', 'selection', 'nentries', 'firstentry', 'x-range', 'nbinsx', 'x_title', 'y_title', 'option', 'output_file']
 
-	def row(self):
+	def row_more(self):
 		return [self.val_and_type(x) for x in [self.name, self.active, self.input_dir, self.input_file, self.tree_name, self.varexp, self.selection, self.x, self.nentries, self.option, self.output_file]]
 
-	def row_head(self):
+	def row_head_more(self):
 		return ['name', 'active', 'in_dir', 'in_file', 'tree', 'varexp', 'sel.', 'x-range', 'NE', 'opt', 'output_file']
+
+	def row(self):
+		return [self.val_and_type(x) for x in [self.name, self.active, self.input_dir, self.input_file, self.tree_name, self.varexp, self.selection]]
+
+	def row_head(self):
+		return ['name', 'active', 'dir', 'in_file', 'tree', 'varexp', 'sel.']
 
 	def val_and_type(self, x):
 		if type(x) == str:
@@ -224,8 +293,7 @@ class TDrawEntry(object):
 		else:
 			return str(x)
 	def __repr__(self):
-		return ' | '.join([self.val_and_type(x) for x in [self.name, self.title, self.active, self.input_dir, self.input_file, self.tree_name, self.varexp, self.selection, self.nentries, self.firstentry, self.x, self.nbinsx, self.x_title, self.y_title, self.option, self.output_file]])
-
+		return self.parents + '\n' + ' | '.join([self.val_and_type(x) for x in [self.name, self.title, self.active, self.input_dir, self.input_file, self.tree_name, self.varexp, self.selection, self.nentries, self.firstentry, self.x, self.nbinsx, self.x_title, self.y_title, self.option, self.output_file]])
 
 class TDrawConfig(object):
 	def __init__(self, fname, opts=None):
@@ -246,15 +314,48 @@ class TDrawConfig(object):
 		if len(section.sections):
 			for s in section.sections:
 				self.process_section(section[s])
+			if section_has_setting('varexp', section, recursive=True):
+				tde = TDrawEntry(section)
+				self.entries.append(tde)
 		else:
 			tde = TDrawEntry(section)
 			self.entries.append(tde)
+
+	def is_copy(self, s):
+		try:
+			if len(s['copy']) > 0:
+				return True
+		except:
+			return False
 
 	def process(self):
 		for s in self.config.sections:
 			if s == 'options':
 				continue
+			if self.is_copy(self.config[s]):
+				print '[i]', s, 'is a copy'
+				continue
 			self.process_section(self.config[s])
+		# now process copies
+		copies = []
+		for s in self.config.sections:
+			if s == 'options':
+				continue
+			if self.is_copy(self.config[s]):
+				scopy = self.config[s]['copy']
+				model = TDrawEntry(self.config[s])
+				for se in self.entries:
+					if scopy in se.parents:
+						print '[i] use for copy:', se.name
+						newtde = TDrawEntry(se.section)
+						for sf in model.fields:
+							setting = model._setting_self(sf, model.section)
+							if setting:
+								newtde.__setattr__(sf, setting)
+						newtde.name = '{}_{}'.format(model.name, newtde.name)
+						copies.append(newtde)
+		for e in copies:
+			self.entries.append(e)
 
 	def __repr__(self):
 		#return '\n'.join(['[i] {} {}'.format(i, str(s)) for i,s in enumerate(self.entries)])
@@ -273,29 +374,28 @@ class TDrawConfig(object):
 				print '    e.input_dir is:',e.input_dir
 			else:
 				input_files = [e.input_file]
-			print '[i]', e
 			pbar = tqdm(input_files)
 			for fn in pbar:
 				sfn = fn
 				if len(fn) > 40:
 					sfn = fn[:18] + '..' + fn[len(fn)-20:]
-				pbar.set_description('    {} : {}'.format(e.name, sfn))
 				if foutname[0] == '+':
 					sfoutname = fn.replace('.root', foutname[1:] + '.root')
 				else:
 					sfoutname = foutname
+				if sfoutname in cleaned:
+					pbar.set_description('    {} : {}'.format(e.name, sfn))
+				else:
+					if self.clean:
+						pbar.set_description('    {} : (c:{}) {}'.format(e.name, sfoutname, sfn))
+					else:
+						pbar.set_description('    {} : (o:{}) {}'.format(e.name, sfoutname, sfn))
 				fin = r.TFile(fn)
 				if not fin:
 					continue
 				hstring = 'htmp({0},{1},{2})'.format(e.nbinsx, e.x[0], e.x[1])
 				t = fin.Get(e.tree_name)
 				if t:
-					# t.MakeClass('Correlations')
-					# types = [type(x) for x in [e.selection, e.option, e.nentries, e.firstentry]]
-					# print types
-					# types = [e.selection, e.option, e.nentries, e.firstentry]
-					# print types
-					# t.Draw(e.varexp + '>>{}'.format(hstring), e.selection, e.option, int(get_value(e.nentries)), int(get_value(e.firstentry)))
 					t.Draw(e.varexp + '>>{}'.format(hstring), e.selection, e.option, e.nentries, e.firstentry)
 					hout = r.gDirectory.Get('htmp')
 					hout.SetDirectory(0)
@@ -307,16 +407,19 @@ class TDrawConfig(object):
 					if sfoutname in cleaned:
 						pass
 					else:
-						print '[i] clean', sfoutname, 'requested'
-						os.remove(sfoutname)
-						cleaned.append(sfoutname)
+						# print '[i] clean', sfoutname, 'requested'
+						try:
+							os.remove(sfoutname)
+						except:
+							pass
+				cleaned.append(sfoutname)
 				fout = r.TFile(sfoutname, 'UPDATE')
 				fout.cd()
 				hout.Write()
 				fout.Purge()
 				fout.Close()
 				fin.Close()
-		print '    done.'
+		print '[i] done.'
 
 def tdraw_from_file(fname, recreate=False, clean_first=False):
 	cleaned = []
@@ -397,7 +500,7 @@ def tdraw_from_file(fname, recreate=False, clean_first=False):
 				if sfoutname in cleaned:
 					pass
 				else:
-					print '[i] clean',sfoutname,'requested'
+					# print '[i] clean',sfoutname,'requested'
 					fout = r.TFile(sfoutname, 'recreate')
 					fout.Close()
 					cleaned.append(sfoutname)
@@ -420,7 +523,7 @@ if __name__=="__main__":
 	parser.add_argument('--recreate', help='write files with "recreate" instead of "update"', action='store_true')
 	parser.add_argument('--clean', help='remove output file - once before start...', action='store_true')
 	parser.add_argument('fname', type=str, nargs='*')
-	parser.add_argument('--new', help='new implementation', action='store_true')
+	parser.add_argument('--old', help='old implementation', action='store_true')
 
 	args = parser.parse_args()
 
@@ -433,12 +536,12 @@ if __name__=="__main__":
 		tc = r.TCanvas('ctmp', 'ctmp')
 		for fn in args.fname:
 			tc.cd()
-			if args.new:
+			if args.old:
+				tdraw_from_file(fn, args.recreate, args.clean)
+			else:
 				cfg = TDrawConfig(fn, args)
 				print cfg
 				cfg.run()
-			else:
-				tdraw_from_file(fn, args.recreate, args.clean)
 
 	if args.ipython:
 		IPython.embed()
