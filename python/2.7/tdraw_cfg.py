@@ -351,6 +351,10 @@ class TDrawConfig(object):
 						for sf in model.fields:
 							setting = model._setting_self(sf, model.section)
 							if setting:
+								if sf == 'selection':
+									if setting[0] == '+':
+										if len(setting.strip()) > 1:
+											setting = '({}) && ({})'.format(newtde.selection, setting[1:])
 								newtde.__setattr__(sf, setting)
 						newtde.name = '{}_{}'.format(model.name, newtde.name)
 						copies.append(newtde)
