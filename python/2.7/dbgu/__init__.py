@@ -1,1 +1,1 @@
-import debug_utils
+from debug_utils import *

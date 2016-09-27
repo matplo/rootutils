@@ -287,6 +287,12 @@ class TDrawEntry(object):
 	def row_head(self):
 		return ['name', 'active', 'dir', 'in_file', 'tree', 'varexp', 'sel.']
 
+	def row_commented(self):
+		return [x for x in ['#', self.name, self.active, self.input_dir, self.input_file, self.tree_name, self.varexp, self.selection]]
+
+	def row_head_commented(self):
+		return ['#', 'name', 'active', 'dir', 'in_file', 'tree', 'varexp', 'sel.']
+
 	def val_and_type(self, x):
 		if type(x) == str:
 			return '"{}"'.format(x)
@@ -333,7 +339,7 @@ class TDrawConfig(object):
 			if s == 'options':
 				continue
 			if self.is_copy(self.config[s]):
-				print '[i]', s, 'is a copy'
+				#print '[i]', s, 'is a copy'
 				continue
 			self.process_section(self.config[s])
 		# now process copies
@@ -346,7 +352,7 @@ class TDrawConfig(object):
 				model = TDrawEntry(self.config[s])
 				for se in self.entries:
 					if scopy in se.parents:
-						print '[i] use for copy:', se.name
+						#print '[i] use for copy:', se.name
 						newtde = TDrawEntry(se.section)
 						for sf in model.fields:
 							setting = model._setting_self(sf, model.section)
@@ -364,6 +370,23 @@ class TDrawConfig(object):
 	def __repr__(self):
 		#return '\n'.join(['[i] {} {}'.format(i, str(s)) for i,s in enumerate(self.entries)])
 		return tabulate([e.row() for e in self.entries], headers=self.entries[0].row_head())
+
+	def tab_comment(self):
+		print tabulate([e.row_commented() for e in self.entries], headers=self.entries[0].row_head_commented(), tablefmt='plain')
+		#print tabulate([e.row_commented() for e in self.entries])
+
+	def dump_class_config(self):
+		self.tab_comment()
+		for e in self.entries:
+			print e.name,'=',e.name
+			print '{}_file = {}'.format(e.name, e.output_file)
+			print '{}_title = {}'.format(e.name, e.title)
+			print '{}_varexp = {}'.format(e.name, e.varexp)
+			print '{}_selection = {}'.format(e.name, e.selection)
+
+		print 'histograms = {}'.format(','.join([e.name for e in self.entries]))
+		print 'files = {}'.format(','.join([e.output_file for e in self.entries]))
+		print 'titles = {}'.format(','.join([e.title for e in self.entries]))
 
 	def run(self):
 		cleaned = []
@@ -528,6 +551,8 @@ if __name__=="__main__":
 	parser.add_argument('--clean', help='remove output file - once before start...', action='store_true')
 	parser.add_argument('fname', type=str, nargs='*')
 	parser.add_argument('--old', help='old implementation', action='store_true')
+	parser.add_argument('--test', help='show what we get from the config...', action='store_true')
+	parser.add_argument('--configobj', help='show what we get from the config...', action='store_true')
 
 	args = parser.parse_args()
 
@@ -544,8 +569,11 @@ if __name__=="__main__":
 				tdraw_from_file(fn, args.recreate, args.clean)
 			else:
 				cfg = TDrawConfig(fn, args)
-				print cfg
-				cfg.run()
-
+				if args.configobj:
+					cfg.dump_class_config()
+				else:
+					print cfg
+					if not args.test:
+						cfg.run()
 	if args.ipython:
 		IPython.embed()
