@@ -130,11 +130,15 @@ class FileView( r.TGMainFrame ):
 				self.tab.AddTab(tabname, dframe)
 				self.tab.SetTab(self.tab.GetNumberOfTabs()-1, r.kFALSE)
 				self.tabs.append(dframe)
-				dframe.Layout()
-				dframe.MapSubwindows()
+				dframe.do_layout()
+				dframe.draw(mf)
+				self.tab.Layout()
+				self.tab.Resize(self.width, self.height)
+				self.tab.MapSubwindows()
 			else:
 				self.logfileFrame.flush()
 				self.tabs[i+2].draw(mf) #remember the log and util tab
+		self.Layout()
 
 class LogFileFrame( r.TGCompositeFrame ):
 	def __init__( self, parent, width, height, name, logfilename=None):
@@ -213,6 +217,8 @@ class LogFileFrame( r.TGCompositeFrame ):
 class CanvasFrame( r.TGCompositeFrame ):
 	def __init__( self, parent, width, height, name):
 		r.TGCompositeFrame.__init__( self, parent, width, height, r.kLHintsExpandX | r.kLHintsExpandY)
+		self.width = width
+		self.height = height
 		self.name = name
 
 		self.frameHint        = r.TGLayoutHints(r.kLHintsExpandX | r.kLHintsExpandY)
@@ -227,6 +233,11 @@ class CanvasFrame( r.TGCompositeFrame ):
 		self.canvasFrame.AddFrame( self.canvas, self.frameHint )
 
 		self.tcanvas = self.canvas.GetCanvas()
+
+	def do_layout(self):
+		self.Layout()
+		self.Resize(width, height)
+		self.MapSubwindows()
 
 class UtilCanvasFrame( r.TGCompositeFrame ):
 	def __init__( self, parent, width, height, name):
@@ -310,6 +321,8 @@ class UtilCanvasFrame( r.TGCompositeFrame ):
 class DrawFrame( r.TGCompositeFrame ):
 	def __init__( self, parent, width, height, name):
 		r.TGCompositeFrame.__init__( self, parent, width, height, r.kLHintsExpandX | r.kLHintsExpandY)
+		self.width = width
+		self.height = height
 		self.name = name
 
 		self.frameHint        = r.TGLayoutHints(r.kLHintsExpandX | r.kLHintsExpandY)
@@ -320,7 +333,7 @@ class DrawFrame( r.TGCompositeFrame ):
 
 		self.canvasFrame = r.TGGroupFrame( self, 'drawing')
 		self.AddFrame(self.canvasFrame, self.frameHint )
-		self.canvas     = r.TRootEmbeddedCanvas( self.name, self.canvasFrame, 50, 50 )
+		self.canvas     = r.TRootEmbeddedCanvas( self.name, self.canvasFrame, 100, 100 )
 		self.canvasFrame.AddFrame( self.canvas, self.frameHint )
 
 		self.buttonsFrame = r.TGButtonGroup( self, 'actions', r.kHorizontalFrame)
@@ -342,6 +355,13 @@ class DrawFrame( r.TGCompositeFrame ):
 		self.buttonsFrame.AddFrame( self.pngButton, self.buttonHint )
 
 		self.mf = None
+
+		self.do_layout()
+
+	def do_layout(self):
+		self.Layout()
+		self.Resize(self.width, self.height)
+		self.MapSubwindows()
 
 	def pdf(self):
 		#if self.mf:
