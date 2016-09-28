@@ -133,7 +133,7 @@ class FileView( r.TGMainFrame ):
 				dframe.do_layout()
 				dframe.draw(mf)
 				self.tab.Layout()
-				self.tab.Resize(self.width, self.height)
+				#self.tab.Resize(self.width, self.height)
 				self.tab.MapSubwindows()
 			else:
 				self.logfileFrame.flush()
