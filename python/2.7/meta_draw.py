@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import ROOT as r 
+import ROOT as r
 import tutils as tu
 import draw_utils as du
 
@@ -14,6 +14,10 @@ import os
 
 from string import atof,atoi
 import eval_string
+
+def get_value(st):
+	np = eval_string.NumericStringParser()
+	return np.eval(st)
 
 class DrawString(object):
 	def __init__(self, s):
@@ -182,7 +186,7 @@ class Comment(object):
 				s=s.split(k)[0]
 		return s
 
-	def get_setting(self, sitem, separator=''):		
+	def get_setting(self, sitem, separator=''):
 		setting = 0
 		if self.get_settings(sitem)[-1]:
 			if separator == '':
@@ -194,32 +198,32 @@ class Comment(object):
 	def get_text(self):
 		return self.get_settings('item=')
 
-	def get_text_size(self):		
+	def get_text_size(self):
 		if self.get_setting('tx_size=', ' '):
 			return atof(self.get_setting('tx_size=', ' '))
 		return 0.025
 
-	def get_color(self):		
+	def get_color(self):
 		if self.get_setting('color=', ' '):
 			return atoi(self.get_setting('color=', ' '))
 		return 1
 
-	def get_bg_color(self):		
+	def get_bg_color(self):
 		if self.get_setting('bgc=', ' '):
 			return atoi(self.get_setting('bgc=', ' '))
 		return r.kWhite
 
-	def get_font(self):		
+	def get_font(self):
 		if self.get_setting(' font=', ' '):
 			return self.get_setting('font=', ' ')
 		return 42
 
-	def get_alpha(self):		
+	def get_alpha(self):
 		if self.get_setting('alpha=', ' '):
 			return atof(self.get_setting('alpha=', ' '))/100.
 		return 0
 
-	def get_alignment(self):		
+	def get_alignment(self):
 		if self.get_setting('align=', ' '):
 			return atoi(self.get_setting('align=', ' '))
 		return 12
@@ -238,7 +242,7 @@ class Comment(object):
 			self.tleg.SetFillStyle(1001)
 			#tleg.SetFillColorAlpha(ROOT.kWhite, 0.9)
 			print '------>',self.get_bg_color()
-			self.tleg.SetFillColorAlpha(self.get_bg_color(), 
+			self.tleg.SetFillColorAlpha(self.get_bg_color(),
 										self.get_alpha())
 			self.tleg.SetTextAlign(self.get_alignment())
 			self.tleg.SetTextSize(self.get_text_size())
@@ -296,7 +300,7 @@ class MetaFigure(object):
 			return
 		self.last_ds = DrawString(cline)
 		self.last_ds.fname = self.check_filepath(self.last_ds.fname)
-		cobj = self.hl.add_from_file(self.last_ds.hname, self.last_ds.fname, self.last_ds.title(), self.last_ds.dopt)		
+		cobj = self.hl.add_from_file(self.last_ds.hname, self.last_ds.fname, self.last_ds.title(), self.last_ds.dopt)
 		if cobj != None:
 			if self.last_ds.scale() != None:
 				self.hl.scale_at_index(-1, self.last_ds.scale())
@@ -313,7 +317,7 @@ class MetaFigure(object):
 		x1 = None
 		x2 = None
 		y1 = None
-		y2 = None	
+		y2 = None
 		if sleg == None:
 			return x1, y1, x2, y2
 		try:
@@ -332,7 +336,7 @@ class MetaFigure(object):
 				retval = l.replace(tag+' ','')
 			else:
 				if tag == l.strip():
-					retval = l.replace(tag,'')				
+					retval = l.replace(tag,'')
 		if split != None and retval != None:
 			retval = retval.split(split)
 		return retval
@@ -366,7 +370,7 @@ class MetaFigure(object):
 			except:
 				print '[w] trouble with line:',t
 		#du.draw_line(x1, y1, x2, y2, col=2, style=7, width=2, option='brNDC', alpha=0.3)
-			du.draw_line(	atof(args[0]), atof(args[1]), atof(args[2]), atof(args[3]),
+			du.draw_line(	get_value(args[0]), get_value(args[1]), get_value(args[2]), get_value(args[3]),
 							atoi(args[4]), atoi(args[5]), atoi(args[6]), args[8], atof(args[7]));
 
 	def axis_range(self, sleg):
@@ -487,15 +491,15 @@ class MetaFigure(object):
 		if logy == True:
 			self.hl.set_log_multipad('y')
 		else:
-			self.hl.set_log_multipad('y', False)			
+			self.hl.set_log_multipad('y', False)
 		if logx == True:
 			self.hl.set_log_multipad('x')
 		else:
-			self.hl.set_log_multipad('x', False)			
+			self.hl.set_log_multipad('x', False)
 		if logz == True:
 			self.hl.set_log_multipad('z')
 		else:
-			self.hl.set_log_multipad('z', False)			
+			self.hl.set_log_multipad('z', False)
 
 		#setgridxy
 		self.hl.set_grid_multipad('xy', False)
@@ -516,7 +520,7 @@ class MetaFigure(object):
 		except:
 			pass
 		leg_opt = 'brNDC'
-		try:			
+		try:
 			if 'alpha=' in sleg:
 				leg_opt = leg_opt + ' +a' + sleg.split('alpha=')[1].split(' ')[0]
 		except:
@@ -613,11 +617,11 @@ class MetaDrawFile(object):
 
 	def pdf(self):
 		for f in self.figures:
-			f.pdf()		
+			f.pdf()
 
 	def png(self):
 		for f in self.figures:
-			f.png()		
+			f.png()
 
 	def add_option(self, opt):
 		for f in self.figures:

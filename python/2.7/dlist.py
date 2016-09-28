@@ -1213,7 +1213,7 @@ class dlist(debugable):
 						newname = self.name + '-{}'.format(i)
 			else:
 				if ':' == name_mod[-1]:
-					newname = name_mod.replace(':','')
+					newname = name_mod.replace(':','') + '_{}'.format(i)
 				else:
 					newname = h.obj.GetName() + name_mod
 
