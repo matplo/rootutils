@@ -46,7 +46,7 @@ class ConfigObject(object):
 			# mode == 2 is section
 			self.load_from_section(input)
 
-	def get(s):
+	def get(self, s):
 		return self.__getattribute__(s)
 
 	def load_from_file(self, input):

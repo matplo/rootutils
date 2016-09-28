@@ -1208,11 +1208,15 @@ class dlist(debugable):
 					newname = self.name + '-{}-'.format(i) + smod
 				else:
 					if 'modn:' in name_mod:
-						newname =  'o_{}'.format(i)
+						newname = 'o_{}'.format(i)
 					else:
 						newname = self.name + '-{}'.format(i)
 			else:
-				newname = h.obj.GetName() + name_mod
+				if ':' == name_mod[-1]:
+					newname = name_mod.replace(':','')
+				else:
+					newname = h.obj.GetName() + name_mod
+
 			if h.dopt.no_legend:
 				newname = newname + '_noleg'
 			if h.dopt.hidden:
