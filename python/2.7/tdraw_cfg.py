@@ -375,7 +375,9 @@ class TDrawConfig(object):
 		print tabulate([e.row_commented() for e in self.entries], headers=self.entries[0].row_head_commented(), tablefmt='plain')
 		#print tabulate([e.row_commented() for e in self.entries])
 
-	def dump_class_config(self):
+	def dump_class_config(self, fout):
+		outs = sys.stdout
+		sys.stdout = fout
 		self.tab_comment()
 		for e in self.entries:
 			print e.name,'=',e.name
@@ -387,6 +389,7 @@ class TDrawConfig(object):
 		print 'histograms = {}'.format(','.join([e.name for e in self.entries]))
 		print 'files = {}'.format(','.join([e.output_file for e in self.entries]))
 		print 'titles = {}'.format(','.join([e.title for e in self.entries]))
+		sys.stdout = outs
 
 	def run(self):
 		cleaned = []
@@ -575,5 +578,9 @@ if __name__=="__main__":
 					print cfg
 					if not args.test:
 						cfg.run()
+						fconfobj = fn.replace('.cfg', '_out.confobj')
+						with open(fconfobj, 'w') as f:
+							cfg.dump_class_config(f)
+						print '[i]',fconfobj,'written.'
 	if args.ipython:
 		IPython.embed()
