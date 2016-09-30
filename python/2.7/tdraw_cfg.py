@@ -98,11 +98,13 @@ def get_value(s, op=None, vdefault=None):
 			retval = op(retval) + rest
 	return retval
 
+
 def find_files(rootdir='.', pattern='*'):
-    return [os.path.join(rootdir, filename)
-            for rootdir, dirnames, filenames in os.walk(rootdir)
-            for filename in filenames
-            if fnmatch.fnmatch(filename, pattern)]
+	return [os.path.join(rootdir, filename)
+			for rootdir, dirnames, filenames in os.walk(rootdir)
+			for filename in filenames
+			if fnmatch.fnmatch(filename, pattern)]
+
 
 def quick_check_section(s, sname):
 	once_per_section = 0
@@ -112,12 +114,13 @@ def quick_check_section(s, sname):
 		try:
 			s[o]
 		except:
-			print >> sys.stderr, '[e] option [',o,'] missing in section [',sname,']'
+			print >> sys.stderr, '[e] option [', o, '] missing in section [', sname, ']'
 			if once_per_section == 0:
 				once_per_section = 1
 				print '    note: some options can be blank but present anyhow'
 			retval = False
 	return retval
+
 
 def section_has_setting(what, section, recursive=True):
 	retval = None
@@ -130,6 +133,7 @@ def section_has_setting(what, section, recursive=True):
 		if section.parent.name:
 			retval = section_has_setting(what, section.parent, recursive)
 	return retval
+
 
 class TDrawEntry(object):
 	def __init__(self, section):
@@ -163,7 +167,7 @@ class TDrawEntry(object):
 		self.x.append(get_value(self.setting('x', section, [-1, 1])[1]))
 
 		if not self.title:
-			#self.title = self.name
+			# self.title = self.name
 			if len(self.selection) > 1:
 				self.title = '{} w/ {}'.format(self.varexp, self.selection)
 			else:
@@ -231,18 +235,18 @@ class TDrawEntry(object):
 							retval = retval.split(',')
 							if self.is_iterable(vdefault) and len(vdefault) > 0:
 								if type(vdefault[0]) == int:
-									retval = [int(get_value(x, int, 0)) for x in retval]
+									retval = [int(get_value(x, int, vdefault)) for x in retval]
 								if type(vdefault[0]) == float:
-									retval = [float(get_value(x, float, 0)) for x in retval]
+									retval = [float(get_value(x, float, vdefault)) for x in retval]
 								if type(vdefault[0]) == bool:
-									retval = [bool(get_value(x, bool, 0)) for x in retval]
+									retval = [bool(get_value(x, bool, vdefault)) for x in retval]
 				else:
 					if type(vdefault) == int:
-						retval = int(get_value(retval, int, 0))
+						retval = int(get_value(retval, int, vdefault))
 					if type(vdefault) == float:
-						retval = float(get_value(retval, float, 0))
+						retval = float(get_value(retval, float, vdefault))
 					if type(vdefault) == bool:
-						retval = bool(get_value(retval, bool, False))
+						retval = bool(get_value(retval, bool, vdefault))
 		return retval
 
 	def make_name(self, section):
@@ -337,6 +341,19 @@ class TDrawConfig(object):
 	def process(self):
 		for s in self.config.sections:
 			if s == 'options':
+				try:
+					slibs = self.config[s]['libs']
+					if type(slibs) == list:
+						for slib in slibs:
+							sexplib = r.gSystem.ExpandPathName(slib.strip())
+							print '[i] loading', sexplib
+							r.gSystem.Load(sexplib)
+					else:
+						sexplib = r.gSystem.ExpandPathName(slibs)
+						print '[i] loading', sexplib
+						r.gSystem.Load(sexplib)
+				except:
+					pass
 				continue
 			if self.is_copy(self.config[s]):
 				#print '[i]', s, 'is a copy'
@@ -426,7 +443,9 @@ class TDrawConfig(object):
 				hstring = 'htmp({0},{1},{2})'.format(e.nbinsx, e.x[0], e.x[1])
 				t = fin.Get(e.tree_name)
 				if t:
-					t.Draw(e.varexp + '>>{}'.format(hstring), e.selection, e.option, e.nentries, e.firstentry)
+					# print e.varexp, e.selection, e.option, e.nentries, e.firstentry
+					nentr = t.Draw(e.varexp + '>>{}'.format(hstring), e.selection, e.option, e.nentries, e.firstentry)
+					# print '[i] number of entries drawn:',nentr
 					hout = r.gDirectory.Get('htmp')
 					hout.SetDirectory(0)
 					hout.SetName(e.name)
