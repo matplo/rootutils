@@ -1201,6 +1201,7 @@ class dlist(debugable):
 			return
 
 		for i,h in enumerate(self.l):
+			newname = h.obj.GetName()
 			if 'mod:' in name_mod or 'modn:' in name_mod:
 				smod = name_mod.replace('mod:', '')
 				smod = name_mod.replace('modn:', '')
@@ -1212,19 +1213,19 @@ class dlist(debugable):
 					else:
 						newname = self.name + '-{}'.format(i)
 			else:
-				if ':' == name_mod[-1]:
-					newname = name_mod.replace(':','') + '_{}'.format(i)
-				else:
-					newname = h.obj.GetName() + name_mod
+				if len(name_mod)>0:
+					if ':' == name_mod[-1]:
+						newname = name_mod.replace(':','') + '_{}'.format(i)
+					else:
+						newname = h.obj.GetName() + name_mod
 
 			if h.dopt.no_legend:
 				newname = newname + '_noleg'
 			if h.dopt.hidden:
 				newname = newname + '_hidden'
-			try:
-				h.obj.Write(newname)
-			except:
-				print >> sys.stderr, '[e] unable to write object:',h.obj.GetName()
+			h.obj.Write(newname)
+			# except:
+			# 	print >> sys.stderr, '[e] unable to write object:',h.obj.GetName()
 
 		try:
 			f.Close()
@@ -1267,9 +1268,9 @@ class dlist(debugable):
 			if h.dopt.hidden or h.obj.GetTitle() == 'fake':
 				continue
 			if isummed == 0:
-				reth = draw_object(h.obj,self.name + '-sum', h.name + '-sum')
+				reth = draw_object(h.obj, self.name + '-sum', h.name + '-sum')
 				if scales != None:
-					reth.Scale(scales[i])
+					reth.obj.Scale(scales[i])
 				isummed += 1
 				continue
 			scale = 1.

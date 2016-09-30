@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from time import sleep
 import tutils
 import ROOT as r
 import IPython
@@ -148,6 +149,8 @@ class TDrawEntry(object):
 		self.title       = self.setting('title', section, '')
 		self.active      = self.setting('active', section, True)
 		self.input_dir   = self.setting('input_dir', section, '')
+		if '$' in self.input_dir:
+			self.input_dir = os.path.expandvars(self.input_dir)
 		self.input_file  = self.setting('input_file', section, '')
 		self.output_file = self.setting('output_file', section, 'tdraw_out.root')
 		self.tree_name   = self.setting('tree_name', section, 't')
@@ -328,8 +331,9 @@ class TDrawConfig(object):
 				tde = TDrawEntry(section)
 				self.entries.append(tde)
 		else:
-			tde = TDrawEntry(section)
-			self.entries.append(tde)
+			if section_has_setting('varexp', section, recursive=True):
+				tde = TDrawEntry(section)
+				self.entries.append(tde)
 
 	def is_copy(self, s):
 		try:
@@ -409,8 +413,15 @@ class TDrawConfig(object):
 		sys.stdout = outs
 
 	def run(self):
+		print '[i] run...'
 		cleaned = []
-		for e in self.entries:
+		if len(self.entries)<1:
+			print '[i] no entries?'
+			return
+		pbare = tqdm(self.entries, desc='    entry')
+		for e in pbare:
+			# pbare.set_description('    {}:{}'.format(pbare.n, e.name))
+			# pbare.update(0)
 			if not e.active:
 				continue
 			foutname = e.output_file
@@ -418,33 +429,41 @@ class TDrawConfig(object):
 				foutname = '+out'
 			if e.input_dir:
 				input_files = find_files(e.input_dir, pattern=e.input_file)
-				print '    e.input_dir is:',e.input_dir
+				#print '    e.input_dir:',e.input_dir, 'input_file:',e.input_file
 			else:
 				input_files = [e.input_file]
-			pbar = tqdm(input_files)
+			pbar = tqdm(input_files, desc='    file')
 			for fn in pbar:
+				ifn = input_files.index(fn)
+				#pbar.set_description('    file #{}'.format(pbar.n))
 				sfn = fn
 				if len(fn) > 40:
 					sfn = fn[:18] + '..' + fn[len(fn)-20:]
 				if foutname[0] == '+':
-					sfoutname = fn.replace('.root', foutname[1:] + '.root')
+					sfoutname = fn.replace('.root', foutname[1:].replace('.root', '') + '.root')
 				else:
-					sfoutname = foutname
-				if sfoutname in cleaned:
-					pbar.set_description('    {} : {}'.format(e.name, sfn))
-				else:
-					if self.clean:
-						pbar.set_description('    {} : (c:{}) {}'.format(e.name, sfoutname, sfn))
-					else:
-						pbar.set_description('    {} : (o:{}) {}'.format(e.name, sfoutname, sfn))
+					sfoutname = foutname.replace('.root', '_{}.root'.format(ifn))
+				#if sfoutname in cleaned:
+				#	pbar.set_description('    {} : {}'.format(e.name, sfn))
+				#else:
+				#	if self.clean:
+				#		pbar.set_description('    {} : (c:{}) {}'.format(e.name, sfoutname, sfn))
+				#	else:
+				#		pbar.set_description('    {} : (o:{}) {}'.format(e.name, sfoutname, sfn))
 				fin = r.TFile(fn)
 				if not fin:
 					continue
-				hstring = 'htmp({0},{1},{2})'.format(e.nbinsx, e.x[0], e.x[1])
+				dopt = e.option
+				if 'norange' in dopt:
+					hstring = 'htmp'
+					dopt = e.option.replace('norange', '')
+				else:
+					hstring = 'htmp({0},{1},{2})'.format(e.nbinsx, e.x[0], e.x[1])
+				#print e.name, dopt, e.option
 				t = fin.Get(e.tree_name)
 				if t:
 					# print e.varexp, e.selection, e.option, e.nentries, e.firstentry
-					nentr = t.Draw(e.varexp + '>>{}'.format(hstring), e.selection, e.option, e.nentries, e.firstentry)
+					nentr = t.Draw(e.varexp + '>>{}'.format(hstring), e.selection, dopt, e.nentries, e.firstentry)
 					# print '[i] number of entries drawn:',nentr
 					hout = r.gDirectory.Get('htmp')
 					hout.SetDirectory(0)
@@ -461,13 +480,17 @@ class TDrawConfig(object):
 							os.remove(sfoutname)
 						except:
 							pass
-				cleaned.append(sfoutname)
+				if sfoutname not in cleaned:
+					cleaned.append(sfoutname)
 				fout = r.TFile(sfoutname, 'UPDATE')
 				fout.cd()
 				hout.Write()
 				fout.Purge()
 				fout.Close()
 				fin.Close()
+		print '[i] output files:'
+		for fn in cleaned:
+			print '    '+fn
 		print '[i] done.'
 
 def tdraw_from_file(fname, recreate=False, clean_first=False):
