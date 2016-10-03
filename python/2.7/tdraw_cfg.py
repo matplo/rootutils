@@ -97,6 +97,8 @@ def get_value(s, op=None, vdefault=None):
 			else:
 				rest = 0
 			retval = op(retval) + rest
+		if op == bool:
+			retval = op(retval)
 	return retval
 
 
@@ -147,7 +149,7 @@ class TDrawEntry(object):
 		self.section     = section
 		self.parents     = self.get_parents()
 		self.title       = self.setting('title', section, '')
-		self.active      = self.setting('active', section, True)
+		self.active      = get_value(str(self.setting('active', section, True)), bool, 1)
 		self.input_dir   = self.setting('input_dir', section, '')
 		if '$' in self.input_dir:
 			self.input_dir = os.path.expandvars(self.input_dir)
@@ -305,6 +307,7 @@ class TDrawEntry(object):
 			return '"{}"'.format(x)
 		else:
 			return str(x)
+
 	def __repr__(self):
 		return self.parents + '\n' + ' | '.join([self.val_and_type(x) for x in [self.name, self.title, self.active, self.input_dir, self.input_file, self.tree_name, self.varexp, self.selection, self.nentries, self.firstentry, self.x, self.nbinsx, self.x_title, self.y_title, self.option, self.output_file]])
 

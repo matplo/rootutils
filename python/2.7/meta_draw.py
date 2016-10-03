@@ -15,9 +15,31 @@ import os
 from string import atof,atoi
 import eval_string
 
-def get_value(st):
-	np = eval_string.NumericStringParser()
-	return np.eval(st)
+#def get_value(st):
+#	np = eval_string.NumericStringParser()
+#	return np.eval(st)
+
+def get_value(s, op=None, vdefault=None):
+	if type(s) != str:
+		s = '{}'.format(s)
+	retval = 0
+	try:
+		np = eval_string.NumericStringParser()
+		retval = np.eval(s)
+	except:
+		if vdefault is None:
+			print >> sys.stderr, '[e] unable to convert to a value:[',s,']',type(s), len(s)
+		else:
+			retval = vdefault
+	if op != None:
+		if op == int:
+			rest = retval - op(retval)
+			if rest > 0.5:
+				rest = int(1)
+			else:
+				rest = 0
+			retval = op(retval) + rest
+	return retval
 
 class DrawString(object):
 	def __init__(self, s):
@@ -358,9 +380,9 @@ class MetaFigure(object):
 			args[2] = '1'
 			args[3] = '1'
 			args[4] = '2 '#color
-			args[5] = '7 '#style
-			args[6] = '2 '#width
-			args[7] = '1.' #alpha
+			args[5] = '1 '#style
+			args[6] = '3 '#width
+			args[7] = '0.5' #alpha
 			args[8] = 'brNDC'
 			nums = t.split(',')
 			try:
@@ -369,9 +391,10 @@ class MetaFigure(object):
 						args[i] = n
 			except:
 				print '[w] trouble with line:',t
-		#du.draw_line(x1, y1, x2, y2, col=2, style=7, width=2, option='brNDC', alpha=0.3)
+			# du.draw_line(x1, y1, x2, y2, col=2, style=7, width=2, option='brNDC', alpha=0.3)
 			du.draw_line(	get_value(args[0]), get_value(args[1]), get_value(args[2]), get_value(args[3]),
-							atoi(args[4]), atoi(args[5]), atoi(args[6]), args[8], atof(args[7]));
+							get_value(args[4], int, 2), get_value(args[5], int, 1), get_value(args[6], int, 3), args[8],
+							get_value(args[7], float, 0.8));
 
 	def axis_range(self, sleg):
 		x1 = None
