@@ -322,6 +322,7 @@ class TDrawConfig(object):
 			self.clean = opts.clean
 		self.cleaned_files = []
 		self.entries = []
+		self.copies = []
 		self.process()
 
 	def process_section(self, section):
@@ -345,6 +346,39 @@ class TDrawConfig(object):
 		except:
 			return False
 
+	def process_copy(self, s):
+		scopy = self.config[s]['copy']
+		copy_names = []
+		if type(scopy) is str:
+			copy_names.append(scopy)
+		else:
+			for scp in scopy:
+				copy_names.append(scp)
+		for scopy in copy_names:
+			model = TDrawEntry(self.config[s])
+			for se in self.entries:
+				docopy = False
+				if type(se.parents) is str:
+					if scopy in se.parents.split(' '):
+						docopy = True
+				else:
+					if scopy in se.parents:
+						docopy = True
+				print se.name, docopy, type(se.parents), se.parents
+				if docopy:
+					print '[i] use for copy:', se.name
+					newtde = TDrawEntry(se.section)
+					for sf in model.fields:
+						setting = model._setting_self(sf, model.section)
+						if setting:
+							if sf == 'selection':
+								if setting[0] == '+':
+									if len(setting.strip()) > 1:
+										setting = '({}) && ({})'.format(newtde.selection, setting[1:])
+							newtde.__setattr__(sf, setting)
+					newtde.name = '{}_{}'.format(model.name, newtde.name)
+					self.copies.append(newtde)
+
 	def process(self):
 		for s in self.config.sections:
 			if s == 'options':
@@ -366,44 +400,14 @@ class TDrawConfig(object):
 				#print '[i]', s, 'is a copy'
 				continue
 			self.process_section(self.config[s])
-		# now process copies
-		copies = []
+
+		# now add copies
 		for s in self.config.sections:
-			if s == 'options':
-				continue
-			if self.is_copy(self.config[s]):
-				scopy = self.config[s]['copy']
-				copy_names = []
-				if type(scopy) is str:
-					copy_names.append(scopy)
-				else:
-					for scp in scopy:
-						copy_names.append(scp)
-				for scopy in copy_names:
-					model = TDrawEntry(self.config[s])
-					for se in self.entries:
-						docopy = False
-						if type(se.parents) is str:
-							if scopy in se.parents.split(' '):
-								docopy = True
-						else:
-							if scopy in se.parents:
-								docopy = True
-						print se.name, docopy, type(se.parents), se.parents
-						if docopy:
-							print '[i] use for copy:', se.name
-							newtde = TDrawEntry(se.section)
-							for sf in model.fields:
-								setting = model._setting_self(sf, model.section)
-								if setting:
-									if sf == 'selection':
-										if setting[0] == '+':
-											if len(setting.strip()) > 1:
-												setting = '({}) && ({})'.format(newtde.selection, setting[1:])
-									newtde.__setattr__(sf, setting)
-							newtde.name = '{}_{}'.format(model.name, newtde.name)
-							copies.append(newtde)
-		for e in copies:
+			if s != 'options':
+				if self.is_copy(self.config[s]):
+					self.process_copy(s)
+
+		for e in self.copies:
 			self.entries.append(e)
 
 		for e in self.entries:
