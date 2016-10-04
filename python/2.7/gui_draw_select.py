@@ -398,7 +398,7 @@ class DrawFrame( r.TGCompositeFrame ):
 				# this is why we are unable to iterate on the TLegend items...
 				stype = '#legend'
 				items = ''
-				#l = o.GetListOfPrimitives()
+				# l = o.GetListOfPrimitives()
 				l = []
 				if '#c' in o.GetOption().split():
 					stype = '#comment'
@@ -419,12 +419,13 @@ class DrawFrame( r.TGCompositeFrame ):
 		self.mf = mf
 		self.canvas.GetCanvas().Clear()
 		self.canvas.GetCanvas().cd()
-		#consider here adding a handler for more that 1 figure in a draw file
+		# consider here adding a handler for more that 1 figure in a draw file
 		mf.draw(no_canvas=True, add_dummy=True)
-		#except:
+		# except:
 		#    print '[e] something went wrong with drawing...', self.fname, 'figure number:', self.draw_figure
-		#self.canvas.GetCanvas().Modified()
+		# self.canvas.GetCanvas().Modified()
 		self.canvas.GetCanvas().Update()
+
 
 def setup_style():
 	#r.gROOT.Reset()
@@ -439,11 +440,13 @@ def setup_style():
 	#r.gStyle.SetErrorX(0) #not by default; use X1 to show the x-error with ol
 	r.gStyle.SetEndErrorSize(0)
 
+
 def make_temp_file(ext='.draw'):
 	ftemp = tempfile.mkstemp(ext, 'tmp_', None, True)
 	os.write(ftemp[0],'#figure\n')
 	os.close(ftemp[0])
 	return ftemp[1]
+
 
 def main():
 	setup_style()
@@ -459,7 +462,8 @@ def main():
 		fn, fext = os.path.splitext(fname)
 		if fext == '.root':
 			import make_draw_files as mdf
-			#fname = mdf.make_draw_file(fname)
+			print '[i] make draw file...'
+			# fname = mdf.make_draw_file(fname)
 			fname = mdf.make_draw_file_smart_group(fname)
 		window = FileView(0, 600, 600, fname)
 		window.RaiseWindow()
