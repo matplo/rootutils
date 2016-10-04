@@ -174,7 +174,7 @@ def make_draw_file_smart_group(fn, extra_opts=[], force=False):
 					ctit = o.GetName()
 				sdescr = ' '.join([os.path.abspath(fn), '		:' + k.GetName() + '/' + o.GetName(), ':p', ':', 'title=' + ctit])
 				obj = k.ReadObj()
-				hg.add_object(obj, sdescr)
+				hg.add_object(o, sdescr)
 
 	with open(fdraw, 'w') as fout:
 		hg.dump(fout)
