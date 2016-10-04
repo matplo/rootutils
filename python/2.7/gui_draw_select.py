@@ -339,17 +339,22 @@ class DrawFrame( r.TGCompositeFrame ):
 		self.buttonsFrame = r.TGButtonGroup( self, 'actions', r.kHorizontalFrame)
 		self.AddFrame( self.buttonsFrame, self.buttonsFrameHint )
 
-		self.dumpFeaturesButton   = r.TGTextButton( self.buttonsFrame, ' Dump Features ', 10 )
+		self.dumpFeaturesButton   = r.TGTextButton( self.buttonsFrame, 'Features', 10 )
 		self.dumpFeaturesDispatch = r.TPyDispatcher( self.dumpFeatures )
 		self.dumpFeaturesButton.Connect( 'Clicked()', "TPyDispatcher", self.dumpFeaturesDispatch, 'Dispatch()' )
 		self.buttonsFrame.AddFrame( self.dumpFeaturesButton, self.buttonHint )
 
-		self.pdfButton   = r.TGTextButton( self.buttonsFrame, ' PDF ', 10 )
+		self.writeRootFileButton   = r.TGTextButton( self.buttonsFrame, 'ROOT', 10 )
+		self.writeRootFileDispatch = r.TPyDispatcher( self.writeRootFile )
+		self.writeRootFileButton.Connect( 'Clicked()', "TPyDispatcher", self.writeRootFileDispatch, 'Dispatch()' )
+		self.buttonsFrame.AddFrame( self.writeRootFileButton, self.buttonHint )
+
+		self.pdfButton   = r.TGTextButton( self.buttonsFrame, 'PDF', 10 )
 		self.pdfDispatch = r.TPyDispatcher( self.pdf )
 		self.pdfButton.Connect( 'Clicked()', "TPyDispatcher", self.pdfDispatch, 'Dispatch()' )
 		self.buttonsFrame.AddFrame( self.pdfButton, self.buttonHint )
 
-		self.pngButton   = r.TGTextButton( self.buttonsFrame, ' PNG ', 10 )
+		self.pngButton   = r.TGTextButton( self.buttonsFrame, 'PNG', 10 )
 		self.pngDispatch = r.TPyDispatcher( self.png )
 		self.pngButton.Connect( 'Clicked()', "TPyDispatcher", self.pngDispatch, 'Dispatch()' )
 		self.buttonsFrame.AddFrame( self.pngButton, self.buttonHint )
@@ -362,6 +367,9 @@ class DrawFrame( r.TGCompositeFrame ):
 		self.Layout()
 		self.Resize(self.width, self.height)
 		self.MapSubwindows()
+
+	def writeRootFile(self):
+		self.mf.hl.write_to_file(self.name + '.root', name_mod='modn:')
 
 	def pdf(self):
 		#if self.mf:
