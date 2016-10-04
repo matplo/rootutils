@@ -373,23 +373,44 @@ class TDrawConfig(object):
 				continue
 			if self.is_copy(self.config[s]):
 				scopy = self.config[s]['copy']
-				model = TDrawEntry(self.config[s])
-				for se in self.entries:
-					if scopy in se.parents:
-						#print '[i] use for copy:', se.name
-						newtde = TDrawEntry(se.section)
-						for sf in model.fields:
-							setting = model._setting_self(sf, model.section)
-							if setting:
-								if sf == 'selection':
-									if setting[0] == '+':
-										if len(setting.strip()) > 1:
-											setting = '({}) && ({})'.format(newtde.selection, setting[1:])
-								newtde.__setattr__(sf, setting)
-						newtde.name = '{}_{}'.format(model.name, newtde.name)
-						copies.append(newtde)
+				copy_names = []
+				if type(scopy) is str:
+					copy_names.append(scopy)
+				else:
+					for scp in scopy:
+						copy_names.append(scp)
+				for scopy in copy_names:
+					model = TDrawEntry(self.config[s])
+					for se in self.entries:
+						docopy = False
+						if type(se.parents) is str:
+							if scopy in se.parents.split(' '):
+								docopy = True
+						else:
+							if scopy in se.parents:
+								docopy = True
+						print se.name, docopy, type(se.parents), se.parents
+						if docopy:
+							print '[i] use for copy:', se.name
+							newtde = TDrawEntry(se.section)
+							for sf in model.fields:
+								setting = model._setting_self(sf, model.section)
+								if setting:
+									if sf == 'selection':
+										if setting[0] == '+':
+											if len(setting.strip()) > 1:
+												setting = '({}) && ({})'.format(newtde.selection, setting[1:])
+									newtde.__setattr__(sf, setting)
+							newtde.name = '{}_{}'.format(model.name, newtde.name)
+							copies.append(newtde)
 		for e in copies:
 			self.entries.append(e)
+
+		for e in self.entries:
+			if len(e.input_file) < 1:
+				e.active = False
+			if len(e.varexp) < 1:
+				e.active = False
 
 	def __repr__(self):
 		#return '\n'.join(['[i] {} {}'.format(i, str(s)) for i,s in enumerate(self.entries)])
