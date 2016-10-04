@@ -178,6 +178,14 @@ class TDrawEntry(object):
 			else:
 				self.title = '{}'.format(self.varexp)
 
+	def copy_fields(self, t):
+		for f in self.fields:
+			self.__setattr__(f, t.__getattribute__(f))
+		if len(self.selection) > 1:
+			self.title = '{} w/ {}'.format(self.varexp, self.selection)
+		else:
+			self.title = '{}'.format(self.varexp)
+
 	def get_selection(self, section):
 		sel = self.setting('selection', section, '')
 		if len(sel) > 0:
@@ -335,9 +343,12 @@ class TDrawConfig(object):
 				tde = TDrawEntry(section)
 				self.entries.append(tde)
 		else:
-			if section_has_setting('varexp', section, recursive=True):
-				tde = TDrawEntry(section)
-				self.entries.append(tde)
+			if self.is_copy(section):
+				self.process_copy(section)
+			else:
+				if section_has_setting('varexp', section, recursive=True):
+					tde = TDrawEntry(section)
+					self.entries.append(tde)
 
 	def is_copy(self, s):
 		try:
@@ -347,27 +358,34 @@ class TDrawConfig(object):
 			return False
 
 	def process_copy(self, s):
-		scopy = self.config[s]['copy']
+		scopy = s['copy']
 		copy_names = []
 		if type(scopy) is str:
 			copy_names.append(scopy)
 		else:
 			for scp in scopy:
 				copy_names.append(scp)
+		#print 'to copy..',copy_names
 		for scopy in copy_names:
-			model = TDrawEntry(self.config[s])
-			for se in self.entries:
+			model = TDrawEntry(s)
+			current_entries = list(self.entries)
+			for se in current_entries:
 				docopy = False
-				if type(se.parents) is str:
-					if scopy in se.parents.split(' '):
-						docopy = True
-				else:
-					if scopy in se.parents:
-						docopy = True
-				print se.name, docopy, type(se.parents), se.parents
+				#if type(se.parents) is str:
+				#	if scopy in se.parents.split(' '):
+				#		docopy = True
+				#else:
+				#	if scopy in se.parents:
+				#		docopy = True
+				if scopy == se.name[:len(scopy)]:
+					docopy = True
+					#print 'copy:    ', scopy, se.name, docopy, type(se.parents), se.parents
 				if docopy:
-					print '[i] use for copy:', se.name
+					# print '[i] use for copy:', se.name
 					newtde = TDrawEntry(se.section)
+					newtde.copy_fields(se)
+					#newtde.name = se.name
+					#newtde.parents = se.parents
 					for sf in model.fields:
 						setting = model._setting_self(sf, model.section)
 						if setting:
@@ -376,8 +394,12 @@ class TDrawConfig(object):
 									if len(setting.strip()) > 1:
 										setting = '({}) && ({})'.format(newtde.selection, setting[1:])
 							newtde.__setattr__(sf, setting)
+					newtde.parents = '{} {}'.format(model.name, newtde.parents)
 					newtde.name = '{}_{}'.format(model.name, newtde.name)
-					self.copies.append(newtde)
+					#print 'new name:', newtde.name
+					#print
+					#self.copies.append(newtde)
+					self.entries.append(newtde)
 
 	def process(self):
 		for s in self.config.sections:
@@ -396,22 +418,24 @@ class TDrawConfig(object):
 				except:
 					pass
 				continue
-			if self.is_copy(self.config[s]):
-				#print '[i]', s, 'is a copy'
-				continue
+			#if self.is_copy(self.config[s]):
+			#	#print '[i]', s, 'is a copy'
+			#	continue
 			self.process_section(self.config[s])
 
 		# now add copies
-		for s in self.config.sections:
-			if s != 'options':
-				if self.is_copy(self.config[s]):
-					self.process_copy(s)
+		# for s in self.config.sections:
+		# 	if s != 'options':
+		# 		if self.is_copy(self.config[s]):
+		# 			self.process_copy(s)
 
-		for e in self.copies:
-			self.entries.append(e)
+		#for e in self.copies:
+		#	self.entries.append(e)
 
 		for e in self.entries:
 			if len(e.input_file) < 1:
+				e.active = False
+			if len(e.output_file) < 1:
 				e.active = False
 			if len(e.varexp) < 1:
 				e.active = False
