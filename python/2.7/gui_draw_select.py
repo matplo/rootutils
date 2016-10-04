@@ -459,7 +459,8 @@ def main():
 		fn, fext = os.path.splitext(fname)
 		if fext == '.root':
 			import make_draw_files as mdf
-			fname = mdf.make_draw_file(fname)
+			#fname = mdf.make_draw_file(fname)
+			fname = mdf.make_draw_file_smart_group(fname)
 		window = FileView(0, 600, 600, fname)
 		window.RaiseWindow()
 		r.gApplication.Run()

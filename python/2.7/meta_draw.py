@@ -658,7 +658,8 @@ if __name__ == '__main__':
 	metafname = None
 	if fext == '.root':
 		import make_draw_files as makedf
-		metafname = makedf.make_draw_file(fname)
+		#metafname = makedf.make_draw_file(fname)
+		metafname = makedf.make_draw_file_smart_group(fname)
 	else:
 		metafname = fname
 	mdf   = MetaDrawFile(metafname)
@@ -673,7 +674,8 @@ if __name__ == '__main__':
 	mdf.add_option('#comment item={}'.format(c))
 	if fext == '.root':
 		print fname
-		metafname = makedf.make_draw_file(fname, mdf.options, force=True)
+		#metafname = makedf.make_draw_file(fname, mdf.options, force=True)
+		metafname = makedf.make_draw_file_smart_group(fname, mdf.options, force=True)
 		mdf   = MetaDrawFile(metafname)
 	mdf.draw()
 	if '--print' in sys.argv:
