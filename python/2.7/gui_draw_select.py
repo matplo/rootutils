@@ -25,6 +25,8 @@ class FileWatch(object):
 				data = f.read()
 		except:
 			pass
+		if data is None:
+			return True
 		self.hexdigest = hashlib.md5(data).hexdigest()
 		if self.hexdigest != self.old_hexdigest:
 			retval = True

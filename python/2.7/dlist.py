@@ -729,7 +729,7 @@ class dlist(debugable):
 			if (xc < xmin) or (xc > xmax):
 				gr.SetBinContent(ibin, 0.)
 				gr.SetBinError(ibin, 0.)
-				gr.SetBinWeight(ibin, 0.)
+				#gr.SetBinWeight(ibin, 0.)
 		return False
 
 	def trim_at_index(self, i=-1, xlow=None, xhigh=None):

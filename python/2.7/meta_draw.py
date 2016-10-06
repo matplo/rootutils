@@ -128,6 +128,10 @@ class DrawString(object):
 		retval = None
 		if st == None:
 			return retval
+		if 'norm_self' in st.lower():
+			retval = st.lower()
+			print '[i] scale is',retval,type(retval)
+			return retval
 		try:
 			#retval = atof(st)
 			np = eval_string.NumericStringParser()
@@ -324,8 +328,25 @@ class MetaFigure(object):
 		self.last_ds.fname = self.check_filepath(self.last_ds.fname)
 		cobj = self.hl.add_from_file(self.last_ds.hname, self.last_ds.fname, self.last_ds.title(), self.last_ds.dopt)
 		if cobj != None:
-			if self.last_ds.scale() != None:
-				self.hl.scale_at_index(-1, self.last_ds.scale())
+			scale = self.last_ds.scale()
+			if scale != None:
+				if type(scale) is str:
+					scale = scale.lower()
+					if 'norm_self_width' in scale:
+						intv = self.hl[-1].obj.Integral('width')
+						if intv != 0:
+							self.hl.scale_at_index(-1, 1./intv)
+						scale = scale.replace('norm_self_width', '1.')
+					if 'norm_self' in scale:
+						intv = self.hl[-1].obj.Integral()
+						if intv != 0:
+							self.hl.scale_at_index(-1, 1./intv)
+						scale = scale.replace('norm_self', '1.')
+					vscale = get_value(scale, float, 1.)
+					if vscale != 1.:
+						self.hl.scale_at_index(-1, vscale)
+				else:
+					self.hl.scale_at_index(-1, scale)
 			if self.last_ds.trim() != None:
 				self.hl.trim_at_index(-1, self.last_ds.trim()[0], self.last_ds.trim()[1])
 		else:
@@ -486,11 +507,11 @@ class MetaFigure(object):
 			if miny == None:
 				miny=self.last_ds.miny()
 			else:
-				miny=atof(miny)
+				miny=get_value(miny, float, -1)
 			if maxy == None:
 				maxy=self.last_ds.maxy()
 			else:
-				maxy=atof(maxy)
+				maxy=get_value(maxy, float,  1.)
 			if logy == False:
 				logy=self.last_ds.logy()
 			if logx == False:

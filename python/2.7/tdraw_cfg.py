@@ -467,6 +467,8 @@ class TDrawConfig(object):
 	def run(self):
 		print '[i] run...'
 		cleaned = []
+		errors = []
+		errors.append('[e] errors:')
 		if len(self.entries)<1:
 			print '[i] no entries?'
 			return
@@ -505,6 +507,7 @@ class TDrawConfig(object):
 				fin = r.TFile(fn)
 				if not fin:
 					continue
+					errors.append('[e] file {} unable to open'.format(fn))
 				dopt = e.option
 				if 'norange' in dopt:
 					hstring = 'htmp'
@@ -513,6 +516,7 @@ class TDrawConfig(object):
 					hstring = 'htmp({0},{1},{2})'.format(e.nbinsx, e.x[0], e.x[1])
 				#print e.name, dopt, e.option
 				t = fin.Get(e.tree_name)
+				hout = None
 				if t:
 					# print e.varexp, e.selection, e.option, e.nentries, e.firstentry
 					nentr = t.Draw(e.varexp + '>>{}'.format(hstring), e.selection, dopt, e.nentries, e.firstentry)
@@ -523,26 +527,39 @@ class TDrawConfig(object):
 					hout.SetTitle(e.title)
 					hout.GetXaxis().SetTitle(e.x_title)
 					hout.GetYaxis().SetTitle(e.y_title)
-				if self.clean is True:
-					if sfoutname in cleaned:
-						pass
-					else:
-						# print '[i] clean', sfoutname, 'requested'
-						try:
-							os.remove(sfoutname)
-						except:
+				else:
+					errors.append('[e] tree {} not found - file {}'.format(e.tree_name, fn))
+					continue
+				if hout:
+					if self.clean is True:
+						if sfoutname in cleaned:
 							pass
-				if sfoutname not in cleaned:
-					cleaned.append(sfoutname)
-				fout = r.TFile(sfoutname, 'UPDATE')
-				fout.cd()
-				hout.Write()
-				fout.Purge()
-				fout.Close()
-				fin.Close()
+						else:
+							# print '[i] clean', sfoutname, 'requested'
+							try:
+								os.remove(sfoutname)
+							except:
+								pass
+						if sfoutname not in cleaned:
+							cleaned.append(sfoutname)
+					fout = r.TFile(sfoutname, 'UPDATE')
+					fout.cd()
+					hout.Write()
+					fout.Purge()
+					fout.Close()
+					fin.Close()
+				else:
+					errors.append('[e] output histogram {} {} not made'.format(e.name, hstring))
+		print
 		print '[i] output files:'
 		for fn in cleaned:
 			print '    '+fn
+		if len(errors) > 1:
+			for i, er in enumerate(errors):
+				if i > 0:
+					print er.replace('[e] ', '    ')
+				else:
+					print er
 		print '[i] done.'
 
 def tdraw_from_file(fname, recreate=False, clean_first=False):
