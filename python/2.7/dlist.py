@@ -740,6 +740,8 @@ class dlist(debugable):
 			self.trim_histogram_range(o.obj, xlow, xhigh)
 		if o.obj.InheritsFrom('TGraph') == True:
 			self.trim_graph_range(o.obj, xlow, xhigh)
+		if o.obj.InheritsFrom('TF1') == True:
+			o.obj.SetRange(xlow, xhigh)
 
 	def rebin(self, val = 2, norm = False):
 		for o in self.l:

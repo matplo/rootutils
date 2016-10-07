@@ -87,7 +87,7 @@ class HistGroup(object):
 		return True
 
 	def add_object(self, obj, sdescr):
-		if obj.InheritsFrom('TH1'):
+		if obj.InheritsFrom('TH1') or obj.InheritsFrom('TH2') or obj.InheritsFrom('TF1'):
 			if len(self.list) < 1:
 				self.xlow = obj.GetXaxis().GetXmin()
 				self.xhigh = obj.GetXaxis().GetXmax()
@@ -116,7 +116,7 @@ class HistGroups(object):
 		for l in self.list:
 			if l.add_object(obj, sdescr):
 				return True
-		if obj.InheritsFrom('TH1'):
+		if obj.InheritsFrom('TH1') or obj.InheritsFrom('TH2') or obj.InheritsFrom('TF1'):
 			hg = HistGroup()
 			hg.options = copy.deepcopy(self.options)
 			hg.add_object(obj, sdescr)
@@ -159,20 +159,26 @@ def make_draw_file_smart_group(fn, extra_opts=[], force=False):
 		if k.ReadObj().InheritsFrom('TList'):
 			pass
 		else:
+			sdopt = ':p '
+			if k.ReadObj().InheritsFrom('TF1'):
+				sdopt = ':l '
 			ctit = k.GetTitle()
 			if len(ctit) < 1:
 				ctit = k.GetName()
-			sdescr = ' '.join([os.path.abspath(fn), '		:' + k.GetName(), ':p', ':', 'title=' + ctit])
+			sdescr = ' '.join([os.path.abspath(fn), '		:' + k.GetName(), sdopt, ':', 'title=' + ctit])
 			obj = k.ReadObj()
 			hg.add_object(obj, sdescr)
 
 	for k in td:
 		if k.ReadObj().InheritsFrom('TList'):
 			for o in k.ReadObj():
+				sdopt = ':p '
+				if k.ReadObj().InheritsFrom('TF1'):
+					sdopt = ':l '
 				ctit = o.GetTitle()
 				if len(ctit) < 1:
 					ctit = o.GetName()
-				sdescr = ' '.join([os.path.abspath(fn), '		:' + k.GetName() + '/' + o.GetName(), ':p', ':', 'title=' + ctit])
+				sdescr = ' '.join([os.path.abspath(fn), '		:' + k.GetName() + '/' + o.GetName(), sdopt, ':', 'title=' + ctit])
 				obj = k.ReadObj()
 				hg.add_object(o, sdescr)
 

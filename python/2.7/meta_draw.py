@@ -128,7 +128,7 @@ class DrawString(object):
 		retval = None
 		if st == None:
 			return retval
-		if 'norm_self' in st.lower():
+		if 'norm_self' in st.lower() or 'norm_self_width' in st.lower():
 			retval = st.lower()
 			print '[i] scale is',retval,type(retval)
 			return retval
