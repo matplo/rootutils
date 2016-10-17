@@ -164,7 +164,6 @@ class TDrawEntry(object):
 		self.nbinsx      = self.setting('nbinsx', section, 10)
 		self.x_title     = self.setting('x_title', section, 'default x title')
 		self.y_title     = self.setting('y_title', section, 'default y title')
-		self.title       = self.setting('title', section, '')
 		self.name        = self.make_name(section)  # section.name
 		self.x           = []
 		self.selection   = self.get_selection(section)
@@ -181,10 +180,11 @@ class TDrawEntry(object):
 	def copy_fields(self, t):
 		for f in self.fields:
 			self.__setattr__(f, t.__getattribute__(f))
-		if len(self.selection) > 1:
-			self.title = '{} w/ {}'.format(self.varexp, self.selection)
-		else:
-			self.title = '{}'.format(self.varexp)
+		if len(self.title) < 1:
+			if len(self.selection) > 1:
+				self.title = '{} w/ {}'.format(self.varexp, self.selection)
+			else:
+				self.title = '{}'.format(self.varexp)
 
 	def get_selection(self, section):
 		sel = self.setting('selection', section, '')

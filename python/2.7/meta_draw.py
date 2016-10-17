@@ -182,14 +182,21 @@ class Comment(object):
 			print 'failed to get the box dimensions'
 			spos = None
 		if spos != None:
-			try:
-				x1 = ut.float_or_None(spos.split(',')[0])
-				y1 = ut.float_or_None(spos.split(',')[1])
-				x2 = ut.float_or_None(spos.split(',')[2])
-				y2 = ut.float_or_None(spos.split(',')[3])
-			except:
-				if ut.is_number(spos.split(',')[0]):
+			pos = [None, None, None, None]
+			for i in xrange(4):
+				try:
+					pos[i] = ut.float_or_None(spos.split(',')[i])
+				except:
 					print '[w] trouble with comment position? x1,y1,x2,y2',self.s
+					if len(spos.split(',')) > i:
+						print '    ', spos.split(',')[i]
+					else:
+						print '    n-numbers found:',len(spos.split(',')),spos.split(',')
+						print '    tip: no spaces in x1,y1,x2,y2 ...'
+			x1 = pos[0]
+			y1 = pos[1]
+			x2 = pos[2]
+			y2 = pos[3]
 		if x1 == None: x1 = x1def
 		if x2 == None: x2 = x2def
 		if y1 == None: y1 = y1def
