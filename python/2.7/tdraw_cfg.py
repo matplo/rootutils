@@ -396,6 +396,7 @@ class TDrawConfig(object):
 							newtde.__setattr__(sf, setting)
 					newtde.parents = '{} {}'.format(model.name, newtde.parents)
 					newtde.name = '{}_{}'.format(model.name, newtde.name)
+					newtde.title = '{} {}'.format(newtde.title, s.name)
 					#print 'new name:', newtde.name
 					#print
 					#self.copies.append(newtde)
