@@ -114,3 +114,25 @@ class NumericStringParser(object):
         results=self.bnf.parseString(num_string,parseAll)
         val=self.evaluateStack( self.exprStack[:] )
         return val
+
+def get_value(s, op=None, vdefault=None):
+    if type(s) != str:
+        s = '{}'.format(s)
+    retval = 0
+    try:
+        np = NumericStringParser()
+        retval = np.eval(s)
+    except:
+        if vdefault is None:
+            print >> sys.stderr, '[e] unable to convert to a value:[',s,']',type(s), len(s)
+        else:
+            retval = vdefault
+    if op != None:
+        if op == int:
+            rest = retval - op(retval)
+            if rest > 0.5:
+                rest = int(1)
+            else:
+                rest = 0
+            retval = op(retval) + rest
+    return retval

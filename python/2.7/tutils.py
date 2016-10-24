@@ -148,7 +148,7 @@ def setup_basic_root():
 
     global app
     app = ROOT.PyROOT.TPyROOTApplication.CreateApplication()
-    
+
 exit_signal = False
 print_first = False
 timer = time.time()
@@ -172,14 +172,14 @@ def signal_handler(signum, frame):
                 if sub_p!=None:
                     print '    the kid:',sub_p
             else:
-                print '    interval:',interval,'s => exit condition:',exit_signal                
+                print '    interval:',interval,'s => exit condition:',exit_signal
         else:
-            print '[i CRTL-C] interval:',interval,'s => exit condition:',exit_signal            
+            print '[i CRTL-C] interval:',interval,'s => exit condition:',exit_signal
         print_first=True
 
-    if exit_signal==True:    
+    if exit_signal==True:
         if sub_p!=None:
-            sub_p.send_signal(signal.SIGKILL)            
+            sub_p.send_signal(signal.SIGKILL)
         sys.exit(0)
 
 def clone(obj, *namemods):
@@ -222,7 +222,7 @@ def __h1d_from_ntuple(fname, ntname, var, cuts, bwidth, xlow, xhigh, title=None,
     if len(modname) > 0:
         hname = modname
     if title==None:
-        htitle = ut.build_string([fname, var],' ')    
+        htitle = ut.build_string([fname, var],' ')
     else:
         htitle = title
     hret = None
@@ -246,9 +246,9 @@ def __h1d_from_ntuple(fname, ntname, var, cuts, bwidth, xlow, xhigh, title=None,
         print >> sys.stderr,'[e] draw from ntuple failed [{}:{}:{}]'.format(fname, ntname, var)
     return hret
 
-def draw_h2d_from_ntuple(fname, ntname, var, cuts, 
-                         xbwidth, xlow, xhigh, 
-                         ybwidth, ylow, yhigh,                          
+def draw_h2d_from_ntuple(fname, ntname, var, cuts,
+                         xbwidth, xlow, xhigh,
+                         ybwidth, ylow, yhigh,
                          title=None, modname='', nev=-1):
     xnbins = int((xhigh-xlow)/xbwidth*1.)
     if xnbins < 1:
@@ -262,9 +262,9 @@ def draw_h2d_from_ntuple(fname, ntname, var, cuts,
     hname = hname.replace('(', '.')
     hname = hname.replace(')', '.')
     if len(modname) > 0:
-        hname = modname    
+        hname = modname
     if title==None:
-        htitle = ut.build_string([fname, var],' ')    
+        htitle = ut.build_string([fname, var],' ')
     else:
         htitle = title
     hret = None
@@ -281,7 +281,7 @@ def draw_h2d_from_ntuple(fname, ntname, var, cuts,
             hret = ROOT.gDirectory.Get('htmp')
             hret.SetDirectory(0)
         fin.Close()
-        
+
         hret.SetName(hname)
         hret.SetTitle(htitle)
     return hret
@@ -308,7 +308,7 @@ def get_mean_from_ntuple(fname, ntname, var, cuts = ''):
             dstr = '{0}>>{1}'.format(var, hname_tmp)
             dentries = tn.Draw(dstr, cuts, 'e') #call sumw2 before the histogram creation!
             hret = ROOT.gDirectory.Get(hname_tmp)
-            hret.SetDirectory(0)            
+            hret.SetDirectory(0)
             mean = hret.GetMean()
             hret.Reset()
             print '*** mean = ', mean
@@ -429,8 +429,8 @@ class DateHistogramRoot(object):
         self.cumuls   = []
 
         self.histogram = None
-        self.hcumulant = None        
-        
+        self.hcumulant = None
+
     def date2num(self, d):
         dt =  ROOT.TDatime(d.year, d.month, d.day, 0, 0, 0)
         try:
@@ -439,7 +439,7 @@ class DateHistogramRoot(object):
         except:
             pass
         return dt.Convert()
-    
+
     def fill(self, date, val):
         idx = None
         try:
@@ -447,8 +447,8 @@ class DateHistogramRoot(object):
             self.values[idx] += val
         except:
             self.values.append(val)
-            self.dates.append(date)            
-            self.datenums.append(self.date2num(date))            
+            self.dates.append(date)
+            self.datenums.append(self.date2num(date))
 
     def cumulate(self):
         c = 0
@@ -456,7 +456,7 @@ class DateHistogramRoot(object):
         for v in self.values:
             c += v
             self.cumuls.append(c)
-            
+
     def makeGraph(self, cumulant = False):
         npoints = len(self.values)
         x = array.array('f', self.datenums)
@@ -464,17 +464,17 @@ class DateHistogramRoot(object):
             y = array.array('f', self.values)
         else:
             self.cumulate()
-            y = array.array('f', self.cumuls)            
-            
+            y = array.array('f', self.cumuls)
+
         gr = ROOT.TGraph(npoints, x, y)
         gr.SetMarkerStyle(20)
-        
+
         gr.GetXaxis().SetTimeDisplay(1)
         gr.GetXaxis().SetNdivisions(-503)
         #gr.GetXaxis().SetTimeFormat("%Y-%m-%d %H:%M")
         gr.GetXaxis().SetTimeFormat("%Y-%m-%d")
         gr.GetXaxis().SetTimeOffset(0,"gmt")
-        
+
         #gr.GetYaxis().SetTitle(what)
         gr_name = 'gr-{0}-cumul:{1}'.format(self.name, str(cumulant))
         gr.SetName(gr_name)
@@ -490,13 +490,13 @@ class DateHistogramRoot(object):
         h.GetXaxis().SetTimeFormat("%Y-%m-%d")
         h.GetXaxis().SetTimeOffset(0,"gmt")
         #h->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2000-02-28 13:00:01");
-        
-    
+
+
     def get_histogram(self, cumulant = False, binned = 1):
         #npoints = len(self.values)
         #xmin    = self.values[0]
         #xmax    = self.values[len(self.values)-1]
-        
+
         d1           = self.dates[0] + datetime.timedelta(days=-7)
         firstMonday  = prev_weekday(d1, 0) # 0 is Monday
         xmin         = self.date2num(firstMonday)
@@ -529,7 +529,7 @@ class DateHistogramRoot(object):
 
         self._fix_h(self.hcumulant)
         self._fix_h(self.histogram)
-        
+
         if cumulant == True:
             return self.hcumulant
 
@@ -563,13 +563,13 @@ def getTempCanvas():
     global gTempCanvas
     if gTempCanvas == None:
         gTempCanvas = ROOT.TCanvas('tc_temp_canvas', 'tc_temp_canvas')
-    return gTempCanvas       
+    return gTempCanvas
 
 def tchain_from_dir(tname, dname, pattern='*.root'):
     ch = ROOT.TChain(tname)
     flist = ut.find_files(dname, pattern)
     for fn in flist:
-        ch.AddFile(fn)    
+        ch.AddFile(fn)
     print '[i] tchain_from_dir: Nfiles:',ch.GetNtrees()
     return ch
 
