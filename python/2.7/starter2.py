@@ -22,7 +22,10 @@ if __name__=="__main__":
 	# https://docs.python.org/2/howto/argparse.html
 	parser = argparse.ArgumentParser(description='another starter not much more...', prog=os.path.basename(__file__))
 	parser.add_argument('-b', '--batch', help='batchmode - do not end with IPython prompt', action='store_true')
+	parser.add_argument('-i', '--prompt', help='end with IPython prompt', action='store_true')
 	args = parser.parse_args()
 	main()
 	if not args.batch:
+		IPython.embed()
+	if args.prompt:
 		IPython.embed()
