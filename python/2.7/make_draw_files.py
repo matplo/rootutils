@@ -139,7 +139,6 @@ class HistGroups(object):
 		for l in self.list:
 			l.dump(fout)
 
-
 def make_draw_file_smart_group(fn, extra_opts=[], force=False):
 	print '[i] make_draw_file_smart_group:', fn
 	f  = R.TFile(fn)
@@ -172,6 +171,20 @@ def make_draw_file_smart_group(fn, extra_opts=[], force=False):
 	for k in td:
 		if k.ReadObj().InheritsFrom('TList'):
 			for o in k.ReadObj():
+				sdopt = ':p '
+				if k.ReadObj().InheritsFrom('TF1'):
+					sdopt = ':l '
+				ctit = o.GetTitle()
+				if len(ctit) < 1:
+					ctit = o.GetName()
+				sdescr = ' '.join([os.path.abspath(fn), '		:' + k.GetName() + '/' + o.GetName(), sdopt, ':', 'title=' + ctit])
+				obj = k.ReadObj()
+				hg.add_object(o, sdescr)
+
+	for k in td:
+		if k.ReadObj().InheritsFrom('TDirectoryFile'):
+			for ko in k.ReadObj().GetListOfKeys():
+				o = ko.ReadObj()
 				sdopt = ':p '
 				if k.ReadObj().InheritsFrom('TF1'):
 					sdopt = ':l '
