@@ -136,3 +136,24 @@ def get_value(s, op=None, vdefault=None):
                 rest = 0
             retval = op(retval) + rest
     return retval
+
+def substring(s, s1, s2=None, vdefault=None):
+    retval = vdefault
+    idx1 = s.find(s1) + len(s1)
+    try:
+        if s2:
+            idx2 = s.find(s2)
+        else:
+            idx2 = len(s)
+    except:
+        idx1 = 0
+        idx2 = len(s)
+        if vdefault:
+            retval = vdefault
+    retval = s[idx1:idx2]
+    return retval
+
+def get_value_substring(s, s1, s2=None, op=None, vdefault=None):
+    subs = substring(s, s1, s2, vdefault)
+    print subs
+    return get_value(subs, op, vdefault)

@@ -10,6 +10,8 @@ import time
 import string
 import random
 
+from eval_string import get_value
+
 def load_file_to_strings(fname):
     outl = []
     if fname != None:
@@ -18,7 +20,7 @@ def load_file_to_strings(fname):
                 outl = [l.strip('\n') for l in f.readlines()]
     else:
         f = sys.stdin
-        outl = [l.strip('\n') for l in f.readlines()]        
+        outl = [l.strip('\n') for l in f.readlines()]
     return outl
 
 def to_file_name(s):
@@ -144,14 +146,14 @@ def signal_handler(signum, frame):
                 if sub_p!=None:
                     print '    the kid:',sub_p
             else:
-                print '    interval:',interval,'s => exit condition:',exit_signal                
+                print '    interval:',interval,'s => exit condition:',exit_signal
         else:
-            print '[i CRTL-C] interval:',interval,'s => exit condition:',exit_signal            
+            print '[i CRTL-C] interval:',interval,'s => exit condition:',exit_signal
         print_first=True
 
-    if exit_signal==True:    
+    if exit_signal==True:
         if sub_p!=None:
-            sub_p.send_signal(signal.SIGKILL)            
+            sub_p.send_signal(signal.SIGKILL)
         sys.exit(0)
 
 def wait():
@@ -163,7 +165,7 @@ def wait():
 
 def random_string(prefix='', ns = 30):
     lst = [random.choice(string.ascii_letters + string.digits) for n in xrange(ns)]
-    return str(prefix)+''.join(lst) 
+    return str(prefix)+''.join(lst)
 
 def remove_duplicates(l):
     newl = []
@@ -172,3 +174,19 @@ def remove_duplicates(l):
             continue
         newl.append(o)
     return newl
+
+def substring(s, s1, s2=None, vdefault=None):
+    retval = vdefault
+    idx1 = s.find(s1) + len(s1)
+    try:
+        if s2:
+            idx2 = s.find(s2)
+        else:
+            idx2 = len(s)
+    except:
+        idx1 = 0
+        idx2 = len(s)
+        if vdefault:
+            retval = vdefault
+    retval = s[idx1:idx2]
+    return retval

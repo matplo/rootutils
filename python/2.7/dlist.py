@@ -447,6 +447,13 @@ class dlist(debugable):
 					cobj = self.add_from_hashlist(hname, fname, new_title, draw_opt)
 				except:
 					pass
+				if cobj:
+					pass
+				else:
+					try:
+						cobj = self.add_from_tfiledirectory(hname, fname, new_title, draw_opt)
+					except:
+						pass
 		return cobj
 
 	def add_from_hashlist(self, hname = '', fname = '', new_title = '', draw_opt = ''):
@@ -457,6 +464,20 @@ class dlist(debugable):
 			#print splits[0], splits[1]
 			hlist = f.Get(splits[0])
 			h = hlist.FindObject(splits[1])
+			if h:
+				cobj = self.add(h, new_title, draw_opt)
+			f.Close()
+		return cobj
+
+	def add_from_tfiledirectory(self, hname = '', fname = '', new_title = '', draw_opt = ''):
+		cobj = None
+		f = ROOT.TFile(fname)
+		if f:
+			splits = hname.split('/')
+			#print splits[0], splits[1]
+			hlist = f.Get(splits[0])
+			h = hlist.Get(splits[1])
+			print '[i] getting h',h,'from',splits[0],splits[1]
 			if h:
 				cobj = self.add(h, new_title, draw_opt)
 			f.Close()
