@@ -539,15 +539,15 @@ class MetaFigure(object):
 		self.hl.set_log_multipad('xyz', False)
 		self.hl.draw(miny=miny,maxy=maxy,logy=logy)
 
-		if logy == True:
+		if logy:
 			self.hl.set_log_multipad('y')
 		else:
 			self.hl.set_log_multipad('y', False)
-		if logx == True:
+		if logx:
 			self.hl.set_log_multipad('x')
 		else:
 			self.hl.set_log_multipad('x', False)
-		if logz == True:
+		if logz:
 			self.hl.set_log_multipad('z')
 		else:
 			self.hl.set_log_multipad('z', False)

@@ -1032,8 +1032,10 @@ class dlist(debugable):
 
 	def set_log_multipad(self, axes='', flag=True):
 		l = self.tcanvas.GetListOfPrimitives()
-		for i in xrange(len(l)):
-			tp = self.tcanvas.cd(i+1)
+		# print self.tcanvas.GetName(), len(l)
+		# changed becaus of #logX 1 did not work?
+		for i in xrange(len(l) + 1):
+			tp = self.tcanvas.cd(i)
 			if tp:
 				if 'z' in axes:
 					tp.SetLogz(flag)
