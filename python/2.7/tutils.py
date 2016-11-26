@@ -117,6 +117,47 @@ def wait():
             time.sleep(10) # this actually does not matter as long as large
             pass
 
+def app_signal_handler(signum, frame):
+    global sub_p
+    global exit_signal
+    global print_first
+    global timer
+    interval = time.time() - timer
+    timer=time.time()
+    if interval < 0.5:
+        exit_signal = True
+    else:
+        exit_signal = False
+    if interval > 60 or exit_signal==True or print_first==False:
+        print
+        if exit_signal==False:
+            print '[i CRTL-C] signal #',signum,'caught; do it quickly twice to exit'
+            if print_first==False:
+                if sub_p!=None:
+                    print '    the kid:',sub_p
+            else:
+                print '    interval:',interval,'s => exit condition:',exit_signal
+        else:
+            print '[i CRTL-C] interval:',interval,'s => exit condition:',exit_signal
+        print_first=True
+
+    if exit_signal==True:
+        if sub_p!=None:
+            sub_p.send_signal(signal.SIGKILL)
+        global app
+        if app:
+            app.Terminate(0)
+        else:
+            ROOT.gApplication.Terminate(0)
+        sys.exit(0)
+
+def run_app():
+    global app
+    if app:
+        app.Run()
+    else:
+        ROOT.gApplication.Run()
+
 def wait_i():
     import IPython
     if not '-b' in sys.argv:
