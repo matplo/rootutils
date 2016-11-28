@@ -413,6 +413,8 @@ class dlist(debugable):
 			count = count + 1
 		if new_title == '':
 			new_title = obj.GetTitle()
+		if new_title[0] == '+':
+			new_title = obj.GetTitle() + new_title[1:]
 		o = draw_object(obj, newname, new_title, draw_opt)
 		if prep == True:
 			for oi in self.l:
@@ -1306,6 +1308,9 @@ class dlist(debugable):
 				reth.obj.Add(h.obj, scale)
 				isummed += 1
 		return reth
+
+	def set_name_as_filename(self, name):
+		self.name = pyutils.to_file_name(name)
 
 	def pdf(self):
 		self.tcanvas.Print(pyutils.to_file_name(self.name)+'.pdf','.pdf')

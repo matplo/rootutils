@@ -155,5 +155,4 @@ def substring(s, s1, s2=None, vdefault=None):
 
 def get_value_substring(s, s1, s2=None, op=None, vdefault=None):
     subs = substring(s, s1, s2, vdefault)
-    print subs
     return get_value(subs, op, vdefault)
