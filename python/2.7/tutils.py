@@ -360,7 +360,7 @@ def get_mean_from_ntuple(fname, ntname, var, cuts = ''):
 def get_object_from_file(hname = '', fname = '', new_title = '', nmod=None):
     if fname == None:
         return None
-    name_mod = '-read'
+    name_mod = '_read'
     if nmod:
         name_mod = nmod
     cobj = None

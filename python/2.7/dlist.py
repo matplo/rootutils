@@ -317,6 +317,12 @@ class dlist(debugable):
 				return True
 		return False
 
+	def get_by_name(self, name):
+		for l in self.l:
+			if l.name == name:
+				return l
+		return None
+
 	def find_miny(self, low=None, logy=False):
 		miny = 1e18
 		for h in self.l:
