@@ -187,6 +187,8 @@ def setup_basic_root():
 
     ROOT.gStyle.SetEndErrorSize(0)
 
+    ROOT.gStyle.SetPalette(53)
+
     global app
     app = ROOT.PyROOT.TPyROOTApplication.CreateApplication()
 
