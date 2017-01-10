@@ -168,7 +168,7 @@ def iprompt():
     if not '-b' in sys.argv:
         IPython.embed()
 
-def setup_basic_root():
+def setup_basic_root(D2pal=True):
     ROOT.gROOT.Reset()
     ROOT.gStyle.SetScreenFactor(1)
 
@@ -187,7 +187,8 @@ def setup_basic_root():
 
     ROOT.gStyle.SetEndErrorSize(0)
 
-    ROOT.gStyle.SetPalette(53)
+    if D2pal:
+        ROOT.gStyle.SetPalette(53)
 
     global app
     app = ROOT.PyROOT.TPyROOTApplication.CreateApplication()
