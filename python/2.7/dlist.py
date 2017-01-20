@@ -22,22 +22,24 @@ def check_andor_make_output_dir(sname, isfilename=False):
 			return False
 	return os.path.isdir(sdir)
 
+
 class debugable(object):
 	def __init__(self):
 		pass
 
 	def debug(self, msg):
 		global gDebug
-		if gDebug == True:
-			print '[d]',msg
+		if gDebug is True:
+			print '[d]', msg
+
 
 class style_iterator(debugable):
-	good_colors  = [ -1,  2,  1,  9,  6, 32, 49, 40,  8, 43, 46, 39, 28, 38, 21, 22, 23]
-	good_markers = [ -1, 20, 24, 21, 25, 33, 27, 28, 34, 29, 30, 20, 24, 21, 25, 27, 33, 28, 34, 29, 30]
-	#good_lines   = [ -1,  1,  2,  3,  5,  8,  6,  7,  4,  9, 10]
-	good_lines   = [ -1,  1,  2,  3,  5,  7,  9,  6, 8, 4, 10, 1,  2,  3,  5,  7,  9,  6, 8, 4, 10]
+	good_colors  = [-1, 2, 1, 9, 6, 32, 49, 40, 8, 43, 46, 39, 28, 38, 21, 22, 23]
+	good_markers = [-1, 20, 24, 21, 25, 33, 27, 28, 34, 29, 30, 20, 24, 21, 25, 27, 33, 28, 34, 29, 30]
+	# good_lines   = [ -1, 1, 2, 3, 5, 8, 6, 7, 4, 9, 10]
+	good_lines   = [-1, 1, 2, 3, 5, 7, 9, 6, 8, 4, 10, 1, 2, 3, 5, 7, 9, 6, 8, 4, 10]
 
-	def __init__(self, reset_idx = 0):
+	def __init__(self, reset_idx=0):
 		self.reset_index = reset_idx
 		self.reset()
 
@@ -54,7 +56,7 @@ class style_iterator(debugable):
 		self.color_idx = 0
 		for o in self.l:
 			icol = force_color
-			if icol == None:
+			if icol is None:
 				icol = self.next_color()
 			o.SetLineColor(icol)
 
@@ -62,7 +64,7 @@ class style_iterator(debugable):
 		self.line_idx = 0
 		for o in self.l:
 			imark = force_line
-			if imark == None:
+			if imark is None:
 				imark = self.next_line()
 			o.SetLineStyle(imark)
 			o.SetLineColor(1)
@@ -75,14 +77,15 @@ class style_iterator(debugable):
 		for o in self.l:
 			imark = self.next_marker()
 			o.SetMarkerStyle(imark)
-			if imark >= 27 : scale = 1.3
+			if imark >= 27:
+				scale = 1.3
 			o.SetMarkerSize(self.marker_size * scale)
 			o.SetMarkerColor(o.GetLineColor())
 
 	def next_color(self):
 		self.color_idx = self.color_idx + 1
 		if self.color_idx >= len(self.good_colors):
-		   self.color_idx = 0
+			self.color_idx = 0
 		return self.good_colors[self.color_idx]
 
 	def next_marker(self):
@@ -98,13 +101,14 @@ class style_iterator(debugable):
 		return self.good_lines[self.line_idx]
 
 	def next(self):
-		self.next_color();
-		self.next_marker();
-		self.next_line();
+		self.next_color()
+		self.next_marker()
+		self.next_line()
+
 
 class draw_option(debugable):
 
-	def __init__(self, stro = ''):
+	def __init__(self, stro=''):
 		self.s = stro.lower()
 		self.strip = self.s
 		self.debug('::draw_option with {}'.format(self.s))
@@ -112,7 +116,7 @@ class draw_option(debugable):
 		self.pstyle      = self.get_style_from_opt('p')
 		self.fstyle      = self.get_style_from_opt('f')
 		self.kolor       = self.get_style_from_opt('k')
-		self.alpha       = self.get_style_from_opt('a') #alpha for fill
+		self.alpha       = self.get_style_from_opt('a')  # alpha for fill
 		self.lwidth      = self.get_style_from_opt('w')
 		self.shift       = self.get_number_from_opt('s')
 		if self.lwidth == 0:
@@ -121,13 +125,13 @@ class draw_option(debugable):
 		if self.psize == 0:
 			self.psize = 0.9
 		else:
-			self.psize = self.psize/100.
+			self.psize = self.psize / 100.
 		self.use_line        = self.check_use_line()
 		self.use_line_legend = self.check_use_line_legend()
 		self.bw              = self.check_black_white()
 		self.use_marker      = self.check_use_marker()
 		self.is_error        = self.has(['serror'], strip=True)
-		self.no_legend       = self.has(['noleg'],  strip=True)
+		self.no_legend       = self.has(['noleg'], strip=True)
 		self.hidden          = self.has(['hidden'], strip=True)
 		self.rectangle       = self.has(['rect'], strip=True)
 		self.last_kolor      = self.has(['-k'])
@@ -168,17 +172,17 @@ class draw_option(debugable):
 	def has(self, lst, strip=False):
 		ret = False
 		for e in lst:
-			#for s in self.s.split(' '):
+			# for s in self.s.split(' '):
 			for s in self.strip.split(' '):
 				if e == s[:len(e)]:
 					ret = True
-					if strip == True:
+					if strip is True:
 						self.strip = self.strip.replace(e, '')
 		return ret
 
-	def get_style_from_opt(self, what): #what can be l or p or f
+	def get_style_from_opt(self, what):  # what can be l or p or f
 		ts = self.s.split('+')
-		#self.debug('::get_style_from_opt ' + str(ts))
+		# self.debug('::get_style_from_opt ' + str(ts))
 		val = 0
 		for t in ts:
 			tt = t.split(' ')[0]
@@ -191,11 +195,11 @@ class draw_option(debugable):
 				except:
 					pass
 		self.debug('::get_style_from_opt on {} returning {}'.format(what, val))
-		self.strip = self.strip.replace('+{}{}'.format(what,str(val)),'')
+		self.strip = self.strip.replace('+{}{}'.format(what, str(val)), '')
 		return val
 
 	def get_number_from_opt(self, what):
-		ts = self.s.split('+'+what)
+		ts = self.s.split('+' + what)
 		if len(ts) < 2:
 			return 0.0
 		snum = ts[1].split(' ')
@@ -204,17 +208,21 @@ class draw_option(debugable):
 			fnum = atof(snum[0])
 		except:
 			fnum = 0.0
-		self.strip = self.strip.replace('+{}{}'.format(what,str(snum[0])),'')
+		self.strip = self.strip.replace('+{}{}'.format(what, str(snum[0])), '')
 		return fnum
 
-def random_string(prefix='', ns = 30):
+
+def random_string(prefix='', ns=30):
+	import random
+	import string
 	lst = [random.choice(string.ascii_letters + string.digits) for n in xrange(ns)]
-	return str(prefix)+''.join(lst)
+	return str(prefix) + ''.join(lst)
+
 
 class draw_object(debugable):
-	def __init__(self, robj, name = None, new_title = None, dopts=''):
+	def __init__(self, robj, name=None, new_title=None, dopts=''):
 		self.name = name
-		if self.name == None:
+		if self.name is None:
 			self.name = '{}_{}'.format(robj.GetName(), random_string())
 		self.obj  = robj.Clone(self.name)
 		if self.obj.InheritsFrom('TH1'):
@@ -230,13 +238,14 @@ class draw_object(debugable):
 		sdopt = self.dopt.stripped() + ' ' + extra_opt
 		if 'draw!' in extra_opt.lower():
 			sdopt = extra_opt
-		if self.is_first==True:
+		if self.is_first is True:
 			if self.obj.InheritsFrom('TGraph'):
 				sdopt = sdopt + ' A'
 			self.debug('doption=' + sdopt)
 			self.obj.Draw(sdopt)
 		else:
 			self.obj.Draw(sdopt + ' same')
+
 
 class dlist(debugable):
 	enable_eps = False
