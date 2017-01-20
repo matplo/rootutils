@@ -255,20 +255,20 @@ class dlist(debugable):
 		self.title             = name
 		self.l                 = []
 		self.style             = style_iterator()
-		self.maxy              = 1e6 # was 1
-		self.miny              = -1e6 # was 0
+		self.maxy              = 1e6  # was 1
+		self.miny              = -1e6  # was 0
 		self.max_adjusted      = False
-		self.axis_title_offset = [5,   5,  5] #[1.4, 1.4, 1.4]
-		self.axis_title_size   = [12, 12, 12] #[0.05, 0.05, 0.05]
-		self.axis_label_size   = [12, 12, 12] # for font 42 [0.04, 0.04, 0.04]
+		self.axis_title_offset = [5, 5, 5]  # [1.4, 1.4, 1.4]
+		self.axis_title_size   = [12, 12, 12]  # [0.05, 0.05, 0.05]
+		self.axis_label_size   = [12, 12, 12]  # for font 42 [0.04, 0.04, 0.04]
 		self.axis_label_offset = [0.02, 0.02, 0.02]
 		self.font              = 42
 		self.pattern           = None
 		self.tcanvas           = None
 		self.minx              = None
 		self.maxx              = None
-		self.pad_name          = None # pad where last drawn
-		self.pad               = None # pad where last drawn
+		self.pad_name          = None  # pad where last drawn
+		self.pad               = None  # pad where last drawn
 		self.set_font(42)
 
 	def set_font(self, fn=42, scale=1.):
