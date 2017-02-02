@@ -6,7 +6,7 @@ def draw_line(x1, y1, x2, y2, col=2, style=7, width=2, option='brNDC', alpha=0.3
     l = ROOT.TLine(x1, y1, x2, y2)
     l.SetLineColor(col)
     if alpha < 1.0:
-        l.SetLineColorAlpha(col, alpha)        
+        l.SetLineColorAlpha(col, alpha)
     l.SetLineWidth(width)
     l.SetLineStyle(style)
     l.Draw()
@@ -19,12 +19,12 @@ def to_file_name(s):
 class canvas:
     def __init__(self, name, title, w=600, h=400, split_fraction=0.0, split_mode=0):
         self.name = name
-        self.tcanvas = ROOT.TCanvas(name, title, w, h)        
+        self.tcanvas = ROOT.TCanvas(name, title, w, h)
         self.pads = []
-        if split_fraction > 0:                        
-            for i in range(2):            
+        if split_fraction > 0:
+            for i in range(2):
                 pname  = name  + '-{0}'.format(i)
-                ptitle = title + ' {0}'.format(i)            
+                ptitle = title + ' {0}'.format(i)
                 x1 = 0
                 x2 = split_fraction
                 y1 = 0
@@ -70,14 +70,14 @@ class canvas:
                 p.SetTopMargin(_top)
                 p.SetBottomMargin(_bottom)
 
-        
+
 def split_canvas(name, title, w=600, h=400, split_ratio=0.2, vertical=0):
     tc = ROOT.TCanvas(name, title, h, w)
 
     tp1 = ROOT.TPad('1', '1', 0.0, 1.0, 0.7, 0.0)
     tp1.Draw()
     tp2 = ROOT.TPad('2', '2', 0.7, 1.0, 1.0, 0.0)
-    tp2.Draw()    
+    tp2.Draw()
 
     tu.gList.append(tc)
 
@@ -87,10 +87,14 @@ def split_canvas(name, title, w=600, h=400, split_ratio=0.2, vertical=0):
 def adjust_pad_margins(_left=0.17, _right=0.01, _top=0.1, _bottom=0.17):
     p = ROOT.gPad
     if p:
-        p.SetLeftMargin(_left)
-        p.SetRightMargin(_right)
-        p.SetTopMargin(_top)
-        p.SetBottomMargin(_bottom)
+        if _left:
+            p.SetLeftMargin(_left)
+        if _right:
+            p.SetRightMargin(_right)
+        if _top:
+            p.SetTopMargin(_top)
+        if _bottom:
+            p.SetBottomMargin(_bottom)
 
 def split_gPad_old(split_ratio=0.5, orient=0):
     # this will have a delete problem...
@@ -104,17 +108,17 @@ def split_gPad_old(split_ratio=0.5, orient=0):
         tp2 = ROOT.TPad('2', '2',1.-split_ratio, 1.0, 1.0, 0.0)
         tp2.Draw()
         adjust_pad_margins()
-        retlist.append(tp2)        
+        retlist.append(tp2)
     if orient == 1:
         tp1 = ROOT.TPad('1', '1', 0.0, split_ratio, 1., 1.)
         tp1.Draw()
-        adjust_pad_margins()        
+        adjust_pad_margins()
         retlist.append(tp1)
         tp2 = ROOT.TPad('2', '2', 0.0, 0., 1., 1. - split_ratio)
         tp2.Draw()
         tp2.cd()
         adjust_pad_margins()
-        retlist.append(tp2)        
+        retlist.append(tp2)
     savepad.cd()
     #return savepad
     return retlist
@@ -125,12 +129,12 @@ def split_gPad(split_ratio=0.5, orient=0):
         savepad.Divide(1,2)
         tp1 = savepad.cd(1)
         #tp1.SetPad( 0.0, 1.0, 1. - split_ratio, 0.0)
-        tp1.SetPad( 0.0, 1.0, split_ratio, 0.0)        
+        tp1.SetPad( 0.0, 1.0, split_ratio, 0.0)
         adjust_pad_margins()
         tp2 = savepad.cd(2)
         tp2.SetPad(split_ratio, 1.0, 1.0, 0.0)
         adjust_pad_margins()
-        tp1.cd()        
+        tp1.cd()
     else:
         savepad.Divide(2,1)
         tp1 = savepad.cd(1)
@@ -167,7 +171,7 @@ def draw_comment_multiline(comment = [], font_size = None, x1 = 0.0, y1 = 0.9, x
         draw_comment(c, font_size, x1, y1 - font_size * 1.2 * (i+1), x2, y2 - font_size * 1.2 * i, font, dopt)
 
 def make_canvas_grid(n, tc = None, name = 'tmp_tc', title = 'tmp_tc', orient=0, xm=0.01, ym=0.01):
-    if tc == None:        
+    if tc == None:
         if orient == 0:
             tc = ROOT.TCanvas(name, title, 800, 600)
         else:
@@ -177,12 +181,12 @@ def make_canvas_grid(n, tc = None, name = 'tmp_tc', title = 'tmp_tc', orient=0, 
     ic = int(math.sqrt(nv))
     while (ir * ic) < n:
         ir = ir + 1
-        if (ir * ic) < n:        
+        if (ir * ic) < n:
             ic = ic + 1
     if orient == 0:
-        tc.Divide(ir, ic, xm, ym)    
+        tc.Divide(ir, ic, xm, ym)
     else:
-        tc.Divide(ic, ir, xm, ym)            
+        tc.Divide(ic, ir, xm, ym)
     return tc
 
 def readjust_6fold(tc):
@@ -218,7 +222,7 @@ def fix_graph(gr, thr=None, debug=False):
             points_to_remove.append(i)
             continue
         if math.isnan(xgr[i]) or math.isnan(ygr[i]):
-            points_to_remove.append(i)            
+            points_to_remove.append(i)
             continue
         if i == 0:
             if xgr[i] == 0 and ygr[i] == 0:
@@ -230,7 +234,7 @@ def fix_graph(gr, thr=None, debug=False):
 
     for i in points_to_remove:
         if i == 0:
-            if debug: 
+            if debug:
                 print '[e] problem with:',gr.GetName()
         if debug:
             print '    removing point at',i, xgr[i], ygr[i]

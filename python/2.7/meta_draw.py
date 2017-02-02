@@ -537,7 +537,51 @@ class MetaFigure(object):
 					logy=False
 
 		self.hl.set_log_multipad('xyz', False)
+
+		# axis shapes and sizes etc..
+		atos = self.get_tags('#ato')
+		for s in atos:
+			for i, ax in enumerate(s.split(',')):
+				print i, ax
+				v = get_value(ax, float, None)
+				if v:
+					if v > 0:
+						self.hl.axis_title_offset[i] = v
+		atss = self.get_tags('#ats')
+		for s in atss:
+			for i, ax in enumerate(s.split(',')):
+				print i, ax
+				v = get_value(ax, float, None)
+				if v:
+					if v > 0:
+						self.hl.axis_title_size[i] = v
+		alos = self.get_tags('#alo')
+		for s in alos:
+			for i, ax in enumerate(s.split(',')):
+				print i, ax
+				v = get_value(ax, float, None)
+				if v:
+					if v > 0:
+						self.hl.axis_label_offset[i] = v
+		alss = self.get_tags('#als')
+		for s in alss:
+			for i, ax in enumerate(s.split(',')):
+				print i, ax
+				v = get_value(ax, float, None)
+				if v:
+					if v > 0:
+						self.hl.axis_label_size[i] = v
+
 		self.hl.draw(miny=miny,maxy=maxy,logy=logy)
+
+		pmargs = self.get_tags('#pad_margins')
+		for s in pmargs:
+			ors = s.split(',')
+			vals = [None, None, None, None]
+			for i, so in enumerate(ors):
+				if i < 4:
+					vals[i] = get_value(so, float, None)
+			self.hl.adjust_pad_margins(vals[0], vals[1], vals[2], vals[3])
 
 		if logy:
 			self.hl.set_log_multipad('y')
@@ -634,6 +678,40 @@ class MetaFigure(object):
 			self.hl.name = tu.unique_name(ut.to_file_name(sname))
 
 		self.hl.update()
+
+		# note: for making funky stuff you probably need root6...
+		groots = self.get_tags('#r')
+		for c in groots:
+			print '[i] trying root to process line', c
+			# result = r.gROOT.ProcessLine(c)
+			# print '  ->', result
+			r.gInterpreter.ProcessLine(c)
+
+		# this is also no good...
+		groots = self.get_tags('#rpy')
+		for c in groots:
+			print '[i] trying root to process line', c
+			with open('./tmp.py', 'w') as f:
+				print >> f, 'import tutils'
+				print >> f, 'import ROOT as r'
+				print >> f, c
+			sys.path.append(os.getcwd())
+			import tmp
+
+		# this is overwritten by hl but a good idea
+		gpads = self.get_tags('#gpad')
+		for s in gpads:
+			print s
+			if 'lm ' in s:
+				v = get_value(s.split(' ')[-1], float, None)
+				if v:
+					r.gPad.SetLeftMargin(v)
+					print 'gpad set left margin to', v
+			if 'rm ' in s:
+				v = get_value(s.split(' ')[-1], float, None)
+				if v:
+					r.gPad.SetRightMargin(v)
+					print 'gpad set right margin to', v
 
 	def pdf(self):
 		if self.drawable == True:

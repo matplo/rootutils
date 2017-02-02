@@ -11,11 +11,14 @@ import pcanvas
 import pyutils
 from string import atof
 
+
 def check_andor_make_output_dir(sname, isfilename=False):
 	sdir = sname
 	if isfilename:
 		sdir = os.path.dirname(sname)
-	if os.path.isdir(sdir) == False:
+	if len(sdir) == 0:
+		sdir = './'
+	if os.path.isdir(sdir) is False:
 		try:
 			os.makedirs(sdir)
 		except:
@@ -1231,8 +1234,8 @@ class dlist(debugable):
 		if fname==None:
 			fname = './' + pyutils.to_file_name(self.name) + '.root'
 
-		if check_andor_make_output_dir(fname, isfilename=True) == False:
-			print >> sys.stderr, '[e] unable to create/access output dir for: ',fname
+		if check_andor_make_output_dir(fname, isfilename=True) is False:
+			print >> sys.stderr, '[e] unable to create/access output dir for: ', fname
 			return
 
 		try:

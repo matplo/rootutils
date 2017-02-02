@@ -430,7 +430,7 @@ class DrawFrame( r.TGCompositeFrame ):
 
 
 def setup_style():
-	#r.gROOT.Reset()
+	# r.gROOT.Reset()
 	r.gStyle.SetScreenFactor(1)
 	if not tutils.is_arg_set('--keep-stats'):
 		r.gStyle.SetOptStat(0)
@@ -442,6 +442,20 @@ def setup_style():
 	#r.gStyle.SetErrorX(0) #not by default; use X1 to show the x-error with ol
 	r.gStyle.SetEndErrorSize(0)
 
+	# added on 01.02.2017
+	r.gStyle.SetLabelSize (0.05, "X")
+	r.gStyle.SetLabelSize (0.05, "Y")
+
+	r.gStyle.SetTitleOffset(1.2, "X")
+	r.gStyle.SetTitleOffset(1.0, "Y")
+
+	r.gStyle.SetTitleSize(0.06, "X")
+	r.gStyle.SetTitleSize(0.06, "Y")
+
+	r.gStyle.SetPadTopMargin(0.1)
+	r.gStyle.SetPadBottomMargin(0.1)
+	r.gStyle.SetPadLeftMargin(0.1)
+	r.gStyle.SetPadRightMargin(0.1)
 
 def make_temp_file(ext='.draw'):
 	ftemp = tempfile.mkstemp(ext, 'tmp_', None, True)
