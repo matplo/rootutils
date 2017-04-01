@@ -626,7 +626,12 @@ class MetaFigure(object):
 			stitle = sleg.split('title=')[1].split(',,')[0]
 		except:
 			pass
-		self.hl.self_legend(title=stitle,x1=x1,x2=x2,y1=y1,y2=y2,tx_size=tx_size,option=leg_opt)
+		ncol = 1
+		try:
+			ncol = int(sleg.split('ncol=')[1].split(',,')[0])
+		except:
+			ncol = 1
+		self.hl.self_legend(ncols=ncol,title=stitle,x1=x1,x2=x2,y1=y1,y2=y2,tx_size=tx_size,option=leg_opt)
 
 		#line
 		self.draw_lines()
