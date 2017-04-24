@@ -22,6 +22,7 @@ def print_preamb(fout, stitle=''):
 	print >> fout, '#-----------------------'
 	print >> fout, '#figure'
 	print >> fout, '#geom 500x500'
+	print >> fout, '#date'
 	print >> fout, '#title: {}'.format(stitle)
 
 
