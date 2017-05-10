@@ -1025,7 +1025,7 @@ class dlist(debugable):
 				#tc = ROOT.gROOT.FindObject(tcname)
 				#tc.cd(i+1)
 				self.tcanvas.cd(i+1)
-				ROOT.gStyle.SetOptTitle(True)
+				ROOT.gStyle.SetOptTitle(False) # True
 				if len(o.dopt.stripped()) > 0:
 					o.obj.Draw(o.dopt.stripped())
 					#print o.obj.GetName(),o.dopt.stripped()
