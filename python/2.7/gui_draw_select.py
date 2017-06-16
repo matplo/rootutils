@@ -457,6 +457,18 @@ def setup_style():
 	r.gStyle.SetPadLeftMargin(0.1)
 	r.gStyle.SetPadRightMargin(0.1)
 
+	NRGBs = 5
+	#NCont = 255
+	NCont = 100
+
+	from array import array
+	stops = array('d', [ 0.00, 0.34, 0.61, 0.84, 1.00 ])
+	red   = array('d', [ 0.00, 0.00, 0.87, 1.00, 0.51 ])
+	green = array('d', [ 0.00, 0.81, 1.00, 0.20, 0.00 ])
+	blue  = array('d', [ 0.51, 1.00, 0.12, 0.00, 0.00 ])
+	r.TColor.CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont)
+	r.gStyle.SetNumberContours(NCont)
+
 def make_temp_file(ext='.draw'):
 	ftemp = tempfile.mkstemp(ext, 'tmp_', None, True)
 	os.write(ftemp[0],'#figure\n')
