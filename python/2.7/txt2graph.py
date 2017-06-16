@@ -109,6 +109,7 @@ def graph(fname, write=False):
 	xye  = [0, 1, 2, 3, 4, 5]
 	sxye = ut.get_arg_with('--xye')
 	if sxye != None:
+		xye  = [-1, -1, -1, -1, -1, -1]
 		sa = sxye.split(',')
 		for i,s in enumerate(sa):
 			xye[i] = int(s)
