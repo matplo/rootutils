@@ -301,31 +301,34 @@ class MetaFigure(object):
 		self.last_ds  = None
 		self.comments = []
 
-	def check_filepath(self, path):
+	def file_ok(self, test_path):
+		if test_path:
+			if '$' in test_path:
+				test_path = r.gSystem.ExpandPathName(test_path)
+		rval = None
+		try:
+			f = open(test_path)
+			f.close()
+			rval = test_path
+		except:
+			pass
+		return rval
+
+	def adjust_filepath(self, path):
 		# if $ within the path -> expand it and continue testing
 		# if the path does not exist
 		# if this does not apply
 		# try to guess that it is a relative path wrt self.fname
-		test_path = path
-		if '$' in path:
-			# expand and try...
-			test_path = r.gSystem.ExpandPathName(path)
-		try:
-			f = open(test_path)
-			f.close()
-		except:
-			user_dir = self.get_tag('#dir', None)
-			if user_dir:
-				dname = user_dir
-			else:
-				dname = os.path.dirname(os.path.abspath(self.fname))
-			test_path = os.path.join(dname, path)
-			if '$' in test_path:
-				test_path = r.gSystem.ExpandPathName(test_path)
-		try:
-			f = open(test_path)
-			f.close()
-		except:
+		test_path = self.file_ok(path)
+		if self.file_ok(test_path) is None:
+			user_dirs = self.get_tags('#dir')
+			user_dirs.append(os.path.dirname(os.path.abspath(self.fname)))
+			for user_dir in user_dirs:
+				test_path = os.path.join(user_dir, path)
+				test_path = self.file_ok(test_path)
+				if test_path:
+					break
+		if test_path is None:
 			test_path = path
 		if path != test_path:
 			print >> sys.stderr,'[w] file path adjusted:',path,'->',test_path
@@ -338,7 +341,7 @@ class MetaFigure(object):
 		if cline[0] == '#':
 			return
 		self.last_ds = DrawString(cline)
-		self.last_ds.fname = self.check_filepath(self.last_ds.fname)
+		self.last_ds.fname = self.adjust_filepath(self.last_ds.fname)
 		cobj = self.hl.add_from_file(self.last_ds.hname, self.last_ds.fname, self.last_ds.title(), self.last_ds.dopt)
 		if cobj != None:
 			scale = self.last_ds.scale()
