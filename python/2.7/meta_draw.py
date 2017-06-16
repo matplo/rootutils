@@ -308,14 +308,20 @@ class MetaFigure(object):
 		# try to guess that it is a relative path wrt self.fname
 		test_path = path
 		if '$' in path:
-			#expand and try...
+			# expand and try...
 			test_path = r.gSystem.ExpandPathName(path)
 		try:
 			f = open(test_path)
 			f.close()
 		except:
-			dname = os.path.dirname(os.path.abspath(self.fname))
+			user_dir = self.get_tag('#dir', None)
+			if user_dir:
+				dname = user_dir
+			else:
+				dname = os.path.dirname(os.path.abspath(self.fname))
 			test_path = os.path.join(dname, path)
+			if '$' in test_path:
+				test_path = r.gSystem.ExpandPathName(test_path)
 		try:
 			f = open(test_path)
 			f.close()
