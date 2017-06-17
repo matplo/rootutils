@@ -88,7 +88,7 @@ class HistGroup(object):
 		return True
 
 	def add_object(self, obj, sdescr):
-		if obj.InheritsFrom('TH1') or obj.InheritsFrom('TH2') or obj.InheritsFrom('TF1'):
+		if obj.InheritsFrom('TH1') or obj.InheritsFrom('TH2') or obj.InheritsFrom('TF1') or obj.InheritsFrom('TGraph'):
 			if len(self.list) < 1:
 				self.xlow = obj.GetXaxis().GetXmin()
 				self.xhigh = obj.GetXaxis().GetXmax()
@@ -117,7 +117,7 @@ class HistGroups(object):
 		for l in self.list:
 			if l.add_object(obj, sdescr):
 				return True
-		if obj.InheritsFrom('TH1') or obj.InheritsFrom('TH2') or obj.InheritsFrom('TF1'):
+		if obj.InheritsFrom('TH1') or obj.InheritsFrom('TH2') or obj.InheritsFrom('TF1') or obj.InheritsFrom('TGraph'):
 			hg = HistGroup()
 			hg.options = copy.deepcopy(self.options)
 			hg.add_object(obj, sdescr)

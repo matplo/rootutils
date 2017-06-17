@@ -8,11 +8,12 @@ import dlist
 import sys
 import pyutils as ut
 import IPython
+import eval_string
 
 
 def read_data(fn=None):
 	f = sys.stdin
-	if fn != None:
+	if fn is not None:
 		f = open(fn)
 	lines = f.read()
 	if f != sys.stdin:
@@ -73,18 +74,55 @@ def make_graph_from_hepfile(fn = None, xye = [0,1,2,3,4,5], xe=None):
 		except:
 			dyep = []
 	name = 'graph_hepfile_' + str(xye)
+
 	if len(xlow) > 0:
-		for i,ix in enumerate(xlow):
+		for i, ix in enumerate(xlow):
 			v = x[i] - ix
-			if xe != None:
+			if xe:
 				v = xe
 			xlow[i] = v
+	else:
+		if xe:
+			xlow = []
+			for i, ix in enumerate(x):
+				if xe < 0:
+					dx1 = -1
+					if i > 0:
+						dx1 = ix - x[i-1]
+					else:
+						dx1 = 1e12
+					dx2 = -1
+					if i < len(x) - 1:
+						dx2 = x[i + 1] - ix
+					else:
+						dx2 = 1e12
+					xe = min(dx1/2., dx2/2.)
+				xlow.append(xe)
+
 	if len(xhigh) > 0:
-		for i,ix in enumerate(xhigh):
+		for i, ix in enumerate(xhigh):
 			v = ix - x[i]
-			if xe != None:
+			if xe:
 				v = xe
 			xhigh[i] = v
+	else:
+		if xe:
+			xhigh = []
+			for i, ix in enumerate(x):
+				if xe < 0:
+					dx1 = -1
+					if i > 0:
+						dx1 = ix - x[i-1]
+					else:
+						dx1 = 1e12
+					dx2 = -1
+					if i < len(x) - 1:
+						dx2 = x[i + 1] - ix
+					else:
+						dx2 = 1e12
+					xe = min(dx1/2., dx2/2.)
+				xhigh.append(xe)
+
 	if len(dyem) > 0:
 		for i, ix in enumerate(dyem):
 			v = dyem[i]
@@ -114,7 +152,11 @@ def graph(fname, write=False):
 		for i,s in enumerate(sa):
 			xye[i] = int(s)
 	if ut.is_arg_set('--hep'):
-		gr = make_graph_from_hepfile(fname, xye, xe=None)
+		xe = None
+		if ut.is_arg_set('--xe'):
+			sxe = ut.get_arg_with('--xe')
+			xe = eval_string.get_value(sxe, float, None)
+		gr = make_graph_from_hepfile(fname, xye, xe=xe)
 	else:
 		gr = make_graph_from_file(fname, xye)
 	stitle = ut.get_arg_with('--title')
