@@ -303,6 +303,8 @@ class MetaFigure(object):
 
 	def file_ok(self, test_path):
 		if test_path:
+			if '~' == test_path[0]:
+				test_path = test_path.replace('~', '$HOME')
 			if '$' in test_path:
 				test_path = r.gSystem.ExpandPathName(test_path)
 		rval = None
