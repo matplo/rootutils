@@ -497,7 +497,10 @@ class TDrawConfig(object):
 				if foutname[0] == '+':
 					sfoutname = fn.replace('.root', foutname[1:].replace('.root', '') + '.root')
 				else:
-					sfoutname = foutname.replace('.root', '_{}.root'.format(ifn))
+					if (len(input_files) > 1):
+						sfoutname = foutname.replace('.root', '_{}.root'.format(ifn))
+					else:
+						sfoutname = foutname
 				#if sfoutname in cleaned:
 				#	pbar.set_description('    {} : {}'.format(e.name, sfn))
 				#else:
