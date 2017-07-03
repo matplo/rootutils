@@ -502,6 +502,12 @@ class MetaFigure(object):
 		normalize = self.get_tag('#normalize', None)
 		if normalize == 'self':
 			self.hl.normalize_self()
+		else:
+			if 'index' in normalize:
+				idx = normalize.split('index=')[1].split(' ')[0]
+				vidx = get_value(idx, int, -1)
+				print '[i] to normalize to',vidx
+				self.hl.normalize_to_index(vidx)
 
 		miny = self.get_tag('#miny', None)
 		maxy = self.get_tag('#maxy', None)
