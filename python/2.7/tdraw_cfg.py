@@ -167,8 +167,8 @@ class TDrawEntry(object):
 		self.name        = self.make_name(section)  # section.name
 		self.x           = []
 		self.selection   = self.get_selection(section)
-		self.x.append(get_value(self.setting('x', section, [-1, 1])[0]))
-		self.x.append(get_value(self.setting('x', section, [-1, 1])[1]))
+		self.x.append(get_value(self.setting('x', section, [-1, 1])[0], float))
+		self.x.append(get_value(self.setting('x', section, [-1, 1])[1], float))
 
 		if not self.title:
 			# self.title = self.name
