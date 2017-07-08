@@ -402,6 +402,20 @@ class TDrawConfig(object):
 					#self.copies.append(newtde)
 					self.entries.append(newtde)
 
+	def load_lib(self, libpath):
+		#sexplib = r.gSystem.ExpandPathName(libpath.strip())
+		sexplib = r.gSystem.DynamicPathName(libpath.strip())
+		sexplib_lib = os.path.basename(sexplib)
+		sexplib_dir = os.path.dirname(sexplib)
+		sexplib_fullpath = os.path.join(sexplib_dir, sexplib_lib)
+		#s = r.TString(sexplib_fullpath)
+		#sp = r.gSystem.FindDynamicLibrary(s)
+		#print sp
+		print '[i] loading', sexplib_fullpath
+		r.gSystem.AddDynamicPath(sexplib_dir)
+		retval = r.gSystem.Load(sexplib_lib)
+		print '    status', retval
+
 	def process(self):
 		for s in self.config.sections:
 			if s == 'options':
@@ -409,13 +423,9 @@ class TDrawConfig(object):
 					slibs = self.config[s]['libs']
 					if type(slibs) == list:
 						for slib in slibs:
-							sexplib = r.gSystem.ExpandPathName(slib.strip())
-							print '[i] loading', sexplib
-							r.gSystem.Load(sexplib)
+							self.load_lib(slib)
 					else:
-						sexplib = r.gSystem.ExpandPathName(slibs)
-						print '[i] loading', sexplib
-						r.gSystem.Load(sexplib)
+						self.load_lib(slibs)
 				except:
 					pass
 				continue
