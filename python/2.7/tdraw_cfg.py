@@ -167,8 +167,8 @@ class TDrawEntry(object):
 		self.name        = self.make_name(section)  # section.name
 		self.x           = []
 		self.selection   = self.get_selection(section)
-		self.x.append(get_value(self.setting('x', section, [-1, 1])[0]))
-		self.x.append(get_value(self.setting('x', section, [-1, 1])[1]))
+		self.x.append(get_value(self.setting('x', section, [-1, 1])[0], float))
+		self.x.append(get_value(self.setting('x', section, [-1, 1])[1], float))
 
 		if not self.title:
 			# self.title = self.name
@@ -507,7 +507,10 @@ class TDrawConfig(object):
 				if foutname[0] == '+':
 					sfoutname = fn.replace('.root', foutname[1:].replace('.root', '') + '.root')
 				else:
-					sfoutname = foutname.replace('.root', '_{}.root'.format(ifn))
+					if (len(input_files) > 1):
+						sfoutname = foutname.replace('.root', '_{}.root'.format(ifn))
+					else:
+						sfoutname = foutname
 				#if sfoutname in cleaned:
 				#	pbar.set_description('    {} : {}'.format(e.name, sfn))
 				#else:

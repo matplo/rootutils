@@ -1230,6 +1230,40 @@ class dlist(debugable):
 			else:
 				print '[w] normalize not defined for non histogram...'
 
+	def normalize_to_index(self, idx, scale_by_binwidth = True, modTitle = False, scaleE = False, to_max=False):
+		intg = 0
+		try:
+			if to_max == True:
+				intg = self.l[idx].obj.GetMaximum()
+			else:
+				intg = self.l[idx].obj.Integral()
+		except:
+			print '[w] normalization to',idx,'failed'
+			return
+		print '[i] normalization defined by index=',idx,'intg=',intg
+		for h in self.l:
+			if h.obj.InheritsFrom('TH1'):
+				#if h.GetSumw2() == None:
+				h.obj.Sumw2()
+				bw   = h.obj.GetBinWidth(1)
+				if intg > 0:
+					if scale_by_binwidth:
+						h.obj.Scale(1./intg/bw)
+						if scaleE == True:
+							scale_errors(h.obj, 1./intg/bw)
+							print '[i] scale by:',1./intg/bw
+					else:
+						h.obj.Scale(1./intg)
+						if scaleE == True:
+							scale_errors(h.obj, 1./intg)
+							print '[i] scale by:',1./intg
+					if modTitle == True:
+						ytitle = h.obj.GetYaxis().GetTitle()
+						ytitle += ' ({0})'.format(bw)
+						h.obj.GetYaxis().SetTitle(ytitle)
+			else:
+				print '[w] normalize not defined for non histogram...'
+
 	def write_to_file(self, fname=None, opt='RECREATE', name_mod=''):
 		if fname==None:
 			fname = './' + pyutils.to_file_name(self.name) + '.root'

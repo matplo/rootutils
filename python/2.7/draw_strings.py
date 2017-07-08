@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import ROOT as r 
+import ROOT as r
 import tutils as tu
 import numpy as np
 from cStringIO import StringIO
@@ -140,7 +140,7 @@ class Comment(object):
 				s=s.split(k)[0]
 		return s
 
-	def get_setting(self, sitem):		
+	def get_setting(self, sitem):
 		setting = 0
 		if self.get_settings(sitem)[-1]:
 			setting = self.get_settings(sitem)[-1]
@@ -149,22 +149,22 @@ class Comment(object):
 	def get_text(self):
 		return self.get_settings('item=')
 
-	def get_text_size(self):		
+	def get_text_size(self):
 		if self.get_setting('tx_size='):
 			return atof(self.get_setting('tx_size='))
 		return 0.025
 
-	def get_color(self):		
+	def get_color(self):
 		if self.get_setting('color='):
 			return atoi(self.get_setting('color='))
 		return 1
 
-	def get_font(self):		
+	def get_font(self):
 		if self.get_setting('font='):
 			return self.get_setting('font=')
 		return 42
 
-	def get_alpha(self):		
+	def get_alpha(self):
 		if self.get_setting('alpha='):
 			return self.get_setting('alpha=')/100.
 		return 0
@@ -194,7 +194,7 @@ def legend_position(sleg):
 	x1 = None
 	x2 = None
 	y1 = None
-	y2 = None	
+	y2 = None
 	if sleg == None:
 		return x1, y1, x2, y2
 	try:
