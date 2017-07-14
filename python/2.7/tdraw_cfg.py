@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
 from time import sleep
+import sys
+sys.argv.append( '-b' )
 import tutils
 import ROOT as r
 import IPython
 import argparse
 import os
 import fnmatch
-import sys
 
 from configobj import ConfigObj
 
@@ -672,7 +673,7 @@ if __name__=="__main__":
 	#parser.add_argument('-w', '--write', help='dump the contents', action='store_true')
 	#parser.add_argument('-f', '--fname', help='file name to operate on', type=str)
 	#parser.add_argument('-r', '--read', help='read a file', type=str)
-	#parser.add_argument('-b', '--batch', help='batchmode - do not end with IPython prompt', action='store_true')
+	parser.add_argument('-b', '--batch', help='batchmode - do not end with IPython prompt', action='store_true')
 	parser.add_argument('-i', '--ipython', help='end with IPython prompt', action='store_true')
 	parser.add_argument('-g', '--example', help='dump an example file and exit', action='store_true')
 	parser.add_argument('--recreate', help='write files with "recreate" instead of "update"', action='store_true')
