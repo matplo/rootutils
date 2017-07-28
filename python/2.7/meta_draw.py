@@ -454,6 +454,8 @@ class MetaFigure(object):
 		self.hl.add(gr, 'WARNING: LIST EMPTY!', 'hidden')
 
 	def draw(self, no_canvas=False, add_dummy=True):
+		if self.get_tag('#debug', None):
+			dlist.gDebug = True
 		if add_dummy == True:
 			if len(self.hl.l) < 1:
 				#self.add_dummy()
@@ -591,6 +593,16 @@ class MetaFigure(object):
 						self.hl.axis_label_size[i] = v
 
 		self.hl.draw(miny=miny,maxy=maxy,logy=logy)
+
+		minz = self.get_tag('#minz', None)
+		if minz:
+			minz = get_value(minz, float, None)
+		maxz = self.get_tag('#maxz', None)
+		if maxz:
+			maxz = get_value(maxz, float, None)
+		if minz or maxz:
+			self.hl.set_min_max_z(minz, maxz)
+		self.hl.update()
 
 		pmargs = self.get_tags('#pad_margins')
 		for s in pmargs:
