@@ -163,6 +163,7 @@ class TDrawEntry(object):
 		self.nentries    = self.setting('nentries', section, 1000000000)
 		self.firstentry  = self.setting('firstentry', section, 0)
 		self.nbinsx      = self.setting('nbinsx', section, 10)
+		self.nbinsy      = self.setting('nbinsy', section, 10)
 		self.x_title     = self.setting('x_title', section, 'default x title')
 		self.y_title     = self.setting('y_title', section, 'default y title')
 		self.name        = self.make_name(section)  # section.name
@@ -170,6 +171,9 @@ class TDrawEntry(object):
 		self.selection   = self.get_selection(section)
 		self.x.append(get_value(self.setting('x', section, [-1, 1])[0], float))
 		self.x.append(get_value(self.setting('x', section, [-1, 1])[1], float))
+		self.y           = []
+		self.y.append(get_value(self.setting('y', section, [-1, 1])[0], float))
+		self.y.append(get_value(self.setting('y', section, [-1, 1])[1], float))
 
 		if not self.title:
 			# self.title = self.name
@@ -528,7 +532,11 @@ class TDrawConfig(object):
 					hstring = 'htmp'
 					dopt = e.option.replace('norange', '')
 				else:
-					hstring = 'htmp({0},{1},{2})'.format(e.nbinsx, e.x[0], e.x[1])
+					# check if drawing in 2D
+					if ':' in e.varexp:
+						hstring = 'htmp({0},{1},{2},{3},{4},{5})'.format(e.nbinsx, e.x[0], e.x[1], e.nbinsy, e.y[0], e.y[1])
+					else:
+						hstring = 'htmp({0},{1},{2})'.format(e.nbinsx, e.x[0], e.x[1])
 				#print e.name, dopt, e.option
 				t = fin.Get(e.tree_name)
 				hout = None

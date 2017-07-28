@@ -385,6 +385,18 @@ class dlist(debugable):
 							maxy = v
 		return maxy
 
+	def set_min_max_z(self, minz=None, maxz=None):
+		for h in self.l:
+			if h.obj.InheritsFrom('TH2'):
+				if maxz:
+					h.obj.SetMaximum(maxz)
+					self.maxz = maxz
+				if minz:
+					h.obj.SetMinimum(minz)
+					self.minz = minz
+		self.max_adjusted = True
+		self.debug('::adjust_maxima z-min: {} z-max {}'.format(self.minz, self.maxz))
+
 	def adjust_maxima(self, miny=None, maxy=None, logy=False):
 		if miny!=None:
 			self.miny=miny
@@ -1204,14 +1216,24 @@ class dlist(debugable):
 
 	def normalize_self(self, scale_by_binwidth = True, modTitle = False, scaleE = False, to_max=False):
 		for h in self.l:
+			if h.obj.InheritsFrom('TH3'):
+				print '[w] normalize_self not implemented for TH3'
 			if h.obj.InheritsFrom('TH1'):
 				#if h.GetSumw2() == None:
 				h.obj.Sumw2()
 				if to_max == True:
 					intg = h.obj.GetMaximum()
 				else:
-					intg = h.obj.Integral(1, h.obj.GetNbinsX())
-				bw   = h.obj.GetBinWidth(1)
+					if h.obj.InheritsFrom('TH2'):
+						intg = h.obj.Integral(1, h.obj.GetNbinsX(), 1, h.obj.GetNbinsY())
+					else:
+						intg = h.obj.Integral(1, h.obj.GetNbinsX())
+				if h.obj.InheritsFrom('TH2'):
+					if scale_by_binwidth:
+						print '[w] bin width for 2D histogram set to 1.'
+					bw = 1.
+				else:
+					bw   = h.obj.GetBinWidth(1)
 				if intg > 0:
 					if scale_by_binwidth:
 						h.obj.Scale(1./intg/bw)
