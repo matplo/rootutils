@@ -231,9 +231,17 @@ class draw_object(debugable):
 		if self.obj.InheritsFrom('TH1'):
 			self.obj.SetDirectory(0)
 		if new_title:
-			self.obj.SetTitle(new_title)
+			self.user_title = new_title
+			if self.obj.InheritsFrom('TF1'):
+				pass
+			else:
+				self.obj.SetTitle(new_title)
 		if self.obj.GetTitle() == '':
-			self.obj.SetTitle(self.name)
+			if self.obj.InheritsFrom('TF1'):
+				pass
+			else:
+				self.obj.SetTitle(self.name)
+			self.user_title = self.name
 		self.dopt = draw_option(dopts)
 		self.is_first = False
 
@@ -1091,7 +1099,8 @@ class dlist(debugable):
 			#opt = o.dopt.stripped()
 			opt = o.dopt.legend_option()
 			self.debug('::self_legend legend entry with opt: {0} {1}'.format(opt,o.obj.GetTitle()) )
-			self.legend.AddEntry(o.obj, o.obj.GetTitle(), opt)
+			#self.legend.AddEntry(o.obj, o.obj.GetTitle(), opt)
+			self.legend.AddEntry(o.obj, o.user_title, opt)
 		self.legend.Draw()
 		self.update()
 		return self.legend
