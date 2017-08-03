@@ -6,6 +6,8 @@ from pyparsing import (Literal,CaselessLiteral,Word,Combine,Group,Optional,
                        ZeroOrMore,Forward,nums,alphas,oneOf)
 import math
 import operator
+import sys
+import re
 
 __author__='Paul McGuire'
 __version__ = '$Revision: 0.0 $'
@@ -18,6 +20,7 @@ All I've done is rewrap Paul McGuire's fourFn.py as a class, so I can use it
 more easily in other places.
 '''
 
+
 class NumericStringParser(object):
     '''
     Most of this code comes from the fourFn.py pyparsing example
@@ -25,9 +28,11 @@ class NumericStringParser(object):
     '''
     def pushFirst(self, strg, loc, toks ):
         self.exprStack.append( toks[0] )
+
     def pushUMinus(self, strg, loc, toks ):
         if toks and toks[0]=='-':
             self.exprStack.append( 'unary -' )
+
     def __init__(self):
         """
         expop   :: '^'
@@ -87,6 +92,7 @@ class NumericStringParser(object):
                 "trunc" : lambda a: int(a),
                 "round" : round,
                 "sgn" : lambda a: abs(a)>epsilon and cmp(a,0) or 0}
+
     def evaluateStack(self, s ):
         op = s.pop()
         if op == 'unary -':
@@ -109,11 +115,13 @@ class NumericStringParser(object):
             return 0
         else:
             return float( op )
+
     def eval(self,num_string,parseAll=True):
         self.exprStack=[]
         results=self.bnf.parseString(num_string,parseAll)
         val=self.evaluateStack( self.exprStack[:] )
         return val
+
 
 def get_value(s, op=None, vdefault=None):
     if type(s) != str:
@@ -137,6 +145,7 @@ def get_value(s, op=None, vdefault=None):
             retval = op(retval) + rest
     return retval
 
+
 def substring(s, s1, s2=None, vdefault=None):
     retval = vdefault
     idx1 = s.find(s1) + len(s1)
@@ -153,6 +162,12 @@ def substring(s, s1, s2=None, vdefault=None):
     retval = s[idx1:idx2]
     return retval
 
+
 def get_value_substring(s, s1, s2=None, op=None, vdefault=None):
     subs = substring(s, s1, s2, vdefault)
     return get_value(subs, op, vdefault)
+
+
+def strip_non_numbers(s):
+    non_decimal = re.compile(r'[^\d.]+')
+    return non_decimal.sub('', s)
