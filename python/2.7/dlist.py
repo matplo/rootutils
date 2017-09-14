@@ -1368,6 +1368,12 @@ class dlist(debugable):
 			if i < len(stitles):
 				h.obj.SetTitle(stitles[i])
 
+	def reset_user_titles(self, stitles):
+		for h in self.l:
+			i = self.l.index(h)
+			if i < len(stitles):
+				h.user_title = stitles[i]
+
 	def draw_comment(self, comment = '', font_size=None, x1 = 0.0, y1 = 0.9, x2 = 0.99, y2 = 0.99):
 		du.draw_comment(comment, font_size, x1, y1, x2, y2)
 
