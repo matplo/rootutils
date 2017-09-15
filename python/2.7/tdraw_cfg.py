@@ -545,11 +545,14 @@ class TDrawConfig(object):
 					nentr = t.Draw(e.varexp + '>>{}'.format(hstring), e.selection, dopt, e.nentries, e.firstentry)
 					# print '[i] number of entries drawn:',nentr
 					hout = r.gDirectory.Get('htmp')
-					hout.SetDirectory(0)
-					hout.SetName(e.name)
-					hout.SetTitle(e.title)
-					hout.GetXaxis().SetTitle(e.x_title)
-					hout.GetYaxis().SetTitle(e.y_title)
+					if hout:
+						hout.SetDirectory(0)
+						hout.SetName(e.name)
+						hout.SetTitle(e.title)
+						hout.GetXaxis().SetTitle(e.x_title)
+						hout.GetYaxis().SetTitle(e.y_title)
+					else:
+						errors.append('[e] histogram {} does not exist; tree {} Nentries={}'.format('htmp', t.GetName(), t.GetEntries()))
 				else:
 					errors.append('[e] tree {} not found - file {}'.format(e.tree_name, fn))
 					continue
