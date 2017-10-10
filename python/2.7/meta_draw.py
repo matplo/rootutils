@@ -247,7 +247,7 @@ class Comment(object):
 		return r.kWhite
 
 	def get_font(self):
-		if self.get_setting(' font=', ' '):
+		if self.get_setting('font=', ' '):
 			return self.get_setting('font=', ' ')
 		return 42
 
@@ -471,6 +471,22 @@ class MetaFigure(object):
 			x1, x2 = self.axis_range(sxrange)
 			self.hl.fix_x_range(x1, x2)
 			self.hl.zoom_axis(0, x1, x2)
+
+		sxrange = self.get_tag('#2dxrange', None)
+		if sxrange != None:
+			x1, x2 = self.axis_range(sxrange)
+			ax = self.hl[0].obj.GetXaxis()
+			ib1 = ax.FindBin(x1)
+			ib2 = ax.FindBin(x2)
+			ax.SetRange(ib1,ib2)
+
+		sxrange = self.get_tag('#2dyrange', None)
+		if sxrange != None:
+			x1, x2 = self.axis_range(sxrange)
+			ax = self.hl[0].obj.GetYaxis()
+			ib1 = ax.FindBin(x1)
+			ib2 = ax.FindBin(x2)
+			ax.SetRange(ib1,ib2)
 
 		if no_canvas == True:
 			if r.gPad:
