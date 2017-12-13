@@ -753,7 +753,10 @@ class dlist(debugable):
 		o = self.l[i]
 		if o.obj.InheritsFrom('TH1') == True:
 			o.obj.Sumw2()
-			o.obj.Scale(val)
+			if val == 0:
+				o.obj.Scale(1.0, "width")
+			else:
+				o.obj.Scale(val)
 		if o.obj.InheritsFrom('TGraph') == True:
 			for i in range(o.obj.GetN()):
 				o.obj.SetPoint(i, o.obj.GetX()[i], o.obj.GetY()[i] * val)
