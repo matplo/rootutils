@@ -26,7 +26,7 @@ THISDIR=$XDIR
 
 rconfig=`which root-config`
 [ -e "$rconfig" ] && RSYS=`$rconfig --prefix`
-if [ -d "$RSYS" ]; then 
+if [ -d "$RSYS" ]; then
 	rootpy=`find $RSYS -name "ROOT.py"`
 	if [ -f "$rootpy" ]; then
 		echo "[i] rootpy is: [$rootpy]"
@@ -35,7 +35,7 @@ if [ -d "$RSYS" ]; then
 
 			echo "[i] using $dir_rootpy"
 			testr=`$THISDIR/test_root.py`
-			if [ $testr == "success" ]; then
+			if [ "x$testr" == "xsuccess" ]; then
 				echo "[i] test .py program responded with: $testr"
 				date > rootsys.conf
 				echo $dir_rootpy >> rootsys.conf
