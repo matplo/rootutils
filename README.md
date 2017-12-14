@@ -7,5 +7,5 @@ dependencied (easy to install with pip)
 ---
 
 ```
-pyparsing configobj tqdm tabulate fuzzywuzzy
+pyparsing configobj tqdm tabulate fuzzywuzzy python-Levenshtein
 ```
