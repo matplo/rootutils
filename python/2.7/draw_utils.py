@@ -53,7 +53,7 @@ class canvas:
 
     def adjust_pad_margins(self, _left=0.15, _right=0.15, _top=0.1, _bottom=0.15):
         if len(self.pads) > 0:
-            for sp in self.pads():
+            for sp in self.pads:
                 sp.cd()
                 p = ROOT.gPad
                 if p:
@@ -70,6 +70,9 @@ class canvas:
                 p.SetTopMargin(_top)
                 p.SetBottomMargin(_bottom)
 
+    def cd(self, i):
+        npads = len(self.pads)
+        return self.pads[npads-(i)].cd()
 
 def split_canvas(name, title, w=600, h=400, split_ratio=0.2, vertical=0):
     tc = ROOT.TCanvas(name, title, h, w)
@@ -254,3 +257,39 @@ def fix_graph(gr, thr=None, debug=False):
         print '[i]', gr.GetName(),'npoints:',npoints_new,'was:',npoints
     return gr
 
+
+def get_axis_factor(i, refpad):
+    try:
+        xFactor = refpad.GetAbsWNDC()/ROOT.gPad.GetAbsWNDC()
+        yFactor = refpad.GetAbsHNDC()/ROOT.gPad.GetAbsHNDC()
+        if i == 0:
+            lfactor = yFactor * 0.06 / xFactor
+        else:
+            lfactor = xFactor * 0.04 / yFactor
+    except:
+        lfactor = 1.0
+    return lfactor
+
+
+def adjust_axis(h, refpad, scaleTSize = 1.0, scaleLSize = 1.0, scaleTOffset = 1.0):
+    xFactor = get_axis_factor(0, refpad)
+    yFactor = get_axis_factor(1, refpad)
+    print xFactor, yFactor
+    for i in xrange(2):
+        if i == 0:
+            axis = h.GetXaxis()
+            lfactor = yFactor / xFactor
+            title_offset = lfactor * scaleTSize * scaleTOffset
+            tsize = 16
+        else:
+            axis = h.GetYaxis()
+            lfactor = xFactor / yFactor
+            title_offset = lfactor * scaleTSize * scaleTOffset
+            tsize = 18
+        axis.SetTickLength(lfactor * 0.01)
+        axis.SetLabelFont(43)
+        axis.SetLabelSize(14 * scaleLSize)
+        axis.SetLabelOffset(0.03 * scaleLSize / 2.)
+        axis.SetTitleFont(43)
+        axis.SetTitleSize(tsize * scaleTSize)
+        axis.SetTitleOffset(title_offset)
