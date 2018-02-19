@@ -74,6 +74,39 @@ class canvas:
         npads = len(self.pads)
         return self.pads[npads-(i)].cd()
 
+
+class CanvasCollect(object):
+    def __init__(self, outputname=''):
+        self.outputname = outputname
+        self.tcanvas_list = []
+
+    def append(self, tc):
+        try:
+            _tc = tc.tcanvas
+        except:
+            _tc = tc
+        self.tcanvas_list.append(_tc)
+
+    def pdf(self, outputname=''):
+        if len(self.tcanvas_list) <= 0:
+            print '[w] asking to create an empty pdf file. nothing done.'
+            return
+        if len(outputname) > 0:
+            self.outputname = outputname
+        if len(self.outputname) <= 0:
+            self.outputname = 'default_canvas_collect.pdf'
+        self.outputname = self.outputname.split('.pdf')[0]
+        self.outputname = self.outputname + '.pdf'
+        for i, tc in enumerate(self.tcanvas_list):
+            if i == 0:
+                _outputname = self.outputname + '('
+                if len(self.tcanvas_list) == 1:
+                    _outputname = self.outputname
+            if i == len(self.tcanvas_list) - 1:
+                _outputname = self.outputname + ')'
+            tc.Print(_outputname, 'pdf')
+        print '[i] pdf file created:', self.outputname
+
 def split_canvas(name, title, w=600, h=400, split_ratio=0.2, vertical=0):
     tc = ROOT.TCanvas(name, title, h, w)
 

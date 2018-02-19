@@ -200,6 +200,7 @@ def setup_basic_root(D2pal=True):
     #ROOT.gStyle.SetErrorX(0) #not by default; use X1 to show the x-error with ol
 
     ROOT.gStyle.SetEndErrorSize(0)
+    # ROOT.gStyle.SetEndErrorSize(4)
 
     if D2pal:
         ROOT.gStyle.SetPalette(53)
