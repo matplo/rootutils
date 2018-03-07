@@ -768,6 +768,10 @@ class MetaFigure(object):
 		if self.drawable == True:
 			self.hl.pdf()
 
+	def pdf_to_file(self, fname):
+		if self.drawable == True:
+			self.hl.pdf_to_file(fname)
+
 	def png(self):
 		if self.drawable == True:
 			self.hl.png()

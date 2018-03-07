@@ -1411,6 +1411,9 @@ class dlist(debugable):
 		if dlist.enable_eps:
 			self.tcanvas.Print(pyutils.to_file_name(self.name)+'.eps','.eps')
 
+	def pdf_to_file(self, fname):
+		self.tcanvas.Print(fname,'pdf')
+
 	def png(self):
 		self.tcanvas.Print(pyutils.to_file_name(self.name)+'.png','.png')
 

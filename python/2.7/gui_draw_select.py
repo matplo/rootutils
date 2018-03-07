@@ -66,6 +66,11 @@ class FileView( r.TGMainFrame ):
 		self.drawButton.Connect( 'Clicked()', "TPyDispatcher", self.drawDispatch, 'Dispatch()' )
 		self.buttonsFrame.AddFrame( self.drawButton, self.buttonHint )
 
+		self.pdfButton   = r.TGTextButton( self.buttonsFrame, ' PDF ' )
+		self.pdfDispatch = r.TPyDispatcher( self.pdf )
+		self.pdfButton.Connect( 'Clicked()', "TPyDispatcher", self.pdfDispatch, 'Dispatch()' )
+		self.buttonsFrame.AddFrame( self.pdfButton, self.buttonHint )
+
 		self.exitButton   = r.TGTextButton( self.buttonsFrame, ' &Quit ' )
 		#self.exitButton.Connect( 'Clicked()', "TPyROOTApplication", r.gApplication, 'Close()' )
 		self.exitButton.SetCommand( 'TPython::Exec( "raise SystemExit" )' )
@@ -111,7 +116,10 @@ class FileView( r.TGMainFrame ):
 			self.draw()
 
 	def draw(self):
-		del self.mdf
+		try:
+			del self.mdf
+		except:
+			pass
 		self.mdf = meta_draw.MetaDrawFile(self.fname)
 
 		#print 'N figures:',len(self.mdf.figures), 'N tabs:',len(self.tabs)
@@ -141,6 +149,19 @@ class FileView( r.TGMainFrame ):
 				self.logfileFrame.flush()
 				self.tabs[i+2].draw(mf) #remember the log and util tab
 		self.Layout()
+
+	def pdf(self):
+		ifig = 0
+		for itab,tab in enumerate(self.tabs):
+			if itab < 2: continue # log and util tab skip
+			fname = self.fname + '.pdf'
+			if ifig == 0:
+				fname = self.fname + '.pdf('
+			if itab == len(self.tabs) - 1:
+				fname = self.fname + '.pdf)'
+			print 'printing to pdf: ', fname
+			tab.pdf_to_file(fname)
+			ifig += 1
 
 class LogFileFrame( r.TGCompositeFrame ):
 	def __init__( self, parent, width, height, name, logfilename=None):
@@ -377,6 +398,9 @@ class DrawFrame( r.TGCompositeFrame ):
 		#if self.mf:
 		#    self.mf.hl.pdf()
 		self.canvas.GetCanvas().Print(self.name+'.pdf', 'pdf')
+
+	def pdf_to_file(self, fname):
+		self.canvas.GetCanvas().Print(fname, 'pdf')
 
 	def png(self):
 		#if self.mf:
