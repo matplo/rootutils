@@ -140,6 +140,7 @@ class draw_option(debugable):
 		self.no_legend       = self.has(['noleg'], strip=True)
 		self.hidden          = self.has(['hidden'], strip=True)
 		self.rectangle       = self.has(['rect'], strip=True)
+		self.overlay         = self.has(['over'], strip=True) #ignore 2D canvas splits
 		self.last_kolor      = self.has(['-k'])
 		self.last_line       = self.has(['-l'])
 
@@ -535,8 +536,14 @@ class dlist(debugable):
 			robj = obj
 		if robj.InheritsFrom('TH2'):
 			cobj = self.append(robj, new_title, draw_opt)
-			if draw_opt == '':
-				draw_opt = 'colz'
+			if '+xprof' in draw_opt:
+				draw_opt = draw_opt + ' over'
+				hprofx = robj.ProfileX()
+				cobj_px = self.append(hprofx, new_title, 'p e1 +k6 +m70 +p20')
+			if '+yprof' in draw_opt:
+				draw_opt = draw_opt + ' over'
+				hprofy = robj.ProfileY()
+				cobj_py = self.append(hprofy, new_title, 'p e1 +k6 +m70 +p25')
 			return cobj
 		if robj.InheritsFrom("TH1") \
 			or robj.InheritsFrom("TGraph") \
@@ -1000,6 +1007,12 @@ class dlist(debugable):
 				has2D = True
 		return has2D
 
+	def has_overlay(self):
+		for o in self.l:
+			if o.dopt.overlay:
+				return True
+		return False
+
 	def draw(self, option='', miny=None, maxy=None, logy=False, colopt='', adjust_pad=True, adjust_axis_attributes=True):
 		if self.has2D() == False:
 			if miny == -1 and maxy == -1:
@@ -1023,7 +1036,8 @@ class dlist(debugable):
 					self.make_canvas(1000, 800)
 				else:
 					self.make_canvas()
-			self.tcanvas = du.make_canvas_grid(len(self.l), self.tcanvas)
+			if self.has_overlay:
+				self.tcanvas = du.make_canvas_grid(len(self.l), self.tcanvas)
 		if self.tcanvas != None:
 			tcname = self.tcanvas.GetName()
 		else:
@@ -1048,17 +1062,30 @@ class dlist(debugable):
 				extra_opt.append('E2')
 				self._process_serror_dopts(i)
 			if self.has2D():
-				#tc = ROOT.gROOT.FindObject(tcname)
-				#tc.cd(i+1)
-				self.tcanvas.cd(i+1)
-				ROOT.gStyle.SetOptTitle(False) # True
-				if len(o.dopt.stripped()) > 0:
-					o.obj.Draw(o.dopt.stripped())
-					#print o.obj.GetName(),o.dopt.stripped()
+				if self.has_overlay:
+					if o.obj.InheritsFrom('TH2'):
+						# ROOT.gStyle.SetOptTitle(False) # True
+						if len(o.dopt.stripped()) > 0:
+							o.obj.Draw(o.dopt.stripped())
+							#print o.obj.GetName(),o.dopt.stripped()
+						else:
+							o.obj.Draw('colz')
+						ROOT.gPad.SetToolTipText(o.obj.GetTitle(), 100)
+						self.adjust_pad_margins(_right=0.17)
+					else:
+						o.draw('same '.join(extra_opt))
 				else:
-					o.obj.Draw('colz')
-				ROOT.gPad.SetToolTipText(o.obj.GetTitle(), 100)
-				self.adjust_pad_margins(_right=0.17)
+					#tc = ROOT.gROOT.FindObject(tcname)
+					#tc.cd(i+1)
+					self.tcanvas.cd(i+1)
+					ROOT.gStyle.SetOptTitle(False) # True
+					if len(o.dopt.stripped()) > 0:
+						o.obj.Draw(o.dopt.stripped())
+						#print o.obj.GetName(),o.dopt.stripped()
+					else:
+						o.obj.Draw('colz')
+					ROOT.gPad.SetToolTipText(o.obj.GetTitle(), 100)
+					self.adjust_pad_margins(_right=0.17)
 			else:
 				o.draw(' '.join(extra_opt))
 			if gDebug:
@@ -1430,7 +1457,11 @@ def add_graphs(o1, o2, w=1.):
 				xe = o1.GetEX()[i]
 				ye = o1.GetEY()[i]
 				fractionE = ye / y[i]
-			y[i] = y[i] + w * o2.Eval(x[i], 0, 'S')
+			if x[i] == o2.GetX()[i]:
+				y[i] = y[i] - o2.GetY[i]
+				print 'simple substr..'
+			else:
+				y[i] = y[i] + w * o2.Eval(x[i], 0, 'S')
 			if o1.InheritsFrom('TGraphErrors'):
 				ye = y[i] * fractionE
 			o1.SetPoint(i, x[i], y[i])
@@ -1792,6 +1823,24 @@ def make_ratio(h1, h2):
 	else:
 		hr.SetDirectory(0)
 		hr.Divide(h2)
+	hl.add(hr, newtitle, 'p')
+
+	hl.reset_axis_titles(None, newtitle)
+
+	return hl
+
+def make_sum(h1, h2, w=1.):
+	hl = dlist('sum {} and {} w{}'.format(h1.GetName(), h2.GetName(), w).replace(' ', '_'))
+	newname = '{}_and_{}_w={}'.format(h1.GetName(), h2.GetName(), w)
+	newtitle = 'sum {} + {} w={}'.format(h1.GetTitle(), h2.GetTitle(), w)
+	hr = h1.Clone(newname)
+	hr.SetTitle(newtitle)
+
+	if h1.InheritsFrom('TGraph') and h2.InheritsFrom('TGraph'):
+		add_graphs(hr, h2, w)
+	else:
+		hr.SetDirectory(0)
+		hr.Add(h2, w)
 	hl.add(hr, newtitle, 'p')
 
 	hl.reset_axis_titles(None, newtitle)
