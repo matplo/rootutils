@@ -10,5 +10,5 @@ prepend-path PATH $env(HOME)/devel/rootutils/python/2.7
 prepend-path PYTHONPATH $env(HOME)/devel/rootutils/python/2.7
 prepend-path PATH $env(HOME)/devel/rootutils/python/2.7/mdown
 prepend-path PYTHONPATH $env(HOME)/devel/rootutils/python/2.7/mdown
-
+prepend-path PYTHONPATH /usr/local/lib/python2.7/site-packages
 set-alias pyroot_cd "cd $env(HOME)/devel/rootutils/python/2.7"
