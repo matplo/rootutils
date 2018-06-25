@@ -533,7 +533,9 @@ class TDrawConfig(object):
 					dopt = e.option.replace('norange', '')
 				else:
 					# check if drawing in 2D
-					if ':' in e.varexp:
+					_varexp_tmp = e.varexp.replace('::', '__static__')
+					# if ':' in e.varexp:
+					if ':' in _varexp_tmp:
 						hstring = 'htmp({0},{1},{2},{3},{4},{5})'.format(e.nbinsx, e.x[0], e.x[1], e.nbinsy, e.y[0], e.y[1])
 					else:
 						hstring = 'htmp({0},{1},{2})'.format(e.nbinsx, e.x[0], e.x[1])
