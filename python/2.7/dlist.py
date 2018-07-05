@@ -272,6 +272,8 @@ class dlist(debugable):
 		self.style             = style_iterator()
 		self.maxy              = 1e6  # was 1
 		self.miny              = -1e6  # was 0
+		self.maxz              = None  # was 1
+		self.minz              = None  # was 0
 		self.max_adjusted      = False
 		self.axis_title_offset = [5, 5, 5]  # [1.4, 1.4, 1.4]
 		self.axis_title_size   = [12, 12, 12]  # [0.05, 0.05, 0.05]
@@ -406,6 +408,8 @@ class dlist(debugable):
 				if minz:
 					h.obj.SetMinimum(minz)
 					self.minz = minz
+			else:
+				self.debug('::adjust_maxima z : object not TH2 - no minz or maxz {} {}'.format(h.obj.GetName(), h.obj.GetTitle()))
 		self.max_adjusted = True
 		self.debug('::adjust_maxima z-min: {} z-max {}'.format(self.minz, self.maxz))
 

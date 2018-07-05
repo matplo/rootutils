@@ -50,6 +50,7 @@ class DrawString(object):
 		self.opts  = ''
 		self.process()
 		#print '[i] fname={} hname={} dopt={} opts={}'.format(self.fname, self.hname, self.dopt, self.opts)
+		dlist.gDebug = True
 
 	def process(self):
 		sargs = self.s.split(':')
