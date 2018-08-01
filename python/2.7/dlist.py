@@ -546,7 +546,8 @@ class dlist(debugable):
 				cobj_px = self.append(hprofx, new_title, 'p e1 +k6 +m70 +p20')
 			if '+yprof' in draw_opt:
 				draw_opt = draw_opt + ' over'
-				hprofy = robj.ProfileY()
+				_hprofy = robj.ProfileY()
+				hprofy = h_to_graph(_hprofy, drop_zero_entries=False, xerror=True, transpose=True)
 				cobj_py = self.append(hprofy, new_title, 'p e1 +k6 +m70 +p25')
 			return cobj
 		if robj.InheritsFrom("TH1") \
@@ -2166,14 +2167,14 @@ def make_list(name, xmin, xmax):
 	hl.add(gr, 'fake', 'noleg hidden p')
 	return hl
 
-def h_to_graph(h, drop_zero_entries=True, xerror=False):
+def h_to_graph(h, drop_zero_entries=True, xerror=False, transpose=False):
 	x = []
 	y = []
 	ex = []
 	ey = []
 	for ib in range(1,h.GetNbinsX()+1):
 		if drop_zero_entries:
-			if h.GetBinContent(ib) <= 0:
+			if (h.GetBinContent(ib)*h.GetBinContent(ib)) <= 0:
 				#print 'dropped bin',ib
 				continue
 		x.append(h.GetBinCenter(ib))
@@ -2185,7 +2186,10 @@ def h_to_graph(h, drop_zero_entries=True, xerror=False):
 		ey.append(h.GetBinError(ib))
 	name = h.GetName() + '_to_graph'
 	title = h.GetTitle()
-	gr = make_graph_xy(name, x, y, ex, ey)
+	if transpose:
+		gr = make_graph_xy(name, y, x, ey, ex)
+	else:
+		gr = make_graph_xy(name, x, y, ex, ey)
 	gr.SetTitle(title)
 	return gr
 
