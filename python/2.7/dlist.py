@@ -287,6 +287,7 @@ class dlist(debugable):
 		self.pad_name          = None  # pad where last drawn
 		self.pad               = None  # pad where last drawn
 		self.set_font(42)
+		self.force_legend      = False # by default no legends on 2D plots
 
 	def set_font(self, fn=42, scale=1.):
 		self.font = fn
@@ -1138,7 +1139,7 @@ class dlist(debugable):
 
 	def self_legend(self, ncols = 1, title='', x1=None, y1=None, x2=None, y2=None, tx_size=None, option='brNDC'):
 		self.empty_legend(ncols, title, x1, y1, x2, y2, tx_size, option)
-		if self.has2D():
+		if self.has2D() and self.force_legend is False:
 			self.update()
 			return self.legend
 		for o in self.l:
@@ -1412,8 +1413,8 @@ class dlist(debugable):
 			if i < len(stitles):
 				h.user_title = stitles[i]
 
-	def draw_comment(self, comment = '', font_size=None, x1 = 0.0, y1 = 0.9, x2 = 0.99, y2 = 0.99):
-		du.draw_comment(comment, font_size, x1, y1, x2, y2)
+	def draw_comment(self, comment = '', font_size=None, x1 = 0.0, y1 = 0.9, x2 = 0.99, y2 = 0.99, rotation=0.0):
+		du.draw_comment(comment, font_size, x1, y1, x2, y2, rotation)
 
 	def sum(self, scales=None):
 		reth = None

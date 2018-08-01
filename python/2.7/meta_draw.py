@@ -214,7 +214,7 @@ class Comment(object):
 		return retval
 
 	def filter_known_settings(self, s):
-		known = ['tx_size=', 'color=', 'font=', 'alpha=', 'align=', 'bgc=']
+		known = ['tx_size=', 'color=', 'font=', 'alpha=', 'align=', 'bgc=', 'tx_rotation=']
 		for k in known:
 			if k in s:
 				s=s.split(k)[0]
@@ -236,6 +236,11 @@ class Comment(object):
 		if self.get_setting('tx_size=', ' '):
 			return atof(self.get_setting('tx_size=', ' '))
 		return 0.025
+
+	def get_text_rotation(self):
+		if self.get_setting('tx_rotation=', ' '):
+			return atof(self.get_setting('tx_rotation=', ' '))
+		return 0.0
 
 	def get_color(self):
 		if self.get_setting('color=', ' '):
@@ -283,7 +288,8 @@ class Comment(object):
 			self.tleg.SetTextFont(self.get_font())
 			self.tleg.SetTextColor(self.get_color())
 		for s in self.text:
-			self.tleg.AddEntry(0, s, '')
+			e = self.tleg.AddEntry(0, s, '')
+			e.SetTextAngle(self.get_text_rotation())
 		return self.tleg
 
 class MetaFigure(object):
@@ -504,6 +510,10 @@ class MetaFigure(object):
 		yt = self.get_tag('#y', None)
 		zt = self.get_tag('#z', None)
 		self.hl.reset_axis_titles(xt, yt, zt)
+
+		fleg = self.get_tag('#force_legend', None)
+		if get_value(fleg, int, 0) > 0:
+			self.hl.force_legend = True
 
 		rebin = self.get_tag('#rebin', None, ' ')
 		if rebin!=None:

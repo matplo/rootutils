@@ -493,6 +493,39 @@ def setup_style():
 	r.TColor.CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont)
 	r.gStyle.SetNumberContours(NCont)
 
+	if tutils.is_arg_set('--mono-palette'):
+		#colNum = 30
+		#palette = []
+		#for i in range(0, colNum):
+		#	# color = r.TColor(1001+i, pow(i/((colNum)*1.0),0.3), pow(i/((colNum)*1.0),0.3), 0.5*(i/((colNum)*1.0)),"")
+		#	fi = i * 1.0
+		#	# color = r.TColor(1001+i, pow(fi/((colNum)*1.0),0.3), pow(fi/((colNum)*1.0),0.3), 0.5*(fi/((colNum)*1.0)),"")
+		#	color = r.TColor(1001 + i, i + 1, i + 1, 0)
+		#	palette.append(1001 + i);
+		#	# if(color);
+		#palette_i = array('i', palette)
+		#r.gStyle.SetPalette(colNum, palette_i);
+
+
+		palette = []
+		paletteSize = 128
+		rgb = [	0.80, 0.55, 0.40,
+				0.85, 0.60, 0.45,
+				0.90, 0.65, 0.50,
+				0.95, 0.70, 0.55,
+				1.,   0.75, 0.60,
+				1.,   0.80, 0.65,
+				1.,   0.85, 0.70,
+				1.,   0.90, 0.75,
+				1.,   0.95, 0.80,
+				1.,   1.,   0.85]
+		for i in range(0, paletteSize):
+			# palette.append(r.TColor.GetColor(rgb[i * 3], rgb[i * 3 + 1], rgb[i * 3 + 2]))
+			palette.append(r.TColor.GetColor(1.-(i*1.0)/paletteSize, 1.-(i*1.0)/paletteSize, 1.-(i*1.0)/paletteSize))
+		palette_i = array('i', palette)
+		r.gStyle.SetPalette(paletteSize, palette_i);
+
+
 def make_temp_file(ext='.draw'):
 	ftemp = tempfile.mkstemp(ext, 'tmp_', None, True)
 	os.write(ftemp[0],'#figure\n')
