@@ -491,7 +491,7 @@ def setup_style():
 	green = array('d', [ 0.00, 0.81, 1.00, 0.20, 0.00 ])
 	blue  = array('d', [ 0.51, 1.00, 0.12, 0.00, 0.00 ])
 	r.TColor.CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont)
-	r.gStyle.SetNumberContours(NCont)
+	# r.gStyle.SetNumberContours(NCont)
 
 	if tutils.is_arg_set('--mono-palette'):
 		#colNum = 30
@@ -508,7 +508,7 @@ def setup_style():
 
 
 		palette = []
-		paletteSize = 128
+		paletteSize = 1024
 		rgb = [	0.80, 0.55, 0.40,
 				0.85, 0.60, 0.45,
 				0.90, 0.65, 0.50,

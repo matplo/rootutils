@@ -143,6 +143,9 @@ class draw_option(debugable):
 		self.overlay         = self.has(['over'], strip=True) #ignore 2D canvas splits
 		self.last_kolor      = self.has(['-k'])
 		self.last_line       = self.has(['-l'])
+		self.smooth          = self.has(['smooth'], strip=True)
+		self.is_time_x       = self.has(['timex'], strip=True)
+		self.is_time_y       = self.has(['timey'], strip=True)
 
 	def stripped(self):
 		return self.strip
@@ -257,6 +260,10 @@ class draw_object(debugable):
 			if self.obj.InheritsFrom('TGraph'):
 				sdopt = sdopt + ' A'
 			self.debug('doption=' + sdopt)
+			if self.dopt.is_time_x:
+				self.obj.GetXaxis().SetTimeDisplay(1)
+			if self.dopt.is_time_y:
+				self.obj.GetYaxis().SetTimeDisplay(1)
 			self.obj.Draw(sdopt)
 		else:
 			self.obj.Draw(sdopt + ' same')
@@ -539,6 +546,11 @@ class dlist(debugable):
 			robj = obj.obj
 		except:
 			robj = obj
+		if 'smooth' in draw_opt:
+			if robj.InheritsFrom('TH1') or robj.InheritsFrom('TH2'):
+				_robj = robj.Clone('{}_smoothed'.format(robj.GetName()))
+				_robj.Smooth()
+				robj = _robj
 		if robj.InheritsFrom('TH2'):
 			cobj = self.append(robj, new_title, draw_opt)
 			if '+xprof' in draw_opt:
@@ -566,6 +578,12 @@ class dlist(debugable):
 				xerror = True
 			if robj.InheritsFrom('TH1') and 'graph' in draw_opt.split(' '):
 				robj = h_to_graph(robj, drop_zero_entries=True, xerror=xerror)
+				if 'no_y_error' in draw_opt.split(' '):
+					scale_graph_errors(robj, 1, 0.0)
+					draw_opt = draw_opt.replace('no_y_error',' ')
+				if 'no_x_error' in draw_opt.split(' '):
+					scale_graph_errors(robj, 0, 0.0)
+					draw_opt = draw_opt.replace('no_x_error',' ')
 				draw_opt = draw_opt.replace('graph',' ')
 			else:
 				if xerror == False:
