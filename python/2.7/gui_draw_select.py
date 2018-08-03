@@ -10,6 +10,7 @@ import meta_draw
 import hashlib
 import tempfile
 import time
+import argparse
 
 class FileWatch(object):
 	def __init__(self, fname):
@@ -36,7 +37,7 @@ class FileWatch(object):
 		return retval
 
 class FileView( r.TGMainFrame ):
-	def __init__( self, parent, width, height, fname):
+	def __init__( self, parent, width, height, fname, args = None):
 		r.TGMainFrame.__init__( self, parent, width, height, r.kHorizontalFrame | r.kFitHeight | r.kFitWidth )
 
 		self.width  = width
@@ -104,9 +105,23 @@ class FileView( r.TGMainFrame ):
 
 		self.draw()
 
+		if args.preent:
+			print 'printing...'
+			if args.preent.lower() == 'pdf1':
+				self.pdf()
+			if args.preent.lower() == 'pdf':
+				self.draw('pdf')
+			if args.preent.lower() == 'png':
+				self.draw('png')
+			print 'done.'
+
+		if args.quit:
+			self.close()
+
 	def close(self):
 		self.CloseWindow()
-		r.gApplication.Close()
+		r.gApplication.Terminate(0)
+		exit(0)
 
 	def on_timer(self):
 		self.logfileFrame.flush()
@@ -115,7 +130,7 @@ class FileView( r.TGMainFrame ):
 		if self.fwatch.changed():
 			self.draw()
 
-	def draw(self):
+	def draw(self, preent=None):
 		try:
 			del self.mdf
 		except:
@@ -148,6 +163,12 @@ class FileView( r.TGMainFrame ):
 			else:
 				self.logfileFrame.flush()
 				self.tabs[i+2].draw(mf) #remember the log and util tab
+				self.tabs[i+2].do_layout()
+				if preent:
+					if preent == 'pdf':
+						self.tabs[i+2].pdf()
+					if preent == 'png':
+						self.tabs[i+2].png()
 		self.Layout()
 
 	def pdf(self):
@@ -453,14 +474,14 @@ class DrawFrame( r.TGCompositeFrame ):
 		self.canvas.GetCanvas().Update()
 
 
-def setup_style():
+def setup_style(args):
 	# r.gROOT.Reset()
 	r.gStyle.SetScreenFactor(1)
-	if not tutils.is_arg_set('--keep-stats'):
+	if not args.keep_stats:
 		r.gStyle.SetOptStat(0)
-	if not tutils.is_arg_set('--keep-title'):
+	if not args.keep_title:
 		r.gStyle.SetOptTitle(0)
-	if not tutils.is_arg_set('--no-double-ticks'):
+	if not args.no_double_ticks:
 		r.gStyle.SetPadTickY(1)
 		r.gStyle.SetPadTickX(1)
 	#r.gStyle.SetErrorX(0) #not by default; use X1 to show the x-error with ol
@@ -534,23 +555,28 @@ def make_temp_file(ext='.draw'):
 
 
 def main():
-	setup_style()
-	fname = tutils.get_arg_with('-f')
-	if not fname:
-		if len(sys.argv) > 1:
-			fname = sys.argv[1]
-		else:
-			fname = make_temp_file()
-	if not os.path.isfile(fname):
-		fname = None
-	if fname:
-		fn, fext = os.path.splitext(fname)
+	parser = argparse.ArgumentParser(description='draw a .draw file', prog=os.path.basename(__file__))
+	parser.add_argument('fname', help='what file to draw', type=str, default="", nargs="?")
+	parser.add_argument('--keep-stats', help='keep statistics in the histograms', action='store_true')
+	parser.add_argument('--keep-title', help='keep title in canvas', action='store_true')
+	parser.add_argument('--no-double-ticks', help='no double ticks - whatever this is', action='store_true')
+	parser.add_argument('--preent', help='just preent - specify the file format: pdf, pdf1 (all in one file), png', type=str)
+	parser.add_argument('--quit', help='quit after showing the windo - good for --print and --quit combination', action='store_true')
+	args = parser.parse_args()
+	print '[i] arguments:', args
+	setup_style(args)
+	if not args.fname:
+		args.fname = make_temp_file()
+	if not os.path.isfile(args.fname):
+		args.fname = None
+	if args.fname:
+		fn, fext = os.path.splitext(args.fname)
 		if fext == '.root':
 			import make_draw_files as mdf
 			print '[i] make draw file...'
-			# fname = mdf.make_draw_file(fname)
-			fname = mdf.make_draw_file_smart_group(fname)
-		window = FileView(0, 600, 600, fname)
+			# args.fname = mdf.make_draw_file(args.fname)
+			args.fname = mdf.make_draw_file_smart_group(args.fname)
+		window = FileView(0, 600, 600, args.fname, args)
 		window.RaiseWindow()
 		r.gApplication.Run()
 
