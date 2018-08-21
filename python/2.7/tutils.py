@@ -35,7 +35,7 @@ def get_gList_names():
             pass
     return names
 
-def load_lib(libpath):
+def load_lib(libpath, silent=True):
     #sexplib = ROOT.gSystem.ExpandPathName(libpath.strip())
     sexplib = ROOT.gSystem.DynamicPathName(libpath.strip())
     sexplib_lib = os.path.basename(sexplib)
@@ -44,10 +44,12 @@ def load_lib(libpath):
     #s = ROOT.TString(sexplib_fullpath)
     #sp = ROOT.gSystem.FindDynamicLibrary(s)
     #print sp
-    print '[i] loading', sexplib_fullpath
+    if not silent:
+        print '[i] loading', sexplib_fullpath
     ROOT.gSystem.AddDynamicPath(sexplib_dir)
     retval = ROOT.gSystem.Load(sexplib_lib)
-    print '    status', retval
+    if not silent:
+        print '    status', retval
 
 def load_lib_old(lname, silent = True):
     stmp = ROOT.gSystem.ExpandPathName(lname)

@@ -514,7 +514,7 @@ def setup_style(args):
 	r.TColor.CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont)
 	# r.gStyle.SetNumberContours(NCont)
 
-	if tutils.is_arg_set('--mono-palette'):
+	if args.mono_palette or not args.color:
 		#colNum = 30
 		#palette = []
 		#for i in range(0, colNum):
@@ -560,6 +560,8 @@ def main():
 	parser.add_argument('--keep-stats', help='keep statistics in the histograms', action='store_true')
 	parser.add_argument('--keep-title', help='keep title in canvas', action='store_true')
 	parser.add_argument('--no-double-ticks', help='no double ticks - whatever this is', action='store_true')
+	parser.add_argument('--mono-palette', help='b&w', action='store_true', default=True)
+	parser.add_argument('--color', help='not b&w', action='store_true', default=False)
 	parser.add_argument('--preent', help='just preent - specify the file format: pdf, pdf1 (all in one file), png', type=str)
 	parser.add_argument('--quit', help='quit after showing the windo - good for --print and --quit combination', action='store_true')
 	args = parser.parse_args()
