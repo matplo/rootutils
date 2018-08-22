@@ -48,8 +48,12 @@ def load_lib(libpath, silent=True):
         print '[i] loading', sexplib_fullpath
     ROOT.gSystem.AddDynamicPath(sexplib_dir)
     retval = ROOT.gSystem.Load(sexplib_lib)
-    if not silent:
+    if not silent and retval != 0:
         print '    status', retval
+
+def load_libs(libs, silent=True):
+    for l in libs:
+        load_lib(l, silent)
 
 def load_lib_old(lname, silent = True):
     stmp = ROOT.gSystem.ExpandPathName(lname)
