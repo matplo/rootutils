@@ -1193,7 +1193,13 @@ class dlist(debugable):
 			self.legend.SetHeader(title)
 		self.legend.SetNColumns(ncols)
 		self.legend.SetBorderSize(0)
-		self.legend.SetFillColor(ROOT.kWhite)
+		fkolor = ROOT.kWhite
+		if '+k' in option:
+			try:
+				fkolor = int(option.split('+k')[1].split(' ')[0])
+			except:
+				fkolor = ROOT.kWhite
+		self.legend.SetFillColor(fkolor)
 		self.legend.SetFillStyle(1001)
 		if '+a' in option:
 			try:
@@ -1201,9 +1207,9 @@ class dlist(debugable):
 				salpha = atof(salpha)/100.
 			except:
 				salpha = 0
-			self.legend.SetFillColorAlpha(ROOT.kWhite, salpha)
+			self.legend.SetFillColorAlpha(fkolor, salpha)
 		else:
-			self.legend.SetFillColorAlpha(ROOT.kWhite, 0)
+			self.legend.SetFillColorAlpha(fkolor, 0)
 		self.legend.SetTextAlign(12)
 		self.legend.SetTextFont(self.font)
 		self.legend.SetTextColor(1)

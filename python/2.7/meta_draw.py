@@ -12,7 +12,7 @@ import time
 
 import os
 
-from string import atof,atoi
+from string import atof, atoi
 import eval_string
 
 #def get_value(st):
@@ -664,31 +664,39 @@ class MetaFigure(object):
 
 		#legend
 		sleg = self.get_tag('#legend')
-		x1,y1,x2,y2 = self.legend_position(sleg)
-		tx_size = 0.025
-		try:
-			tx_size = atof(sleg.split('tx_size=')[1].split(' ')[0])
-		except:
-			pass
-		leg_opt = 'brNDC'
-		try:
-			if 'alpha=' in sleg:
-				leg_opt = leg_opt + ' +a' + sleg.split('alpha=')[1].split(' ')[0]
-		except:
+		if sleg:
+			x1,y1,x2,y2 = self.legend_position(sleg)
+			tx_size = 0.025
+			try:
+				tx_size = atof(sleg.split('tx_size=')[1].split(' ')[0])
+			except:
+				pass
 			leg_opt = 'brNDC'
-		#print '[i] legend options:',leg_opt
-		stitle = ''
-		try:
-			stitle = sleg.split('title=')[1].split(',,')[0]
-		except:
-			pass
-		ncol = 1
-		try:
-			ncol = int(sleg.split('ncol=')[1].split(',,')[0])
-		except:
+			try:
+				if 'alpha=' in sleg:
+					leg_opt = leg_opt + ' +a' + sleg.split('alpha=')[1].split(' ')[0]
+			except:
+				leg_opt = 'brNDC'
+			#print '[i] legend options:',leg_opt
+			stitle = ''
+			try:
+				stitle = sleg.split('title=')[1].split(',,')[0]
+			except:
+				pass
 			ncol = 1
-		self.hl.self_legend(ncols=ncol,title=stitle,x1=x1,x2=x2,y1=y1,y2=y2,tx_size=tx_size,option=leg_opt)
-
+			try:
+				ncol = int(sleg.split('ncol=')[1].split(' ')[0])
+			except:
+				ncol = 1
+			fcol = 0
+			try:
+				fcol = int(sleg.split('fcol=')[1].split(' ')[0])
+			except:
+				fcol = 0
+			if fcol > 0:
+				# leg.SetFillColor(fcol)
+				leg_opt = leg_opt + ' +k{}'.format(fcol)
+			leg = self.hl.self_legend(ncols=ncol,title=stitle,x1=x1,x2=x2,y1=y1,y2=y2,tx_size=tx_size,option=leg_opt)
 		#line
 		self.draw_lines()
 
