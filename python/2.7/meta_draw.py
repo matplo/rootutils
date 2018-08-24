@@ -297,6 +297,7 @@ class MetaFigure(object):
 			self.name = tu.make_unique_name(fname)
 		else:
 			self.name = tu.make_unique_name('MetaFigure')
+		self.figure_name = self.name
 		self.fname    = fname
 		self.drawable = True
 		self.data     = []
@@ -346,6 +347,7 @@ class MetaFigure(object):
 		if len(cline) < 1:
 			return
 		self.data.append(cline)
+		self.figure_name = self.get_tag('#figure', None)
 		if cline[0] == '#':
 			return
 		self.last_ds = DrawString(cline)
@@ -460,6 +462,7 @@ class MetaFigure(object):
 		self.hl.add(gr, 'WARNING: LIST EMPTY!', 'hidden')
 
 	def draw(self, no_canvas=False, add_dummy=True):
+		self.figure_name = self.get_tag('#figure', None)
 		if self.get_tag('#debug', None):
 			dlist.gDebug = True
 		if add_dummy == True:
@@ -809,7 +812,7 @@ class MetaDrawFile(object):
 				if len(self.figures[-1].data) > 1:
 					fig = MetaFigure(fname)
 					self.figures.append(fig)
-				continue
+				# continue
 			self.figures[-1].process_line(d)
 		self.options = []
 

@@ -11,6 +11,8 @@ import hashlib
 import tempfile
 import time
 import argparse
+import pyutils
+
 
 class FileWatch(object):
 	def __init__(self, fname):
@@ -163,6 +165,15 @@ class FileView( r.TGMainFrame ):
 			else:
 				self.logfileFrame.flush()
 				self.tabs[i+2].draw(mf) #remember the log and util tab
+				if not mf.figure_name:
+					mf.figure_name = 'Fig {}'.format(i)
+					stabname = '{}'.format(mf.figure_name)
+				else:
+					stabname = '{} {}'.format(i, mf.figure_name)
+				self.tabs[i+2].name = '{}_{}'.format(self.fname, pyutils.to_file_name(stabname))
+				tabname = r.TGString(stabname)
+				self.tab.GetTabTab(i+2).SetText(tabname)
+				#'{}_{}'.format(self.fname, i, pyutils.to_file_name(mf.figure_name))
 				self.tabs[i+2].do_layout()
 				if preent:
 					if preent == 'pdf':
