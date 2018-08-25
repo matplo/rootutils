@@ -195,6 +195,12 @@ class FileView( r.TGMainFrame ):
 			tab.pdf_to_file(fname)
 			ifig += 1
 
+# class MyTextView( r.TGTextView ):
+# 	def __init__(self, parent):
+# 		r.TGTextView.__init__(self, parent)
+# 	def getClipText(self):
+# 		return self.fClipText.GetCurrentLine().GetText()
+
 class LogFileFrame( r.TGCompositeFrame ):
 	def __init__( self, parent, width, height, name, logfilename=None):
 		r.TGCompositeFrame.__init__( self, parent, width, height, r.kLHintsExpandX | r.kLHintsExpandY)
@@ -212,8 +218,22 @@ class LogFileFrame( r.TGCompositeFrame ):
 		self.AddFrame(self.contentFrame, self.frameHint )
 		#self.content     = r.TGTextEdit( self )
 		#self.content.SetReadOnly()
+		#self.content     = MyTextView(self) #r.TGTextView( self )
 		self.content     = r.TGTextView( self )
 		self.contentFrame.AddFrame( self.content, self.frameHint )
+
+		self.buttonsFrame = r.TGButtonGroup( self, 'tools', r.kHorizontalFrame)
+		self.AddFrame( self.buttonsFrame, self.buttonsFrameHint )
+
+		self.copyToClipboardButton   = r.TGTextButton( self.buttonsFrame, 'Copy to clipboard' )
+		self.copyToClipboardDispatch = r.TPyDispatcher( self.copyToClipboard )
+		self.copyToClipboardButton.Connect( 'Clicked()', "TPyDispatcher", self.copyToClipboardDispatch, 'Dispatch()' )
+		self.buttonsFrame.AddFrame( self.copyToClipboardButton, self.buttonHint )
+
+		self.clearButton   = r.TGTextButton( self.buttonsFrame, 'Clear' )
+		self.clearDispatch = r.TPyDispatcher( self.clear )
+		self.clearButton.Connect( 'Clicked()', "TPyDispatcher", self.clearDispatch, 'Dispatch()' )
+		self.buttonsFrame.AddFrame( self.clearButton, self.buttonHint )
 
 		self.logfile = None
 		self.logfilename = logfilename
@@ -240,6 +260,16 @@ class LogFileFrame( r.TGCompositeFrame ):
 		sys.stdout.flush()
 		#sys.stderr.flush()
 
+	def copyToClipboard(self):
+		copied = self.content.Copy()
+		print "text copied...", copied
+		# print >> sys.stderr, self.content.getClipText()
+		self.draw()
+
+	def clear(self):
+		# self.content.SelectAll()
+		self.content.Clear()
+
 	def __del__(self):
 		if self.initialized:
 			sys.stdout = self.keep_stdout
@@ -249,7 +279,7 @@ class LogFileFrame( r.TGCompositeFrame ):
 			self.logfile.close()
 		print 'LogFileFrame closed.', self.logfilename
 
-	def draw(self, p = None):
+	def draw_old(self, p = None):
 		self.content.Clear()
 		with open(self.logfilename, 'r') as f:
 			cl = f.readlines()
@@ -264,6 +294,12 @@ class LogFileFrame( r.TGCompositeFrame ):
 		#self.content.SetVsbPosition(self.content.ReturnLineCount());
 		self.content.Update()
 		self.content.ShowBottom()
+		self.content.Update()
+
+	def draw(self, p = None):
+		self.content.LoadFile(self.logfilename)
+		self.content.ShowBottom()
+		self.content.Update()
 
 #class FeaturesFrameBox( r.TGMsgBox ):
 #	def __init__( self, parent, main, title, msg):
