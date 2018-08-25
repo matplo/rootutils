@@ -12,7 +12,7 @@ import tempfile
 import time
 import argparse
 import pyutils
-
+import pyperclip
 
 class FileWatch(object):
 	def __init__(self, fname):
@@ -262,7 +262,18 @@ class LogFileFrame( r.TGCompositeFrame ):
 
 	def copyToClipboard(self):
 		copied = self.content.Copy()
-		print "text copied...", copied
+		# print "[i] logfile text copied to clipboard", copied
+
+		if not pyperclip.is_available():
+			# print >> sys.stderr, '[e] no pyperclip functionality available'
+			print '[w] no pyperclip functionality available'
+		try:
+			cl = []
+			with open(self.logfilename, 'r') as f:
+				cl = f.readlines()
+			pyperclip.copy(''.join(cl))
+		except:
+			print '[e] pyperclip.copy failed.'
 		# print >> sys.stderr, self.content.getClipText()
 		self.draw()
 
@@ -419,8 +430,8 @@ class DrawFrame( r.TGCompositeFrame ):
 		self.frameHint        = r.TGLayoutHints(r.kLHintsExpandX | r.kLHintsExpandY)
 		self.frameHintEY      = r.TGLayoutHints(r.kLHintsExpandY)
 		self.frameHintEX      = r.TGLayoutHints(r.kLHintsExpandX)
-		self.buttonsFrameHint = r.TGLayoutHints(r.kLHintsExpandX)
-		self.buttonHint       = r.TGLayoutHints(r.kLHintsCenterX | r.kLHintsExpandX, 5,5,3,4)
+		self.buttonsFrameHint = r.TGLayoutHints(r.kLHintsCenterX | r.kLHintsExpandX)
+		self.buttonHint       = r.TGLayoutHints(r.kLHintsCenterX | r.kLHintsExpandX, 0, 0, 0, 0) #5,5,3,4)
 
 		self.canvasFrame = r.TGGroupFrame( self, 'drawing')
 		self.AddFrame(self.canvasFrame, self.frameHint )
@@ -430,22 +441,29 @@ class DrawFrame( r.TGCompositeFrame ):
 		self.buttonsFrame = r.TGButtonGroup( self, 'actions', r.kHorizontalFrame)
 		self.AddFrame( self.buttonsFrame, self.buttonsFrameHint )
 
-		self.dumpFeaturesButton   = r.TGTextButton( self.buttonsFrame, 'Features', 10 )
+		self.dumpFeaturesButton   = r.TGTextButton( self.buttonsFrame, 'Features->Log', 0 )
 		self.dumpFeaturesDispatch = r.TPyDispatcher( self.dumpFeatures )
 		self.dumpFeaturesButton.Connect( 'Clicked()', "TPyDispatcher", self.dumpFeaturesDispatch, 'Dispatch()' )
 		self.buttonsFrame.AddFrame( self.dumpFeaturesButton, self.buttonHint )
+		self.dumpFeaturesButton.SetWrapLength(50)
 
-		self.writeRootFileButton   = r.TGTextButton( self.buttonsFrame, 'ROOT', 10 )
+		self.copyToClipperFeaturesButton   = r.TGTextButton( self.buttonsFrame, 'Features->ClipB', 1 )
+		self.copyToClipperFeaturesDispatch = r.TPyDispatcher( self.copyToClipperFeatures )
+		self.copyToClipperFeaturesButton.Connect( 'Clicked()', "TPyDispatcher", self.copyToClipperFeaturesDispatch, 'Dispatch()' )
+		self.buttonsFrame.AddFrame( self.copyToClipperFeaturesButton, self.buttonHint )
+		self.copyToClipperFeaturesButton.SetWrapLength(50)
+
+		self.writeRootFileButton   = r.TGTextButton( self.buttonsFrame, 'ROOT', 2 )
 		self.writeRootFileDispatch = r.TPyDispatcher( self.writeRootFile )
 		self.writeRootFileButton.Connect( 'Clicked()', "TPyDispatcher", self.writeRootFileDispatch, 'Dispatch()' )
 		self.buttonsFrame.AddFrame( self.writeRootFileButton, self.buttonHint )
 
-		self.pdfButton   = r.TGTextButton( self.buttonsFrame, 'PDF', 10 )
+		self.pdfButton   = r.TGTextButton( self.buttonsFrame, 'PDF', 3 )
 		self.pdfDispatch = r.TPyDispatcher( self.pdf )
 		self.pdfButton.Connect( 'Clicked()', "TPyDispatcher", self.pdfDispatch, 'Dispatch()' )
 		self.buttonsFrame.AddFrame( self.pdfButton, self.buttonHint )
 
-		self.pngButton   = r.TGTextButton( self.buttonsFrame, 'PNG', 10 )
+		self.pngButton   = r.TGTextButton( self.buttonsFrame, 'PNG', 4 )
 		self.pngDispatch = r.TPyDispatcher( self.png )
 		self.pngButton.Connect( 'Clicked()', "TPyDispatcher", self.pngDispatch, 'Dispatch()' )
 		self.buttonsFrame.AddFrame( self.pngButton, self.buttonHint )
@@ -475,10 +493,9 @@ class DrawFrame( r.TGCompositeFrame ):
 		#    self.mf.hl.png()
 		self.canvas.GetCanvas().Print(self.name+'.png', 'png')
 
-	def dumpFeatures(self):
-		# NOTE:
-		print '-----'
-		print '[i] Features of',self.name,'...'
+	def features_text(self):
+		stext = []
+		stext.append(self.name)
 		tc = self.canvas.GetCanvas()
 		l = tc.GetListOfPrimitives()
 		for o in l:
@@ -486,7 +503,7 @@ class DrawFrame( r.TGCompositeFrame ):
 				continue
 			if o.InheritsFrom('TH1'):
 				continue
-			print o.GetName(), o.Class().GetName(),o.GetOption()
+			stext.append(' '.join([o.GetName(), o.Class().GetName(), o.GetOption()]))
 			if o.Class().GetName() == 'TLegend':
 				# TLegend::GetListOfPrimitives() triggers a crash when clearing (redraw) the gPad/Canvas
 				# this is why we are unable to iterate on the TLegend items...
@@ -500,12 +517,31 @@ class DrawFrame( r.TGCompositeFrame ):
 						items = items + ' item={}'.format(p.GetLabel())
 				if '#l' in o.GetOption().split():
 					stype = '#legend'
-				lposs = '{:.3},{:.3},{:.3},{:.3},'.format(o.GetX1NDC(),o.GetY1NDC(),o.GetX2NDC(),o.GetY2NDC())
+				lposs = '{:.3},{:.3},{:.3},{:.3},'.format(o.GetX1NDC(), o.GetY1NDC(), o.GetX2NDC(), o.GetY2NDC())
 				if len(items) == 0:
-					print stype,lposs,'tx_size=',o.GetTextSize()
+					stext.append(' '.join([stype, lposs, 'tx_size=', str(o.GetTextSize())]))
 				else:
-					print stype,lposs,items,'tx_size=',o.GetTextSize()
+					stext.append(' '.join([stype, lposs, items, 'tx_size=', str(o.GetTextSize())]))
+		return stext
+
+	def dumpFeatures(self):
+		# NOTE:
+		print '-----'
+		print '[i] Features of',
+		for s in self.features_text():
+			print s
 		print
+
+	def copyToClipperFeatures(self):
+		if not pyperclip.is_available():
+			#print >> sys.stderr, '[e] no pyperclip functionality available'
+			print '[w] no pyperclip functionality available'
+		try:
+			print '[i] features copied to clipboard'
+			sf = self.features_text()
+			pyperclip.copy('\n'.join(sf))
+		except:
+			print '[e] pyperclip.copy failed.'
 
 	def draw(self, mf):
 		print
