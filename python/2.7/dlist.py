@@ -409,7 +409,7 @@ class dlist(debugable):
 
 	def set_min_max_z(self, minz=None, maxz=None):
 		for h in self.l:
-			if h.obj.InheritsFrom('TH2'):
+			if h.obj.InheritsFrom('TH2') or h.obj.InheritsFrom('TF2'):
 				if maxz:
 					h.obj.SetMaximum(maxz)
 					self.maxz = maxz
@@ -547,11 +547,11 @@ class dlist(debugable):
 		except:
 			robj = obj
 		if 'smooth' in draw_opt:
-			if robj.InheritsFrom('TH1') or robj.InheritsFrom('TH2'):
+			if robj.InheritsFrom('TH1') or robj.InheritsFrom('TF2'):
 				_robj = robj.Clone('{}_smoothed'.format(robj.GetName()))
 				_robj.Smooth()
 				robj = _robj
-		if robj.InheritsFrom('TH2'):
+		if robj.InheritsFrom('TH2') or robj.InheritsFrom('TF2'):
 			cobj = self.append(robj, new_title, draw_opt)
 			if '+xprof' in draw_opt:
 				draw_opt = draw_opt + ' over'
@@ -1029,6 +1029,8 @@ class dlist(debugable):
 		for i,o in enumerate(self.l):
 			if o.obj.IsA().InheritsFrom('TH2') == True:
 				has2D = True
+			if o.obj.IsA().InheritsFrom('TF2') == True:
+				has2D = True
 		return has2D
 
 	def has_overlay(self):
@@ -1087,7 +1089,7 @@ class dlist(debugable):
 				self._process_serror_dopts(i)
 			if self.has2D():
 				if self.has_overlay:
-					if o.obj.InheritsFrom('TH2'):
+					if o.obj.InheritsFrom('TH2') or o.obj.InheritsFrom('TF2'):
 						# ROOT.gStyle.SetOptTitle(False) # True
 						if len(o.dopt.stripped()) > 0:
 							o.obj.Draw(o.dopt.stripped())
@@ -1296,11 +1298,11 @@ class dlist(debugable):
 				if to_max == True:
 					intg = h.obj.GetMaximum()
 				else:
-					if h.obj.InheritsFrom('TH2'):
+					if h.obj.InheritsFrom('TH2') or h.obj.InheritsFrom('TF2'):
 						intg = h.obj.Integral(1, h.obj.GetNbinsX(), 1, h.obj.GetNbinsY())
 					else:
 						intg = h.obj.Integral(1, h.obj.GetNbinsX())
-				if h.obj.InheritsFrom('TH2'):
+				if h.obj.InheritsFrom('TH2') or h.obj.InheritsFrom('TF2'):
 					if scale_by_binwidth:
 						print '[w] bin width for 2D histogram set to 1.'
 					bw = 1.
