@@ -431,6 +431,7 @@ class DrawFrame( r.TGCompositeFrame ):
 		self.frameHintEY      = r.TGLayoutHints(r.kLHintsExpandY)
 		self.frameHintEX      = r.TGLayoutHints(r.kLHintsExpandX)
 		self.buttonsFrameHint = r.TGLayoutHints(r.kLHintsCenterX | r.kLHintsExpandX)
+		# self.buttonHint       = r.TGLayoutHints(r.kLHintsCenterX | r.kLHintsExpandX, 0, 0, 0, 0) #5,5,3,4)
 		self.buttonHint       = r.TGLayoutHints(r.kLHintsCenterX | r.kLHintsExpandX, 0, 0, 0, 0) #5,5,3,4)
 
 		self.canvasFrame = r.TGGroupFrame( self, 'drawing')
@@ -453,17 +454,22 @@ class DrawFrame( r.TGCompositeFrame ):
 		self.buttonsFrame.AddFrame( self.copyToClipperFeaturesButton, self.buttonHint )
 		self.copyToClipperFeaturesButton.SetWrapLength(50)
 
-		self.writeRootFileButton   = r.TGTextButton( self.buttonsFrame, 'ROOT', 2 )
+		self.writeRootMacroButton   = r.TGTextButton( self.buttonsFrame, '.C', 2 )
+		self.writeRootMacroDispatch = r.TPyDispatcher( self.writeRootMacro )
+		self.writeRootMacroButton.Connect( 'Clicked()', "TPyDispatcher", self.writeRootMacroDispatch, 'Dispatch()' )
+		self.buttonsFrame.AddFrame( self.writeRootMacroButton, self.buttonHint )
+
+		self.writeRootFileButton   = r.TGTextButton( self.buttonsFrame, 'ROOT', 3 )
 		self.writeRootFileDispatch = r.TPyDispatcher( self.writeRootFile )
 		self.writeRootFileButton.Connect( 'Clicked()', "TPyDispatcher", self.writeRootFileDispatch, 'Dispatch()' )
 		self.buttonsFrame.AddFrame( self.writeRootFileButton, self.buttonHint )
 
-		self.pdfButton   = r.TGTextButton( self.buttonsFrame, 'PDF', 3 )
+		self.pdfButton   = r.TGTextButton( self.buttonsFrame, 'PDF', 4 )
 		self.pdfDispatch = r.TPyDispatcher( self.pdf )
 		self.pdfButton.Connect( 'Clicked()', "TPyDispatcher", self.pdfDispatch, 'Dispatch()' )
 		self.buttonsFrame.AddFrame( self.pdfButton, self.buttonHint )
 
-		self.pngButton   = r.TGTextButton( self.buttonsFrame, 'PNG', 4 )
+		self.pngButton   = r.TGTextButton( self.buttonsFrame, 'PNG', 5 )
 		self.pngDispatch = r.TPyDispatcher( self.png )
 		self.pngButton.Connect( 'Clicked()', "TPyDispatcher", self.pngDispatch, 'Dispatch()' )
 		self.buttonsFrame.AddFrame( self.pngButton, self.buttonHint )
@@ -479,6 +485,9 @@ class DrawFrame( r.TGCompositeFrame ):
 
 	def writeRootFile(self):
 		self.mf.hl.write_to_file(self.name + '.root', name_mod='modn:')
+
+	def writeRootMacro(self):
+		self.mf.hl.tcanvas.SaveAs(self.name + '.C', '.C')
 
 	def pdf(self):
 		#if self.mf:
