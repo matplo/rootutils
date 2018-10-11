@@ -188,7 +188,26 @@ def iprompt():
     if not '-b' in sys.argv:
         IPython.embed()
 
-def setup_basic_root(D2pal=True):
+def mono_palette():
+    palette = []
+    paletteSize = 1024
+    rgb = [ 0.80, 0.55, 0.40,
+            0.85, 0.60, 0.45,
+            0.90, 0.65, 0.50,
+            0.95, 0.70, 0.55,
+            1.,   0.75, 0.60,
+            1.,   0.80, 0.65,
+            1.,   0.85, 0.70,
+            1.,   0.90, 0.75,
+            1.,   0.95, 0.80,
+            1.,   1.,   0.85]
+    for i in range(0, paletteSize):
+        # palette.append(r.TColor.GetColor(rgb[i * 3], rgb[i * 3 + 1], rgb[i * 3 + 2]))
+        palette.append(ROOT.TColor.GetColor(1.-(i*1.0)/paletteSize, 1.-(i*1.0)/paletteSize, 1.-(i*1.0)/paletteSize))
+    palette_i = array.array('i', palette)
+    ROOT.gStyle.SetPalette(paletteSize, palette_i);
+
+def setup_basic_root(D2pal=1):
     ROOT.gROOT.Reset()
     ROOT.gStyle.SetScreenFactor(1)
 
@@ -208,8 +227,11 @@ def setup_basic_root(D2pal=True):
     ROOT.gStyle.SetEndErrorSize(0)
     # ROOT.gStyle.SetEndErrorSize(4)
 
-    if D2pal:
+    if D2pal == 1:
         ROOT.gStyle.SetPalette(53)
+
+    if D2pal == -1:
+        mono_palette()
 
     global app
     app = ROOT.PyROOT.TPyROOTApplication.CreateApplication()
