@@ -606,7 +606,7 @@ def setup_style(args):
 	r.TColor.CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont)
 	# r.gStyle.SetNumberContours(NCont)
 
-	if args.mono_palette or not args.color:
+	if args.mono_palette and not args.color:
 		#colNum = 30
 		#palette = []
 		#for i in range(0, colNum):
