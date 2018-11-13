@@ -1,3 +1,5 @@
+from array import array
+
 def get_quantiles_graph(nq=4, h=None, smod=''):
 	xq = [0.0] * nq
 	yq = [0.0] * nq
