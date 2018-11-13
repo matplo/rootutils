@@ -56,7 +56,7 @@ def get_quant_from_2D(h=None, n=50, smod = ''):
 	x = []
 	y = []
 	for ibx in range(1, h.GetXaxis().GetNbins() + 1):
-		hproj = h.ProjectionY(ibx, ibx)
+		hproj = h.ProjectionY('{}_py{}'.format(h.GetName(), ibx), ibx, ibx)
 		axq, ayq = get_quantiles(100, hproj, smod + '_proj_{}'.format(ibx))
 		x.append(h.GetXaxis().GetBinCenter(ibx))
 		y.append(ayq[n])
