@@ -1,4 +1,6 @@
 from array import array
+import ROOT as r
+
 
 def get_quantiles_graph(nq=4, h=None, smod=''):
 	xq = [0.0] * nq
