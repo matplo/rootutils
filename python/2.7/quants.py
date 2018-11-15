@@ -1,6 +1,6 @@
 from array import array
+import tutils
 import ROOT as r
-
 
 def get_quantiles_graph(nq=4, h=None, smod=''):
 	xq = [0.0] * nq
@@ -48,9 +48,9 @@ def get_quantiles(nq=4, h=None, smod=''):
 	axq = array('d', xq)
 	ayq = array('d', yq)
 
-	if h is None:
-		h = r.TH1F("h","demo quantiles",100,-3,3)
-		h.FillRandom("gaus",5000);
+	# if h is None:
+	# 	h = r.TH1F("h","demo quantiles",100,-3,3)
+	#	h.FillRandom("gaus",5000);
 
 	h.GetQuantiles(nq, ayq, axq);
 
@@ -63,12 +63,15 @@ def get_quant_from_2D(h=None, n=50, smod = ''):
 		hproj = h.ProjectionY('{}_py{}'.format(h.GetName(), ibx), ibx, ibx)
 		axq, ayq = get_quantiles(100, hproj, smod + '_proj_{}'.format(ibx))
 		x.append(h.GetXaxis().GetBinCenter(ibx))
+		# print x[-1], ayq
 		y.append(ayq[n])
 	return x, y
 
 def get_quant_from_2D_graph(h=None, n=50, smod = ''):
 	x, y = get_quant_from_2D(h, n, smod)
-	gr = r.TGraph(len(x), x, y)
+	ax = array('d', x)
+	ay = array('d', y)
+	gr = r.TGraph(len(x), ax, ay)
 	gr.SetName('quant_gr_{}_{}'.format(h.GetName(), n))
 	tutils.gList.append(gr)
 	return gr
