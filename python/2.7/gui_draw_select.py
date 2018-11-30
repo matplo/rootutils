@@ -653,11 +653,13 @@ def main():
 	parser.add_argument('--keep-title', help='keep title in canvas', action='store_true')
 	parser.add_argument('--no-double-ticks', help='no double ticks - whatever this is', action='store_true')
 	parser.add_argument('--mono-palette', help='b&w', action='store_true', default=True)
+	parser.add_argument('--no-date', help='ignore #date', action='store_true', default=False)
 	parser.add_argument('--color', help='not b&w', action='store_true', default=False)
 	parser.add_argument('--preent', help='just preent - specify the file format: pdf, pdf1 (all in one file), png', type=str)
 	parser.add_argument('--quit', help='quit after showing the windo - good for --print and --quit combination', action='store_true')
 	args = parser.parse_args()
 	print '[i] arguments:', args
+	meta_draw.MetaFigure.show_date = not args.no_date
 	setup_style(args)
 	if not args.fname:
 		args.fname = make_temp_file()

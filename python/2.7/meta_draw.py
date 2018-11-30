@@ -292,6 +292,7 @@ class Comment(object):
 		return self.tleg
 
 class MetaFigure(object):
+	show_date = False
 	def __init__(self, fname=''):
 		if fname:
 			self.name = tu.make_unique_name(fname)
@@ -717,7 +718,7 @@ class MetaFigure(object):
 			self.hl.resize_window(x,y)
 
 		ds = self.get_tag('#date')
-		if ds != None:
+		if ds != None and self.show_date is True:
 			try:
 				st = ds.replace('#date', '').strip()
 			except:
