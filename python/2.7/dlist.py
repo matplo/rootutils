@@ -10,7 +10,7 @@ from dbgu import debug_utils as dbgu
 import pcanvas
 import pyutils
 from string import atof
-
+from eval_string import get_value
 
 def check_andor_make_output_dir(sname, isfilename=False):
 	sdir = sname
@@ -577,7 +577,12 @@ class dlist(debugable):
 			else:
 				xerror = True
 			if robj.InheritsFrom('TH1') and 'graph' in draw_opt.split(' '):
-				robj = h_to_graph(robj, drop_zero_entries=True, xerror=xerror)
+				y_min = True
+				y_min_test = draw_opt.split('ymin')
+				if len(y_min_test) > 1:
+					y_min_test = y_min_test[1].split(' ')[0]
+					y_min = get_value(y_min_test, float, 0.0)
+				robj = h_to_graph(robj, drop_zero_entries=y_min, xerror=xerror)
 				if 'no_y_error' in draw_opt.split(' '):
 					scale_graph_errors(robj, 1, 0.0)
 					draw_opt = draw_opt.replace('no_y_error',' ')
@@ -2194,16 +2199,23 @@ def make_list(name, xmin, xmax):
 	hl.add(gr, 'fake', 'noleg hidden p')
 	return hl
 
-def h_to_graph(h, drop_zero_entries=True, xerror=False, transpose=False):
+def h_to_graph(h, drop_zero_entries=False, xerror=False, transpose=False):
 	x = []
 	y = []
 	ex = []
 	ey = []
 	for ib in range(1,h.GetNbinsX()+1):
 		if drop_zero_entries:
-			if (h.GetBinContent(ib)*h.GetBinContent(ib)) <= 0:
-				#print 'dropped bin',ib
-				continue
+			if type(drop_zero_entries) is bool:
+				ymin = 0.0
+				if (h.GetBinContent(ib)*h.GetBinContent(ib)) <= ymin:
+					print 'dropped bin bool', ib, h.GetBinContent(ib), ymin
+					continue
+			else:
+				ymin = drop_zero_entries
+				if h.GetBinContent(ib) <= ymin:
+					print 'dropped bin', ib, h.GetBinContent(ib), ymin
+					continue
 		x.append(h.GetBinCenter(ib))
 		y.append(h.GetBinContent(ib))
 		if xerror == True:
