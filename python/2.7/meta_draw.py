@@ -136,7 +136,7 @@ class DrawString(object):
 			#retval = atof(st)
 			np = eval_string.NumericStringParser()
 			retval = np.eval(st)
-			#print st,retval
+			print st,retval
 		except:
 			retval = None
 			print '[w] scale not understood:',self.s
