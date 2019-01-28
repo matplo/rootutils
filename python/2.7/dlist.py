@@ -299,12 +299,12 @@ class dlist(debugable):
 	def set_font(self, fn=42, scale=1.):
 		self.font = fn
 		if self.font == 42:
-			self.axis_title_offset = [1.40, 1.45, 1.40] # y offset was 1.40 then 1.45
+			self.axis_title_offset = [1.40, 1.45, 1.0] # y offset was 1.40 then 1.45
 			self.axis_title_size   = [0.05 * scale, 0.05 * scale, 0.05 * scale]
 			self.axis_label_size   = [0.04 * scale, 0.04 * scale, 0.04 * scale]
 			self.axis_label_offset = [0.02, 0.02, 0.02]
 		if self.font == 43:
-			self.axis_title_offset = [ 3,     3,     3] #[1.4, 1.4, 1.4]
+			self.axis_title_offset = [ 3,     3,     2] #[1.4, 1.4, 1.4]
 			self.axis_label_offset = [ 0.01,  0.01,  0.01]
 			self.axis_title_size   = [12 * scale, 12 * scale, 12 * scale] #[0.05, 0.05, 0.05]
 			self.axis_label_size   = [12 * scale, 12 * scale, 12 * scale] # for font 42 [0.04, 0.04, 0.04]
