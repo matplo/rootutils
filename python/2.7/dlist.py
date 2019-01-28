@@ -846,6 +846,23 @@ class dlist(debugable):
 		if o.obj.InheritsFrom('TF1') == True:
 			o.obj.SetRange(xlow, xhigh)
 
+	def flatten_at_index(self, i=-1, val=None):
+		if len(self.l) < 1:
+			return
+		o = self.l[i]
+		print 'flatten', o.obj.GetName(), val
+		if o.obj.InheritsFrom('TH2') and val is not None:
+			h = o.obj
+			if not h.GetSumw2():
+				h.Sumw2()
+			for ibx in range(1, h.GetXaxis().GetNbins() + 1):
+				for iby in range(1, h.GetYaxis().GetNbins() + 1):
+					if h.GetBinContent(ibx, iby) != 0 or h.GetBinError(ibx, iby) > 0:
+						h.SetBinContent(ibx, iby, val)
+						h.SetBinError(ibx, iby, 0.0)
+		else:
+			print 'flatten implemented only for TH2'
+
 	def rebin(self, val = 2, norm = False):
 		for o in self.l:
 			if o.obj.InheritsFrom('TH1') == False:

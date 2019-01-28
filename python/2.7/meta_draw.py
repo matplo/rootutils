@@ -142,6 +142,22 @@ class DrawString(object):
 			print '[w] scale not understood:',self.s
 		return retval
 
+	def flatten(self):
+		st = self.get_arg('flatten=', ',')
+		retval = None
+		if st == None:
+			return retval
+		try:
+			#retval = atof(st)
+			np = eval_string.NumericStringParser()
+			retval = np.eval(st)
+			#print st,retval
+		except:
+			retval = None
+			print '[w] flatten not understood:',self.s
+		return retval
+
+
 	def trim(self):
 		st = self.get_arg('trim=',',')
 		if st == None:
@@ -376,6 +392,10 @@ class MetaFigure(object):
 					self.hl.scale_at_index(-1, scale)
 			if self.last_ds.trim() != None:
 				self.hl.trim_at_index(-1, self.last_ds.trim()[0], self.last_ds.trim()[1])
+			flatten = self.last_ds.flatten()
+			if flatten != None:
+				print 'flattening by', flatten
+				self.hl.flatten_at_index(-1, flatten)
 		else:
 			print '[w] failed to add',self.last_ds.hname,'from',self.last_ds.fname
 
