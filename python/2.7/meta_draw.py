@@ -670,7 +670,7 @@ class MetaFigure(object):
 		sleg = self.get_tag('#legend')
 		if sleg:
 			x1,y1,x2,y2 = self.legend_position(sleg)
-			tx_size = 0.025
+			tx_size = 0.035 #0.025
 			try:
 				tx_size = atof(sleg.split('tx_size=')[1].split(' ')[0])
 			except:
@@ -700,10 +700,27 @@ class MetaFigure(object):
 			if fcol > 0:
 				# leg.SetFillColor(fcol)
 				leg_opt = leg_opt + ' +k{}'.format(fcol)
+			try:
+				pos = sleg.split('pos=')[1]
+			except:
+				pos = None
+			if pos:
+				if pos == 'down':
+					x1,y1,x2,y2 = 0.2,0.25,0.92,0.44
+				if pos == 'up':
+					x1,y1,x2,y2 = 0.2,0.67,0.92,0.87
+				if pos == 'lr':
+					x1,y1,x2,y2 = 0.52,0.25,0.92,0.44
+				if pos == 'ur':
+					x1,y1,x2,y2 = 0.52,0.67,0.92,0.87
+				if pos == 'll':
+					x1,y1,x2,y2 = 0.2,0.25,0.52,0.44
+				if pos == 'ul':
+					x1,y1,x2,y2 = 0.2,0.67,0.52,0.87
 			leg = self.hl.self_legend(ncols=ncol,title=stitle,x1=x1,x2=x2,y1=y1,y2=y2,tx_size=tx_size,option=leg_opt)
+
 		#line
 		self.draw_lines()
-
 		#size of the window
 		x = 400
 		y = 300

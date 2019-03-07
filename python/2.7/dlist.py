@@ -1187,11 +1187,11 @@ class dlist(debugable):
 
 	def empty_legend(self, ncols, title='', x1=None, y1=None, x2=None, y2=None, tx_size=None, option='brNDC'):
 		if x1==None:
-			x1 = 0.6 # was 0.3 # was 0.5
+			x1 = 0.2 # 0.6 # was 0.3 # was 0.5
 		if y1==None:
-			y1 = 0.67 #0.7 #was 0.67
+			y1 = 0.67 #0.67 #0.7 #was 0.67
 		if x2==None:
-			x2 = 0.8 #0.88
+			x2 = 0.92 # 0.8 #0.88
 		if y2==None:
 			y2 = 0.87 #0.88 #used also 0.9
 		option = option + ' #l'
@@ -1216,7 +1216,10 @@ class dlist(debugable):
 				salpha = 0
 			self.legend.SetFillColorAlpha(fkolor, salpha)
 		else:
-			self.legend.SetFillColorAlpha(fkolor, 0)
+			if fkolor == ROOT.kWhite:
+				self.legend.SetFillColorAlpha(fkolor, 0.66)
+			else:
+				self.legend.SetFillColorAlpha(fkolor, 0.10)
 		self.legend.SetTextAlign(12)
 		self.legend.SetTextFont(self.font)
 		self.legend.SetTextColor(1)

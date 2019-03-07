@@ -341,7 +341,12 @@ def main():
 	except:
 		pass
 	print tx_size
-	hl.self_legend(title=stitle,x1=x1,x2=x2,y1=y1,y2=y2,tx_size=tx_size)
+	_lopts = 'brNDC'
+	try:
+		_lopts = sleg.split('options=')[1]
+	except:
+		_lopts = ''
+	hl.self_legend(title=stitle,x1=x1,x2=x2,y1=y1,y2=y2,tx_size=tx_size, option=_lopts)
 
 	#size of the window
 	x = 400

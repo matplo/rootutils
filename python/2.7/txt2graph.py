@@ -9,6 +9,8 @@ import sys
 import pyutils as ut
 import IPython
 import eval_string
+import argparse
+import os
 
 
 def read_data(fn=None):
@@ -138,36 +140,36 @@ def make_graph_from_hepfile(fn = None, xye = [0,1,2,3,4,5], xe=None):
 	gr = dlist.make_graph_ae_xy(name, x, y, xlow, xhigh, dyem, dyep)
 	return gr
 
-def graph(fname, write=False):
-	if fname == None:
+def graph(args):
+	if not args.fname:
 		hlname = 'stdin'
 	else:
-		hlname = fname
+		hlname = args.fname
 	hl = dlist.dlist(hlname)
 	xye  = [0, 1, 2, 3, 4, 5]
-	sxye = ut.get_arg_with('--xye')
+	sxye = args.xye
 	if sxye != None:
 		xye  = [-1, -1, -1, -1, -1, -1]
 		sa = sxye.split(',')
 		for i,s in enumerate(sa):
 			xye[i] = int(s)
-	if ut.is_arg_set('--hep'):
+	if args.hep:
 		xe = None
-		if ut.is_arg_set('--xe'):
-			sxe = ut.get_arg_with('--xe')
+		if args.xe:
+			sxe = args.xe
 			xe = eval_string.get_value(sxe, float, None)
-		gr = make_graph_from_hepfile(fname, xye, xe=xe)
+		gr = make_graph_from_hepfile(args.fname, xye, xe=xe)
 	else:
-		gr = make_graph_from_file(fname, xye)
-	stitle = ut.get_arg_with('--title')
+		gr = make_graph_from_file(args.fname, args.xye)
+	stitle = args.title
 	if stitle == None:
 		stitle = hlname
-	hl.add(gr, stitle, 'P')
-	sname = ut.get_arg_with('--name')
+	hl.add(gr, stitle, args.style)
+	sname = args.name
 	if sname != None:
 		hl.l[-1].obj.SetName(sname)
 	hl.make_canvas()
-	logy = ut.is_arg_set('--logy')
+	logy = args.logy
 	hl.draw(logy=logy)
 	hl.self_legend()
 	if logy:
@@ -176,13 +178,13 @@ def graph(fname, write=False):
 	ylabel = ut.get_arg_with('-y')
 	hl.reset_axis_titles(xlabel,ylabel)
 	hl.update()
-	if ut.is_arg_set('--print'):
-		hl.tcanvas.Print()
+	if args.prnt:
+		hl.tcanvas.Print(hl.tcanvas.GetName() + '.pdf', '.pdf')
 
 	tu.gList.append(hl)
 
-	if write==True:
-		stitle = ut.get_arg_with('--title')
+	if args.write==True:
+		stitle = args.title
 		if stitle == None:
 			hl.write_to_file(hl.name+'.root')
 		else:
@@ -192,13 +194,25 @@ def graph(fname, write=False):
 	return gr
 
 if __name__=="__main__":
+	parser = argparse.ArgumentParser(description='make root graphs from text files', prog=os.path.basename(__file__))
+	parser.add_argument('-g', '--debug', help='debug mode', action='store_true')
+	parser.add_argument('-w', '--write', help='write a root file - otherwise nothing is written', action='store_true')
+	parser.add_argument('-i', '--prompt', help='end with IPython prompt', action='store_true')
+	parser.add_argument('-p', '--prnt', help='draw to a file', action='store_true', default = False)
+	parser.add_argument('--logy', help='set log y axis', action='store_true', default = False)
+	parser.add_argument('--hep', help='file is in some HEP standard', action='store_true', default = False)
+
+	parser.add_argument('--xye', help='comma separated column numbers for x,y, and errors', default = '0,1,2', type=str)
+	parser.add_argument('--xe', help='set x errors to a value', default = '0', type=str)
+	parser.add_argument('--style', help='draw style', default = 'P', type=str)
+
+	parser.add_argument('-t', '--title', help='output title', default = 'default title', type=str)
+	parser.add_argument('-n', '--name', help='output name', default = 'graph', type=str)
+	parser.add_argument('fname', help='input file name - if missing then stdin', nargs='?')
+
+	args = parser.parse_args()
+
 	tu.setup_basic_root()
-	if ut.is_arg_set('--debug'):
+	if args.debug:
 		dlist.gDebug = True
-	fname = ut.get_arg_with('-f')
-	write=False
-	if ut.is_arg_set('--root'):
-		write=True
-	gr = graph(fname, write)
-	if not ut.is_arg_set('-b'):
-		IPython.embed()
+	gr = graph(args)
