@@ -8,7 +8,7 @@ import os
 
 def main():
 
-	tutils.setup_basic_root()
+	# tutils.setup_basic_root()
 
 	h = r.TH1D('test', 'test', 10, 0, 1)
 	h.Fill(.2)
@@ -25,7 +25,7 @@ if __name__=="__main__":
 	parser.add_argument('-i', '--prompt', help='end with IPython prompt', action='store_true')
 	args = parser.parse_args()
 	main()
-	if not args.batch:
-		tutils.run_app()
-	if args.prompt:
-		tutils.run_app()
+	#if not args.batch:
+	#	tutils.run_app()
+	#if args.prompt:
+	#	tutils.run_app()

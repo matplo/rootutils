@@ -1141,11 +1141,11 @@ class dlist(debugable):
 
 		if adjust_pad == True and self.has2D() == False:
 			self.adjust_pad_margins()
-
 		self.update()
 		self.pad_name = ROOT.gPad.GetName() # name is better
-		self.get_pad_drawn();
-		self.debug('[i] ' + self.name + ' drawing on ' + str(self.pad))
+		self.pad = self.get_pad_drawn()
+		if self.pad:
+			self.debug('[i] ' + self.name + ' drawing on ' + str(self.pad))
 
 	def draw_bare(self, option=''):
 		for i,o in enumerate(self.l):
@@ -1176,7 +1176,9 @@ class dlist(debugable):
 					tp.SetGridx(flag)
 
 	def get_pad_drawn(self):
-		self.pad = ROOT.gROOT.FindObject(self.pad_name);
+		self.pad = ROOT.gROOT.FindObject(self.pad_name)
+		if not self.pad:
+			self.pad = None
 		return self.pad
 
 	def self_legend(self, ncols = 1, title='', x1=None, y1=None, x2=None, y2=None, tx_size=None, option='brNDC'):

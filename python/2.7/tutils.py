@@ -234,7 +234,8 @@ def setup_basic_root(D2pal=1):
         mono_palette()
 
     global app
-    app = ROOT.PyROOT.TPyROOTApplication.CreateApplication()
+    # app = ROOT.PyROOT.TPyROOTApplication.CreateApplication()
+    app = ROOT.PyROOT.TPyROOTApplication.CreatePyROOTApplication()
 
 exit_signal = False
 print_first = False
