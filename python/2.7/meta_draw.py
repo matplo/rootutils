@@ -7,10 +7,10 @@ import draw_utils as du
 import dlist
 import sys
 import pyutils as ut
-import IPython
 import time
 
 import os
+import argparse
 
 from string import atof, atoi
 import eval_string
@@ -599,11 +599,11 @@ class MetaFigure(object):
 		if logy == True:
 			if miny != None:
 				if miny <= 0:
-					print '[w] overrdingin logy miny<=0',miny
+					print '[w] overriding logy miny<=0',miny
 					logy=False
 			if maxy != None:
 				if maxy <= 0:
-					print '[w] overrdingin logy maxy<=0',maxy
+					print '[w] overriding logy maxy<=0',maxy
 					logy=False
 
 		self.hl.set_log_multipad('xyz', False)
@@ -842,6 +842,7 @@ class MetaFigure(object):
 class MetaDrawFile(object):
 	def __init__(self, fname=None):
 		self.data = ut.load_file_to_strings(fname)
+		print '[i] got data:', self.data
 		self.figures = []
 		fig = MetaFigure(fname)
 		self.figures.append(fig)
@@ -872,8 +873,12 @@ class MetaDrawFile(object):
 		self.options.append(opt)
 
 if __name__ == '__main__':
-	tu.setup_basic_root()
-	fname = ut.get_arg_with('-f')
+	# tu.setup_basic_root()
+	parser = argparse.ArgumentParser(description='draw a .draw file', prog=os.path.basename(__file__))
+	parser.add_argument('fname', help='what file to draw', type=str, default="", nargs="?")
+	args = parser.parse_args()
+	print '[i] arguments:', args
+	fname = args.fname
 	fn, fext = os.path.splitext(fname)
 	metafname = None
 	if fext == '.root':
@@ -882,6 +887,7 @@ if __name__ == '__main__':
 		metafname = makedf.make_draw_file_smart_group(fname)
 	else:
 		metafname = fname
+	print '[i] got to draw:', metafname
 	mdf   = MetaDrawFile(metafname)
 	if '--logy' in sys.argv:
 		mdf.add_option('#logy true')
@@ -901,4 +907,4 @@ if __name__ == '__main__':
 	if '--print' in sys.argv:
 		mdf.pdf()
 	if not ut.is_arg_set('-b'):
-		IPython.embed()
+		r.gApplication.Run()
