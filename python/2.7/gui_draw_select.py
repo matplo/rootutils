@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 # import tutils
+import import_root
+import_root.atry(verbose=False)
 import ROOT as r
 # import IPython
 # import dlist
