@@ -1,0 +1,4 @@
+*~
+*.pyc
+rootsys.conf
+/__pycache__
