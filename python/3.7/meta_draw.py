@@ -214,12 +214,12 @@ class Comment(object):
 
 	def get_text_size(self):
 		if self.get_setting('tx_size=', ' '):
-			return atof(self.get_setting('tx_size=', ' '), float, 0.0)
+			return get_value(self.get_setting('tx_size=', ' '), float, 0.035)
 		return 0.025
 
 	def get_text_rotation(self):
 		if self.get_setting('tx_rotation=', ' '):
-			return atof(self.get_setting('tx_rotation=', ' '), float, 0.0)
+			return get_value(self.get_setting('tx_rotation=', ' '), float, 0.0)
 		return 0.0
 
 	def get_color(self):
@@ -376,10 +376,10 @@ class MetaFigure(object):
 		if sleg == None:
 			return x1, y1, x2, y2
 		try:
-			x1 = get_value(sleg.split(',')[0], float, 0.0)
-			y1 = get_value(sleg.split(',')[1], float, 0.0)
-			x2 = get_value(sleg.split(',')[2], float, 1.0)
-			y2 = get_value(sleg.split(',')[3], float, 1.0)
+			x1 = get_value(sleg.split(',')[0], float, None)
+			y1 = get_value(sleg.split(',')[1], float, None)
+			x2 = get_value(sleg.split(',')[2], float, None)
+			y2 = get_value(sleg.split(',')[3], float, None)
 		except:
 			print('[w] trouble with legend position? x1,y1,x2,y2',sleg)
 		return x1, y1, x2, y2
@@ -654,7 +654,11 @@ class MetaFigure(object):
 		#legend
 		sleg = self.get_tag('#legend')
 		if sleg:
-			x1,y1,x2,y2 = self.legend_position(sleg)
+			x1 = None
+			x2 = None
+			y1 = None
+			y2 = None
+
 			tx_size = 0.035 #0.025
 			try:
 				tx_size = get_value(sleg.split('tx_size=')[1].split(' ')[0], float, 0.035)
@@ -686,7 +690,7 @@ class MetaFigure(object):
 				# leg.SetFillColor(fcol)
 				leg_opt = leg_opt + ' +k{}'.format(fcol)
 			try:
-				pos = sleg.split('pos=')[1]
+				pos = sleg.split('pos=')[1].split(' ')[0]
 			except:
 				pos = None
 			if pos:
@@ -702,7 +706,9 @@ class MetaFigure(object):
 					x1,y1,x2,y2 = 0.2,0.25,0.52,0.44
 				if pos == 'ul':
 					x1,y1,x2,y2 = 0.2,0.67,0.52,0.87
-			leg = self.hl.self_legend(ncols=ncol,title=stitle,x1=x1,x2=x2,y1=y1,y2=y2,tx_size=tx_size,option=leg_opt)
+			else:
+				x1,y1,x2,y2 = self.legend_position(sleg)
+			self.leg = self.hl.self_legend(ncols=ncol,title=stitle,x1=x1,x2=x2,y1=y1,y2=y2,tx_size=tx_size,option=leg_opt)
 
 		#line
 		self.draw_lines()

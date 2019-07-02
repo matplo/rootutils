@@ -593,12 +593,13 @@ class DrawFrame(r.TGCompositeFrame):
 				self.canvas.GetCanvas().Clear()
 				self.canvas.GetCanvas().cd()
 				# consider here adding a handler for more that 1 figure in a draw file
-				try:
-					# print '[d] drawing', mf.name
-					mf.draw(no_canvas=True, add_dummy=True)
-				except:
-					print('[e] something went wrong with drawing...', self.name, 'mf: ', self.mf)
+				#try:
+				#	# print '[d] drawing', mf.name
+				#	mf.draw(no_canvas=True, add_dummy=True)
+				#except:
+				#	print('[e] something went wrong with drawing...', self.name, 'mf: ', self.mf)
 				# self.canvas.GetCanvas().Modified()
+				mf.draw(no_canvas=True, add_dummy=True)
 				self.canvas.GetCanvas().Update()
 			else:
 				'[e] get canvas failed for', self.name
