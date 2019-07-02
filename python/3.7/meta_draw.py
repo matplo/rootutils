@@ -527,6 +527,10 @@ class MetaFigure(object):
 					print('[i] to normalize to',vidx)
 					self.hl.normalize_to_index(vidx)
 
+		scalebwidth = self.get_tag('#scalebwidth', None)
+		if scalebwidth:
+			self.hl.scale_by_binwidth(modifYtitle=True)
+
 		miny = self.get_tag('#miny', None)
 		maxy = self.get_tag('#maxy', None)
 		logx = self.get_tag('#logx', None)

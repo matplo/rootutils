@@ -1310,11 +1310,23 @@ class dlist(debugable):
 			if h.obj.InheritsFrom('TH1'):
 				if h.obj.GetSumw2() == None:
 					h.obj.Sumw2()
-				bw   = h.obj.GetBinWidth(1)
-				if modifYtitle == True:
-					newytitle = h.obj.GetYaxis().GetTitle() + ' / {}'.format(bw)
-					h.obj.GetYaxis().SetTitle(newytitle)
-				h.obj.Scale(1./bw)
+				if h.obj.GetBinWidth(1) == h.obj.GetBinWidth(2):
+					bw   = h.obj.GetBinWidth(1)
+					if modifYtitle == True:
+						newytitle = h.obj.GetYaxis().GetTitle() + ' / {}'.format(bw)
+						h.obj.GetYaxis().SetTitle(newytitle)
+					h.obj.Scale(1./bw)
+				else:
+					for ib in range(1, h.obj.GetNbinsX() + 1):
+						v = h.obj.GetBinContent(ib)
+						v = v / h.obj.GetBinWidth(ib)
+						ve = h.obj.GetBinError(ib)
+						ve = ve / h.obj.GetBinWidth(ib)
+						h.obj.SetBinContent(ib, v)
+						h.obj.SetBinError(ib, ve)
+					if modifYtitle == True:
+						newytitle = h.obj.GetYaxis().GetTitle() + ' / {}'.format('BW')
+						h.obj.GetYaxis().SetTitle(newytitle)
 			else:
 				print('[w] normalize not defined for non histogram...')
 
@@ -2272,3 +2284,27 @@ def scale_graph_errors(gr, axis, scale=1.):
 			else:
 				gr.GetEYlow()[i] = gr.GetEYlow()[i] * scale
 				gr.GetEYhigh()[i] = gr.GetEYhigh()[i] * scale
+
+def scale_by_binwidth(h, modifYtitle = True):
+	if h.InheritsFrom('TH1'):
+		if h.GetSumw2() == None:
+			h.Sumw2()
+		if h.GetBinWidth(1) == h.GetBinWidth(2):
+			bw   = h.GetBinWidth(1)
+			if modifYtitle == True:
+				newytitle = h.GetYaxis().GetTitle() + ' / {}'.format(bw)
+				h.GetYaxis().SetTitle(newytitle)
+			h.Scale(1./bw)
+		else:
+			for ib in range(1, h.GetNbinsX() + 1):
+				v = h.GetBinContent(ib)
+				v = v / h.GetBinWidth(ib)
+				ve = h.GetBinError(ib)
+				ve = ve / h.GetBinWidth(ib)
+				h.SetBinContent(ib, v)
+				h.SetBinError(ib, ve)
+			if modifYtitle == True:
+				newytitle = h.GetYaxis().GetTitle() + ' / {}'.format('BW')
+				h.GetYaxis().SetTitle(newytitle)
+	else:
+		print('[w] normalize not defined for non histogram...')

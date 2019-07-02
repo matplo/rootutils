@@ -24,6 +24,7 @@ def print_preamb(fout, stitle=''):
 	print('#geom 500x500', file=fout)
 	print('#date', file=fout)
 	print('#title: {}'.format(stitle), file=fout)
+	print('#legend pos=ur', file=fout)
 
 
 def make_draw_file(fn, extra_opts=[], force=False):
