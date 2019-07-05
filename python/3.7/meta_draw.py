@@ -140,7 +140,9 @@ class DrawString(object):
 class Comment(object):
 	def __init__(self, s):
 		self.s = s
-		self.box = self.get_box()
+		self.box = self.get_position()
+		if self.box is None:
+			self.box = self.get_box()
 		self.text = self.get_text()
 		self.tleg = None
 
@@ -194,7 +196,7 @@ class Comment(object):
 		return retval
 
 	def filter_known_settings(self, s):
-		known = ['tx_size=', 'color=', 'font=', 'alpha=', 'align=', 'bgc=', 'tx_rotation=']
+		known = ['tx_size=', 'color=', 'font=', 'alpha=', 'align=', 'bgc=', 'tx_rotation=', 'pos=']
 		for k in known:
 			if k in s:
 				s=s.split(k)[0]
@@ -246,6 +248,24 @@ class Comment(object):
 		if self.get_setting('align=', ' '):
 			return get_value(self.get_setting('align=', ' '), int, 1)
 		return 12
+
+	def get_position(self):
+		pos = self.get_setting('pos=', ' ')
+		retval = None
+		if pos:
+			if pos == 'down':
+				retval = [0.2,0.25,0.92,0.44]
+			if pos == 'up':
+				retval = [0.2,0.67,0.92,0.87]
+			if pos == 'lr':
+				retval = [0.52,0.25,0.92,0.44]
+			if pos == 'ur':
+				retval = [0.52,0.67,0.92,0.87]
+			if pos == 'll':
+				retval = [0.2,0.25,0.52,0.44]
+			if pos == 'ul':
+				retval = [0.2,0.67,0.52,0.87]
+		return retval
 
 	def legend(self):
 		self.tleg = None
