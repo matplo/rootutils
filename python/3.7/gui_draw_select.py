@@ -4,6 +4,7 @@
 import import_root
 import_root.atry(verbose=False)
 import ROOT as r
+r.PyConfig.IgnoreCommandLineOptions = True
 # import IPython
 # import dlist
 import os
