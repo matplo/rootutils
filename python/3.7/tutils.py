@@ -208,7 +208,7 @@ def mono_palette():
     ROOT.gStyle.SetPalette(paletteSize, palette_i);
 
 def setup_basic_root(D2pal=1):
-    ROOT.gROOT.Reset()
+    # ROOT.gROOT.Reset()
     ROOT.gStyle.SetScreenFactor(1)
 
     if not is_arg_set('--keep-stats'):
