@@ -9,6 +9,8 @@ r.PyConfig.IgnoreCommandLineOptions = True
 import argparse
 import os
 import fnmatch
+import numpy as np
+import array
 
 from configobj import ConfigObj
 
@@ -16,6 +18,8 @@ import eval_string
 
 from tqdm import tqdm
 from tabulate import tabulate
+
+
 
 def dump_example():
 	sexample = '''
@@ -74,6 +78,21 @@ libs =
 	with open('tdraw_example.cfg', 'w') as f:
 		print(sexample, file=f)
 	print('[i] tdraw_example.cfg written.')
+
+
+def logbins(xmin, xmax, nbins):
+	lspace = np.logspace(np.log10(xmin), np.log10(xmax), nbins+1)
+	arr = array.array('f', lspace)
+	return arr
+
+
+def logbins_string(xmin, xmax, nbins):
+	vals = []
+	lspace = np.logspace(np.log10(xmin), np.log10(xmax), nbins+1)
+	for b in lspace:
+		vals.append('{}'.format((b)))
+	return ','.join(vals)
+
 
 def get_value(s, op=None, vdefault=None):
 	if type(s) != str:
@@ -161,6 +180,9 @@ class TDrawEntry(object):
 		self.firstentry  = self.setting('firstentry', section, 0)
 		self.nbinsx      = self.setting('nbinsx', section, 10)
 		self.nbinsy      = self.setting('nbinsy', section, 10)
+		self.logx 		 = self.setting('logx', section, False)
+		self.logy 		 = self.setting('logy', section, False)
+		print (self.logx, self.logy)
 		self.x_title     = self.setting('x_title', section, 'default x title')
 		self.y_title     = self.setting('y_title', section, 'default y title')
 		self.name        = self.make_name(section)  # section.name
@@ -485,6 +507,8 @@ class TDrawConfig(object):
 		if len(self.entries)<1:
 			print('[i] no entries?')
 			return
+		logxcounter = 0
+		htmp_name = 'htmp'
 		pbare = tqdm(self.entries, desc='    entry')
 		for e in pbare:
 			# pbare.set_description('    {}:{}'.format(pbare.n, e.name))
@@ -525,6 +549,7 @@ class TDrawConfig(object):
 					continue
 					errors.append('[e] file {} unable to open'.format(fn))
 				dopt = e.option
+				htmp_name = 'htmp'
 				if 'norange' in dopt:
 					hstring = 'htmp'
 					dopt = e.option.replace('norange', '')
@@ -535,15 +560,29 @@ class TDrawConfig(object):
 					if ':' in _varexp_tmp:
 						hstring = 'htmp({0},{1},{2},{3},{4},{5})'.format(e.nbinsx, e.x[0], e.x[1], e.nbinsy, e.y[0], e.y[1])
 					else:
-						hstring = 'htmp({0},{1},{2})'.format(e.nbinsx, e.x[0], e.x[1])
+						if e.logx:
+							_bas = logbins_string(e.x[0], e.x[1], e.nbinsx)
+							_plines = []
+							_plines.append("const float tmpx{0}[] = {1}{2}{3};".format(logxcounter, "{", _bas, "}"))
+							_plines.append("TH1F *htmp{0} = new TH1F(\"htmp{0}\", \"htmp{0}\", {1}, tmpx{0});".format(logxcounter, e.nbinsx))
+							print ()
+							for _l in _plines:
+								print (_l)
+								r.gInterpreter.ProcessLine(_l)
+							hstring = '+htmp{0}'.format(logxcounter)
+							htmp_name = 'htmp{0}'.format(logxcounter)
+							logxcounter += 1
+						else:
+							hstring = 'htmp({0},{1},{2})'.format(e.nbinsx, e.x[0], e.x[1])
 				#print e.name, dopt, e.option
 				t = fin.Get(e.tree_name)
 				hout = None
 				if t:
 					# print e.varexp, e.selection, e.option, e.nentries, e.firstentry
+					# print ('hstring is', hstring)
 					nentr = t.Draw(e.varexp + '>>{}'.format(hstring), e.selection, dopt, e.nentries, e.firstentry)
 					# print '[i] number of entries drawn:',nentr
-					hout = r.gDirectory.Get('htmp')
+					hout = r.gDirectory.Get(htmp_name)
 					if hout:
 						hout.SetDirectory(0)
 						hout.SetName(e.name)
