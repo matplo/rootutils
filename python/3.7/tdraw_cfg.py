@@ -565,9 +565,9 @@ class TDrawConfig(object):
 							_plines = []
 							_plines.append("const float tmpx{0}[] = {1}{2}{3};".format(logxcounter, "{", _bas, "}"))
 							_plines.append("TH1F *htmp{0} = new TH1F(\"htmp{0}\", \"htmp{0}\", {1}, tmpx{0});".format(logxcounter, e.nbinsx))
-							print ()
+							# print ()
 							for _l in _plines:
-								print (_l)
+								# print (_l)
 								r.gInterpreter.ProcessLine(_l)
 							hstring = '+htmp{0}'.format(logxcounter)
 							htmp_name = 'htmp{0}'.format(logxcounter)
