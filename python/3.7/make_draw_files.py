@@ -161,6 +161,8 @@ def make_draw_file_smart_group(fn, extra_opts=[], force=False):
 			pass
 		else:
 			sdopt = ':p '
+			if k.ReadObj().InheritsFrom('TH2'):
+				sdopt = ':colz '
 			if k.ReadObj().InheritsFrom('TF1'):
 				sdopt = ':l '
 			ctit = k.GetTitle()
@@ -174,6 +176,8 @@ def make_draw_file_smart_group(fn, extra_opts=[], force=False):
 		if k.ReadObj().InheritsFrom('TList'):
 			for o in k.ReadObj():
 				sdopt = ':p '
+				if k.ReadObj().InheritsFrom('TH2'):
+					sdopt = ':colz '
 				if k.ReadObj().InheritsFrom('TF1'):
 					sdopt = ':l '
 				ctit = o.GetTitle()
@@ -188,6 +192,8 @@ def make_draw_file_smart_group(fn, extra_opts=[], force=False):
 			for ko in k.ReadObj().GetListOfKeys():
 				o = ko.ReadObj()
 				sdopt = ':p '
+				if k.ReadObj().InheritsFrom('TH2'):
+					sdopt = ':colz '
 				if k.ReadObj().InheritsFrom('TF1'):
 					sdopt = ':l '
 				ctit = o.GetTitle()

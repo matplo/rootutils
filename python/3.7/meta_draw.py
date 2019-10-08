@@ -548,8 +548,14 @@ class MetaFigure(object):
 					self.hl.normalize_to_index(vidx)
 
 		scalebwidth = self.get_tag('#scalebwidth', None)
-		if scalebwidth:
-			self.hl.scale_by_binwidth(modifYtitle=True)
+		if len(scalebwidth.split(' ')) > 1:
+			modifYtitle = False
+			if scalebwidth.split(' ')[1] == 'True':
+				modifYtitle = True
+			self.hl.scale_by_binwidth(modifYtitle=modifYtitle)
+		else:
+			if scalebwidth:
+				self.hl.scale_by_binwidth(modifYtitle=True)
 
 		miny = self.get_tag('#miny', None)
 		maxy = self.get_tag('#maxy', None)
