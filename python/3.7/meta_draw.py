@@ -294,9 +294,12 @@ class Comment(object):
 
 class MetaFigure(object):
 	show_date = False
-	def __init__(self, fname=''):
-		if fname:
-			self.name = tu.make_unique_name(fname)
+	def __init__(self, fname='', wname=None):
+		self.wname = wname
+		if self.wname is None:
+			self.wname = fname
+		if self.wname:
+			self.name = tu.make_unique_name(self.wname)
 		else:
 			self.name = tu.make_unique_name('MetaFigure')
 		self.figure_name = self.name
@@ -841,16 +844,16 @@ class MetaFigure(object):
 		self.data.append(opt)
 
 class MetaDrawFile(object):
-	def __init__(self, fname=None):
+	def __init__(self, fname=None, wname=None):
 		self.data = ut.load_file_to_strings(fname)
 		print('[i] got data:', self.data)
 		self.figures = []
-		fig = MetaFigure(fname)
+		fig = MetaFigure(fname, wname)
 		self.figures.append(fig)
 		for d in self.data:
 			if d[:len('#figure')] == '#figure':
 				if len(self.figures[-1].data) > 1:
-					fig = MetaFigure(fname)
+					fig = MetaFigure(fname, wname)
 					self.figures.append(fig)
 				# continue
 			self.figures[-1].process_line(d)

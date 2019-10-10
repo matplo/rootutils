@@ -1289,6 +1289,7 @@ class dlist(debugable):
 				title = self.name + '-canvas'
 			name = pyutils.to_file_name(name)
 			self.tcanvas = ROOT.TCanvas(name, title, w, h)
+			print('[i] making canvas', self.tcanvas.GetName())
 			self.tcanvas.cd()
 			if split > 0:
 				du.split_gPad(split, orientation)

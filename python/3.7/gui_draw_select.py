@@ -67,8 +67,12 @@ class FileView(r.TGMainFrame):
 		self.width  = width
 		self.height = height
 		self.fname  = fname
-
-		self.SetWindowName(self.fname)
+		self.wname  = self.fname
+		try:
+			self.wname = args.wname
+		except:
+			pass
+		self.SetWindowName(self.wname)
 
 		self.SetLayoutManager(r.TGVerticalLayout(self))
 		self.Resize(width, height)
@@ -161,7 +165,7 @@ class FileView(r.TGMainFrame):
 		except:
 			pass
 		try:
-			self.mdf = meta_draw.MetaDrawFile(self.fname)
+			self.mdf = meta_draw.MetaDrawFile(self.fname, self.wname)
 		except:
 			print('[e] failed to create MetaDrawFile with', self.fname)
 
@@ -176,7 +180,7 @@ class FileView(r.TGMainFrame):
 		#  tutils.gList = []
 
 		for i, mf in enumerate(self.mdf.figures):
-			tcname = '{}_Fig{}_canvas'.format(self.fname, i)
+			tcname = '{}_Fig{}_canvas'.format(self.wname, i)
 			if i >= len(self.tabs) - 2:  # remember the log and util tab
 				dframe = DrawFrame(self, self.width, self.height, tcname)
 				tabname = 'Fig {}'.format(i)
@@ -196,7 +200,7 @@ class FileView(r.TGMainFrame):
 					stabname = '{}'.format(mf.figure_name)
 				else:
 					stabname = '{} {}'.format(i, mf.figure_name)
-				self.tabs[i + 2].name = '{}_{}'.format(self.fname, pyutils.to_file_name(stabname))
+				self.tabs[i + 2].name = '{}_{}'.format(self.wname, pyutils.to_file_name(stabname))
 				tabname = r.TGString(stabname)
 				self.tab.GetTabTab(i + 2).SetText(tabname)
 				#  '{}_{}'.format(self.fname, i, pyutils.to_file_name(mf.figure_name))
@@ -213,12 +217,12 @@ class FileView(r.TGMainFrame):
 		for itab, tab in enumerate(self.tabs):
 			if itab < 2:
 				continue  # log and util tab skip
-			fname = self.fname + '.pdf'
+			fname = self.wname + '.pdf'
 			if ifig == 0:
-				fname = self.fname + '.pdf('
+				fname = self.wname + '.pdf('
 			if itab == len(self.tabs) - 1:
-				fname = self.fname + '.pdf)'
-			print('printing to pdf: ', fname)
+				fname = self.wname + '.pdf)'
+			print('[i] printing to pdf: ', fname)
 			tab.pdf_to_file(fname)
 			ifig += 1
 
@@ -459,7 +463,7 @@ class DrawFrame(r.TGCompositeFrame):
 		self.width = width
 		self.height = height
 		self.name = name
-
+		print ('[i] constructor', type(self), self.name)
 		self.frameHint        = r.TGLayoutHints(r.kLHintsExpandX | r.kLHintsExpandY)
 		self.frameHintEY      = r.TGLayoutHints(r.kLHintsExpandY)
 		self.frameHintEX      = r.TGLayoutHints(r.kLHintsExpandX)
@@ -525,6 +529,7 @@ class DrawFrame(r.TGCompositeFrame):
 	def pdf(self):
 		# if self.mf:
 		#     self.mf.hl.pdf()
+		print ('[i] pdf', type(self), self.name)
 		self.canvas.GetCanvas().Print(self.name + '.pdf', 'pdf')
 
 	def pdf_to_file(self, fname):
@@ -601,9 +606,10 @@ class DrawFrame(r.TGCompositeFrame):
 				#	print('[e] something went wrong with drawing...', self.name, 'mf: ', self.mf)
 				# self.canvas.GetCanvas().Modified()
 				mf.draw(no_canvas=True, add_dummy=True)
+				print('[i] DrawFrame {} drawing into TCanvas {}'.format(self.name, self.canvas.GetCanvas().GetName()))
 				self.canvas.GetCanvas().Update()
 			else:
-				'[e] get canvas failed for', self.name
+				print('[e] get canvas failed for', self.name)
 		else:
 			print('[e] no canvas?', self.name)
 
@@ -691,6 +697,7 @@ def main():
 	parser.add_argument('--force', help='ignore and override existing .draw file', action='store_true', default=False)
 	parser.add_argument('--preent', help='just preent - specify the file format: pdf, pdf1 (all in one file), png', type=str)
 	parser.add_argument('--quit', help='quit after showing the windo - good for --print and --quit combination', action='store_true')
+	parser.add_argument('--wname', help='set window / output file name; default is same as fname', type=str, default='')
 	args = parser.parse_args()
 	print('[i] arguments:', args)
 	meta_draw.MetaFigure.show_date = not args.no_date
