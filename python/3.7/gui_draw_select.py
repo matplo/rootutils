@@ -63,7 +63,6 @@ class FileWatch(object):
 class FileView(r.TGMainFrame):
 	def __init__(self, parent, width, height, fname, args=None):
 		r.TGMainFrame.__init__(self, parent, width, height, r.kHorizontalFrame | r.kFitHeight | r.kFitWidth)
-
 		self.width  = width
 		self.height = height
 		self.fname  = fname
@@ -72,6 +71,8 @@ class FileView(r.TGMainFrame):
 			self.wname = args.wname
 		except:
 			pass
+		self.args = args
+
 		self.SetWindowName(self.wname)
 
 		self.SetLayoutManager(r.TGVerticalLayout(self))
@@ -164,11 +165,9 @@ class FileView(r.TGMainFrame):
 			del self.mdf
 		except:
 			pass
-		try:
-			self.mdf = meta_draw.MetaDrawFile(self.fname, self.wname)
-		except:
-			print('[e] failed to create MetaDrawFile with', self.fname)
-
+		self.mdf = meta_draw.MetaDrawFile(self.fname, self.wname, self.args)
+		print('[i] created mdf')
+		# print('[e] failed to create MetaDrawFile with', self.fname, file=sys.stderr)
 		#  print 'N figures:',len(self.mdf.figures), 'N tabs:',len(self.tabs)
 		#  if len(self.mdf.figures) != len(self.tabs):
 		#      self.tab.RemoveAll()
@@ -698,6 +697,7 @@ def main():
 	parser.add_argument('--preent', help='just preent - specify the file format: pdf, pdf1 (all in one file), png', type=str)
 	parser.add_argument('--quit', help='quit after showing the windo - good for --print and --quit combination', action='store_true')
 	parser.add_argument('--wname', help='set window / output file name; default is same as fname', type=str, default='')
+	parser.add_argument('-r', '--replace', help='specify replacements colon separated - --r tag:yes replaces <tag> to yes', action='append')
 	args = parser.parse_args()
 	print('[i] arguments:', args)
 	meta_draw.MetaFigure.show_date = not args.no_date

@@ -844,9 +844,26 @@ class MetaFigure(object):
 		self.data.append(opt)
 
 class MetaDrawFile(object):
-	def __init__(self, fname=None, wname=None):
-		self.data = ut.load_file_to_strings(fname)
-		print('[i] got data:', self.data)
+	def __init__(self, fname=None, wname=None, args=None):
+		self.data_raw = ut.load_file_to_strings(fname)
+		print('[i] got data:', self.data_raw)
+		self.data = []
+		if args.replace:
+			for s in self.data_raw:
+				sr = s
+				for srepl in args.replace:
+					splits = srepl.split(':')
+					sfrom = splits[0]
+					sto = ''
+					if len(splits)>1:
+						sto = splits[1]
+						if len(sfrom) > 0:
+							sr = sr.replace('<{}>'.format(sfrom), sto)
+						else:
+							sr = sr
+				self.data.append(sr)
+		else:
+			self.data = self.data_raw
 		self.figures = []
 		fig = MetaFigure(fname, wname)
 		self.figures.append(fig)
