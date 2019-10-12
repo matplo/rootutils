@@ -858,12 +858,16 @@ class MetaDrawFile(object):
 					if len(splits)>1:
 						sto = splits[1]
 						if len(sfrom) > 0:
-							sr = sr.replace('<{}>'.format(sfrom), sto)
+							if '<{}>'.format(sfrom) in sr:
+								sr = sr.replace('<{}>'.format(sfrom), sto)
+							else:
+								sr = sr.replace('{}'.format(sfrom), '{}'.format(sto))
 						else:
 							sr = sr
 				self.data.append(sr)
 		else:
 			self.data = self.data_raw
+		print('[i] drawing data:', self.data)
 		self.figures = []
 		fig = MetaFigure(fname, wname)
 		self.figures.append(fig)

@@ -70,7 +70,11 @@ class FileView(r.TGMainFrame):
 		try:
 			self.wname = args.wname
 		except:
+			self.wname  = self.fname
 			pass
+		if len(self.wname) == 0:
+			self.wname  = self.fname
+
 		self.args = args
 
 		self.SetWindowName(self.wname)
