@@ -861,7 +861,7 @@ class MetaDrawFile(object):
 							if '<{}>'.format(sfrom) in sr:
 								sr = sr.replace('<{}>'.format(sfrom), sto)
 							else:
-								sr = sr.replace('{}'.format(sfrom), '{}'.format(sto))
+								sr = sr.replace(' {} '.format(sfrom), ' {} '.format(sto))
 						else:
 							sr = sr
 				self.data.append(sr)
