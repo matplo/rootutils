@@ -6,6 +6,7 @@ sys.argv.append( '-b' )
 import tutils
 import ROOT as r
 r.PyConfig.IgnoreCommandLineOptions = True
+r.gROOT.SetBatch(True)
 import argparse
 import os
 import fnmatch
@@ -182,7 +183,7 @@ class TDrawEntry(object):
 		self.nbinsy      = self.setting('nbinsy', section, 10)
 		self.logx 		 = self.setting('logx', section, False)
 		self.logy 		 = self.setting('logy', section, False)
-		print (self.logx, self.logy)
+		# print (self.logx, self.logy)
 		self.x_title     = self.setting('x_title', section, 'default x title')
 		self.y_title     = self.setting('y_title', section, 'default y title')
 		self.name        = self.make_name(section)  # section.name
