@@ -551,16 +551,36 @@ class dlist(debugable):
 				_robj.Smooth()
 				robj = _robj
 		if robj.InheritsFrom('TH2') or robj.InheritsFrom('TF2'):
+			xprof_new_title = new_title
+			xprof_dopt="p e1 +k6 +m70 +p20"
+			if '+xprof' in draw_opt or '+xprof' in new_title:
+				if '+xprof[' in draw_opt:
+					xprof_dopt = draw_opt.split('+xprof[')[1].split(']')[0] + ' over'
+					draw_opt = draw_opt.replace('+xprof[{}]'.format(xprof_dopt), '')
+				if '+xprof[' in new_title:
+					xprof_new_title = new_title.split('+xprof[')[1].split(']')[0]
+					new_title = new_title.replace('+xprof[{}]'.format(xprof_new_title), '')
+			yprof_drop_zero_entries = False
+			yprof_new_title = new_title
+			yprof_dopt="p e1 +k6 +m70 +p25"
+			if '+yprof' in draw_opt or '+yprof' in new_title:
+				if '+yprof[' in draw_opt:
+					yprof_dopt = draw_opt.split('+yprof[')[1].split(']')[0] + ' over'
+					draw_opt = draw_opt.replace('+yprof[{}]'.format(yprof_dopt), '')
+					yprof_drop_zero_entries = ('-0' in yprof_dopt)
+					if yprof_drop_zero_entries:
+						yprof_dopt = yprof_dopt.replace('-0', '')
+				if '+yprof[' in new_title:
+					yprof_new_title = new_title.split('+yprof[')[1].split(']')[0]
+					new_title = new_title.replace('+yprof[{}]'.format(yprof_new_title), '')
 			cobj = self.append(robj, new_title, draw_opt)
 			if '+xprof' in draw_opt:
-				draw_opt = draw_opt + ' over'
 				hprofx = robj.ProfileX()
-				cobj_px = self.append(hprofx, new_title, 'p e1 +k6 +m70 +p20')
+				cobj_px = self.append(hprofx, xprof_new_title, xprof_dopt)
 			if '+yprof' in draw_opt:
-				draw_opt = draw_opt + ' over'
 				_hprofy = robj.ProfileY()
-				hprofy = h_to_graph(_hprofy, drop_zero_entries=False, xerror=True, transpose=True)
-				cobj_py = self.append(hprofy, new_title, 'p e1 +k6 +m70 +p25')
+				hprofy = h_to_graph(_hprofy, drop_zero_entries=yprof_drop_zero_entries, xerror=True, transpose=True)
+				cobj_py = self.append(hprofy, yprof_new_title, yprof_dopt)
 			return cobj
 		if robj.InheritsFrom("TH1") \
 			or robj.InheritsFrom("TGraph") \

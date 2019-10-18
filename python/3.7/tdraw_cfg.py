@@ -478,11 +478,14 @@ class TDrawConfig(object):
 
 	def __repr__(self):
 		#return '\n'.join(['[i] {} {}'.format(i, str(s)) for i,s in enumerate(self.entries)])
-		return tabulate([e.row() for e in self.entries], headers=self.entries[0].row_head())
+		if len(self.entries):
+			return tabulate([e.row() for e in self.entries], headers=self.entries[0].row_head())
+		return tabulate([e.row_commented() for e in self.entries])
 
 	def tab_comment(self):
-		print(tabulate([e.row_commented() for e in self.entries], headers=self.entries[0].row_head_commented(), tablefmt='plain'))
-		#print tabulate([e.row_commented() for e in self.entries])
+		if len(self.entries):
+			print(tabulate([e.row_commented() for e in self.entries], headers=self.entries[0].row_head_commented(), tablefmt='plain'))
+		print(tabulate([e.row_commented() for e in self.entries]))
 
 	def dump_class_config(self, fout):
 		outs = sys.stdout
