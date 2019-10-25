@@ -12,6 +12,7 @@ import os
 import fnmatch
 import numpy as np
 import array
+import tempfile
 
 from configobj import ConfigObj
 
@@ -346,10 +347,11 @@ class TDrawEntry(object):
 
 class TDrawConfig(object):
 	def __init__(self, fname, opts=None):
-		self.fname = fname
+		self.fname = fname				
 		self.config = ConfigObj(fname, raise_errors=True)
 		self.recreate = False
 		self.clean = True
+		self.opts = opts
 		if opts:
 			self.recreate = opts.recreate
 			self.clean = opts.clean
@@ -562,7 +564,10 @@ class TDrawConfig(object):
 					_varexp_tmp = e.varexp.replace('::', '__static__')
 					# if ':' in e.varexp:
 					if ':' in _varexp_tmp:
-						hstring = 'htmp({0},{1},{2},{3},{4},{5})'.format(e.nbinsx, e.x[0], e.x[1], e.nbinsy, e.y[0], e.y[1])
+						if 'prof' in dopt:
+							hstring = 'htmp({0},{1},{2})'.format(e.nbinsx, e.x[0], e.x[1])
+						else:
+							hstring = 'htmp({0},{1},{2},{3},{4},{5})'.format(e.nbinsx, e.x[0], e.x[1], e.nbinsy, e.y[0], e.y[1])
 					else:
 						if e.logx:
 							_bas = logbins_string(e.x[0], e.x[1], e.nbinsx)
@@ -622,6 +627,10 @@ class TDrawConfig(object):
 		print('[i] output files:')
 		for fn in cleaned:
 			print('    '+fn)
+		if len(self.opts.merged_output):
+			print('[i] calling hadd')
+			cmnd = 'hadd -f {} '.format(self.opts.merged_output) + ' '.join(cleaned)
+			os.system(cmnd)
 		if len(errors) > 1:
 			for i, er in enumerate(errors):
 				if i > 0:
@@ -721,6 +730,35 @@ def tdraw_from_file(fname, recreate=False, clean_first=False):
 			fin.Close()
 	print('    done.')
 
+
+def process_replacements(fn, args):
+	outfn = fn
+	if len(args.replace):
+		with open(fn) as f:
+			clines = f.readlines()
+		new_lines = []
+		for l in clines:
+			sr = l
+			for srepl in args.replace:
+				splits = srepl.split(':')
+				sfrom = splits[0]
+				sto = ''
+				if len(splits)>1:
+					sto = splits[1]
+					if len(sfrom) > 0:
+						if '<{}>'.format(sfrom) in sr:
+							sr = sr.replace('<{}>'.format(sfrom), sto)
+						else:
+							sr = sr.replace(' {} '.format(sfrom), ' {} '.format(sto))
+					else:
+						sr = sr
+			new_lines.append(sr)
+		fd, outfn = tempfile.mkstemp(text=True)
+		with open(outfn, 'w') as f:
+			f.writelines(new_lines)
+	return outfn
+
+
 if __name__=="__main__":
 	parser = argparse.ArgumentParser(description='execute tdraw based on the config file', prog=os.path.basename(__file__))
 	#parser.add_argument('-w', '--write', help='dump the contents', action='store_true')
@@ -734,6 +772,9 @@ if __name__=="__main__":
 	parser.add_argument('--old', help='old implementation', action='store_true')
 	parser.add_argument('--test', help='show what we get from the config...', action='store_true')
 	parser.add_argument('--configobj', help='show what we get from the config...', action='store_true')
+	parser.add_argument('--write-confobj', help='write confobj after the run', action='store_true')
+	parser.add_argument('-r', '--replace', help='specify replacements colon separated - --r tag:yes replaces <tag> to yes', action='append')
+	parser.add_argument('--merged-output', help='merge the output files to a single file', default='', type=str)
 
 	args = parser.parse_args()
 
@@ -749,6 +790,9 @@ if __name__=="__main__":
 			if args.old:
 				tdraw_from_file(fn, args.recreate, args.clean)
 			else:
+				fn = process_replacements(fn, args)
+				if fn != args.fname:
+					print('[i] working with', fn)
 				cfg = TDrawConfig(fn, args)
 				if args.configobj:
 					cfg.dump_class_config()
@@ -756,7 +800,11 @@ if __name__=="__main__":
 					print(cfg)
 					if not args.test:
 						cfg.run()
-						fconfobj = fn.replace('.cfg', '_out.confobj')
-						with open(fconfobj, 'w') as f:
-							cfg.dump_class_config(f)
-						print('[i]',fconfobj,'written.')
+						if args.write_confobj:
+							fconfobj = fn.replace('.cfg', '_out.confobj')
+							with open(fconfobj, 'w') as f:
+								cfg.dump_class_config(f)
+							print('[i]',fconfobj,'written.')
+				if fn != args.fname:
+					print('[i] removing', fn)
+					os.unlink(fn)
