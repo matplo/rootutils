@@ -727,6 +727,8 @@ class MetaFigure(object):
 			except:
 				pos = None
 			if pos:
+				if pos == 'max':
+					x1,y1,x2,y2 = 0.2,0.25,0.92,0.87
 				if pos == 'down':
 					x1,y1,x2,y2 = 0.2,0.25,0.92,0.44
 				if pos == 'up':
