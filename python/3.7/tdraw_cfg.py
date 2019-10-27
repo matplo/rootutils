@@ -787,13 +787,15 @@ if __name__=="__main__":
 	# tutils.setup_basic_root()
 	if args.fname:
 		tc = r.TCanvas('ctmp', 'ctmp')
-		for fn in args.fname:
+		for sfn in args.fname:
 			tc.cd()
 			if args.old:
 				tdraw_from_file(fn, args.recreate, args.clean)
 			else:
-				fn = process_replacements(fn, args)
-				if fn != args.fname:
+				fn = process_replacements(sfn, args)
+				if fn != sfn:
+					print('[i] working with temp. file', fn)
+				else:
 					print('[i] working with', fn)
 				cfg = TDrawConfig(fn, args)
 				if args.configobj:
@@ -807,6 +809,6 @@ if __name__=="__main__":
 							with open(fconfobj, 'w') as f:
 								cfg.dump_class_config(f)
 							print('[i]',fconfobj,'written.')
-				if fn != args.fname:
+				if fn != sfn:
 					print('[i] removing', fn)
 					os.unlink(fn)
