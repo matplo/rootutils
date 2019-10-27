@@ -733,6 +733,8 @@ def tdraw_from_file(fname, recreate=False, clean_first=False):
 
 def process_replacements(fn, args):
 	outfn = fn
+	if args.replace is None:
+		return outfn
 	if len(args.replace):
 		with open(fn) as f:
 			clines = f.readlines()
