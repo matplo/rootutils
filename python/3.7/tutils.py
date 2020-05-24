@@ -11,6 +11,7 @@ import array
 import import_root
 import_root.atry(verbose=False)
 import ROOT
+ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 sub_p = None
 exit_signal = False
