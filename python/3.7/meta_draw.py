@@ -59,19 +59,25 @@ class DrawString(object):
 
 	def title(self):
 		st = self.get_arg('title=', sp=',,')
-		if st == None:
+		if st is None:
 			st = self.fname
+		return st
+
+	def exec(self):
+		st = self.get_arg('exec=', sp=',,')
+		if st is None:
+			return st
 		return st
 
 	def miny(self):
 		st = self.get_arg('miny=')
-		if st != None:
+		if st is not None:
 			st = get_value(st, float, -1.)
 		return st
 
 	def maxy(self):
 		st = self.get_arg('maxy=')
-		if st != None:
+		if st is not None:
 			st = get_value(st, float, 1.)
 		return st
 
@@ -99,7 +105,7 @@ class DrawString(object):
 	def scale(self):
 		st = self.get_arg('scale=',',')
 		retval = None
-		if st == None:
+		if st is None:
 			return retval
 		if 'norm_self' in st.lower() or 'norm_self_width' in st.lower():
 			retval = st.lower()
@@ -116,7 +122,7 @@ class DrawString(object):
 	def flatten(self):
 		st = self.get_arg('flatten=', ',')
 		retval = None
-		if st == None:
+		if st is None:
 			return retval
 		try:
 			retval = get_value(st, float, 1.)
@@ -129,7 +135,7 @@ class DrawString(object):
 
 	def trim(self):
 		st = self.get_arg('trim=',',')
-		if st == None:
+		if st is None:
 			return st
 		args = []
 		for s in st.split(' '):
@@ -164,7 +170,7 @@ class Comment(object):
 		except:
 			print('failed to get the box dimensions')
 			spos = None
-		if spos != None:
+		if spos is not None:
 			pos = [None, None, None, None]
 			for i in range(4):
 				try:
@@ -358,9 +364,9 @@ class MetaFigure(object):
 		self.last_ds = DrawString(cline)
 		self.last_ds.fname = self.adjust_filepath(self.last_ds.fname)
 		cobj = self.hl.add_from_file(self.last_ds.hname, self.last_ds.fname, self.last_ds.title(), self.last_ds.dopt)
-		if cobj != None:
+		if cobj is not None:
 			scale = self.last_ds.scale()
-			if scale != None:
+			if scale is not None:
 				if type(scale) is str:
 					scale = scale.lower()
 					if 'norm_self_width' in scale:
@@ -378,12 +384,15 @@ class MetaFigure(object):
 						self.hl.scale_at_index(-1, vscale)
 				else:
 					self.hl.scale_at_index(-1, scale)
-			if self.last_ds.trim() != None:
+			if self.last_ds.trim() is not None:
 				self.hl.trim_at_index(-1, self.last_ds.trim()[0], self.last_ds.trim()[1])
 			flatten = self.last_ds.flatten()
-			if flatten != None:
+			if flatten is not None:
 				print('flattening by', flatten)
 				self.hl.flatten_at_index(-1, flatten)
+			_exec = self.last_ds.exec()
+			if _exec is not None:
+				cobj.exec.append(_exec)
 		else:
 			print('[w] failed to add',self.last_ds.hname,'from',self.last_ds.fname)
 
@@ -415,7 +424,7 @@ class MetaFigure(object):
 			else:
 				if tag == l.strip():
 					retval = l.replace(tag,'')
-		if split != None and retval != None:
+		if split is not None and retval is not None:
 			retval = retval.split(split)
 		return retval
 
@@ -485,13 +494,13 @@ class MetaFigure(object):
 				return
 
 		sxrange = self.get_tag('#xrange', None)
-		if sxrange != None:
+		if sxrange is not None:
 			x1, x2 = self.axis_range(sxrange)
 			self.hl.fix_x_range(x1, x2)
 			self.hl.zoom_axis(0, x1, x2)
 
 		sxrange = self.get_tag('#2dxrange', None)
-		if sxrange != None:
+		if sxrange is not None:
 			x1, x2 = self.axis_range(sxrange)
 			ax = self.hl[0].obj.GetXaxis()
 			ib1 = ax.FindBin(x1)
@@ -499,7 +508,7 @@ class MetaFigure(object):
 			ax.SetRange(ib1,ib2)
 
 		sxrange = self.get_tag('#2dyrange', None)
-		if sxrange != None:
+		if sxrange is not None:
 			x1, x2 = self.axis_range(sxrange)
 			ax = self.hl[0].obj.GetYaxis()
 			ib1 = ax.FindBin(x1)
@@ -595,11 +604,11 @@ class MetaFigure(object):
 				logz=self.last_ds.logz()
 
 		if logy == True:
-			if miny != None:
+			if miny is not None:
 				if miny <= 0:
 					print('[w] overriding logy miny<=0',miny)
 					logy=False
-			if maxy != None:
+			if maxy is not None:
 				if maxy <= 0:
 					print('[w] overriding logy maxy<=0',maxy)
 					logy=False
@@ -677,7 +686,7 @@ class MetaFigure(object):
 		#setgridxy
 		self.hl.set_grid_multipad('xy', False)
 		grids = self.get_tag('#grid', None)
-		if grids != None:
+		if grids is not None:
 			self.hl.set_grid_multipad(grids)
 
 		sfigtitle = self.get_tag('#title', '')
@@ -751,7 +760,7 @@ class MetaFigure(object):
 		x = 400
 		y = 300
 		gs = self.get_tag('#geom')
-		if gs != None:
+		if gs is not None:
 			try:
 				x = get_value(gs.split('x')[0], int, 0)
 				y = get_value(gs.split('x')[1], int, 0)
@@ -761,7 +770,7 @@ class MetaFigure(object):
 			self.hl.resize_window(x,y)
 
 		ds = self.get_tag('#date')
-		if ds != None and self.show_date is True:
+		if ds is not None and self.show_date is True:
 			try:
 				st = ds.replace('#date', '').strip()
 			except:
@@ -788,7 +797,7 @@ class MetaFigure(object):
 				#tu.gList.append(leg)
 
 		sname = self.get_tag('#name', None)
-		if sname != None:
+		if sname is not None:
 			#self.hl.tcanvas.SetName(sname)
 			self.hl.tcanvas.SetTitle(sname)
 			self.hl.name = tu.unique_name(ut.to_file_name(sname))

@@ -747,6 +747,11 @@ def process_replacements(fn, args):
 				sto = ''
 				if len(splits)>1:
 					sto = splits[1]
+					if '.gt.' in sto: sto = sto.replace('.gt.', '>')
+					if '.lt.' in sto: sto = sto.replace('.lt.', '<')
+					if '.geq.' in sto: sto = sto.replace('.gt.', '>=')
+					if '.leq.' in sto: sto = sto.replace('.lt.', '<=')
+					if '.eq.' in sto: sto = sto.replace('.eq.', '==')
 					if len(sfrom) > 0:
 						if '<{}>'.format(sfrom) in sr:
 							sr = sr.replace('<{}>'.format(sfrom), sto)

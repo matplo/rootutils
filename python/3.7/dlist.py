@@ -250,6 +250,7 @@ class draw_object(debugable):
 			self.user_title = self.name
 		self.dopt = draw_option(dopts)
 		self.is_first = False
+		self.exec = []
 
 	def draw(self, extra_opt=''):
 		sdopt = self.dopt.stripped() + ' ' + extra_opt
@@ -1113,6 +1114,23 @@ class dlist(debugable):
 			tcname = self.tcanvas.GetName()
 		else:
 			tcname = 'used only in 2D case'
+
+		for i,o in enumerate(self.l):
+			for _exec in o.exec:
+				# try:
+				import importlib
+				_mod_name, _meth_name = _exec.rsplit('.', 1)
+				if _mod_name[:2] == './':
+					sys.path.append(os.getcwd())
+					_mod_name = _mod_name[2:]
+				print('[i] attempting to import', _mod_name)
+				_module = importlib.import_module(_mod_name)
+				print('[i] trying to get method', _meth_name, 'from', _module)
+				_meth = getattr(_module, _meth_name)
+				_meth(cobj=o, hl=self)
+				#except:
+				#	print('[w] failed to exec',_meth_name, 'from', _mod_name, 'on', self.last_ds.hname, ' - command in', self.last_ds.fname)
+				#	pass
 
 		for i,o in enumerate(self.l):
 			if o.dopt.shift != 0:
