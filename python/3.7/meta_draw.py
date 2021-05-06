@@ -559,6 +559,26 @@ class MetaFigure(object):
 					print('[i] to normalize to',vidx)
 					self.hl.normalize_to_index(vidx)
 
+		sscale = self.get_tag('#scale', None)
+		if sscale:
+			if sscale == 'const':
+				sval = sscale.split('const=')[1].split(' ')[0]
+				val = get_value(sval, float, 1.)
+				print('[i] scale any to', val)
+				self.hl.scale_any(val)
+			if 'index' in sscale:
+				idx = sscale.split('index=')[1].split(' ')[0]
+				vidx = get_value(idx, int, -1)
+				print('[i] to scale to', vidx)
+				newhl = self.hl.ratio_to(vidx)
+				try:
+					ratio_fout_name = sscale.split('fout=')[1].split(' ')[0]
+					newhl.write_to_file(fname=ratio_fout_name, name_mod = "modn:")
+					print('[i] ratio to {} written to {}'.format(vidx, ratio_fout_name))
+				except:
+					print('[e] failed: ratio to index {} writing to {}'.format(vidx, ratio_fout_name))
+
+
 		scalebwidth = self.get_tag('#scalebwidth', None)
 		if scalebwidth:
 			if len(scalebwidth.split(' ')) > 1:
