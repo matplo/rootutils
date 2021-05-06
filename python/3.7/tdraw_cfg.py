@@ -587,7 +587,7 @@ class TDrawConfig(object):
 				t = fin.Get(e.tree_name)
 				hout = None
 				if t:
-					# print e.varexp, e.selection, e.option, e.nentries, e.firstentry
+					# print(e.varexp, e.selection, e.option, e.nentries, e.firstentry, dopt)
 					# print ('hstring is', hstring)
 					nentr = t.Draw(e.varexp + '>>{}'.format(hstring), e.selection, dopt, e.nentries, e.firstentry)
 					# print '[i] number of entries drawn:',nentr
