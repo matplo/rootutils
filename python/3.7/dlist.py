@@ -1500,6 +1500,17 @@ class dlist(debugable):
 			hret.add(hlr.last().obj, hlr.last().obj.GetTitle(), opt)
 		return hret
 
+	def ratio_to_graph(self, ito = 0, opt='p'):
+		hdenom = self.l[ito].obj
+		hret = dlist('{}-ratio-to-index-{}'.format(self.name, ito))
+		for i in range(len(self.l)):
+			if i == ito:
+				continue
+			h = self.l[i].obj
+			hlr = ROOT.TGraphAsymmErrors(h, hdenom)
+			hret.add(hlr, h.GetTitle()+'_div_'+hdenom.GetTitle(), opt)
+		return hret
+
 	def ratio_to_href(self, hdenom, opt='HIST'):
 		hret = dlist('{}-ratio-to-href-{}'.format(self.name, hdenom.GetName()))
 		for i in range(len(self.l)):

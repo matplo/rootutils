@@ -561,16 +561,53 @@ class MetaFigure(object):
 
 		sscale = self.get_tag('#scale', None)
 		if sscale:
-			if sscale == 'const':
+			if 'const' in sscale:
 				sval = sscale.split('const=')[1].split(' ')[0]
 				val = get_value(sval, float, 1.)
 				print('[i] scale any to', val)
 				self.hl.scale_any(val)
-			if 'index' in sscale:
+			if 'indexGraph=' in sscale:
+				idx = sscale.split('indexGraph=')[1].split(' ')[0]
+				vidx = get_value(idx, int, -1)
+				print('[i] to scale to', vidx)
+				newhl = self.hl.ratio_to_graph(vidx)
+				try:
+					ratio_fout_name = sscale.split('fout=')[1].split(' ')[0]
+					newhl.write_to_file(fname=ratio_fout_name, name_mod = "modn:")
+					print('[i] ratio to {} written to {}'.format(vidx, ratio_fout_name))
+				except:
+					print('[e] failed: ratio to index {} writing to {}'.format(vidx, ratio_fout_name))
+
+			if 'index=' in sscale:
 				idx = sscale.split('index=')[1].split(' ')[0]
 				vidx = get_value(idx, int, -1)
 				print('[i] to scale to', vidx)
 				newhl = self.hl.ratio_to(vidx)
+				if 'limit_error' in sscale:
+					yemax = None
+					if 'limit_error_max' in sscale:
+						yemaxs = sscale.split('limit_error_max=')[1].split(' ')[0]
+						yemax = get_value(yemaxs, float, 0.0)
+					yemin = None
+					if 'limit_error_min' in sscale:
+						yemins = sscale.split('limit_error_min=')[1].split(' ')[0]
+						yemin = get_value(yemins, float, 0.0)
+					grhl_tmp = dlist.dlist('tmp')
+					for o in newhl:
+						if o.obj.InheritsFrom('TH1'):
+							_gr = r.TGraphAsymmErrors(o.obj)
+							for _i in range(_gr.GetN()):
+								if yemax is not None:
+									_eymax = _gr.GetY()[_i] + _gr.GetEYhigh()[_i]
+									if _eymax > yemax:
+										_gr.SetPointEYhigh(_i, yemax - _gr.GetY()[_i])
+								if yemin is not None:
+									_eymin = _gr.GetY()[_i] - _gr.GetEYlow()[_i]
+									if _eymin < yemin:
+										_gr.SetPointEYlow(_i, _gr.GetY()[_i] - yemin)
+						grhl_tmp.add(_gr, o.obj.GetTitle() + '_gr', 'p')
+					if len(grhl_tmp.l) > 0:
+						newhl.add_list(grhl_tmp)
 				try:
 					ratio_fout_name = sscale.split('fout=')[1].split(' ')[0]
 					newhl.write_to_file(fname=ratio_fout_name, name_mod = "modn:")
