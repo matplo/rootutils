@@ -624,17 +624,34 @@ class DateHistogramRoot(object):
 
         return self.histogram
 
-def graph_from_h(h, xdelta):
+def graph_from_h(h, xdelta, drop_threshold=None):
     if not h.InheritsFrom('TH1'):
-        return None
-    gr = ROOT.TGraphErrors(h.GetNbinsX())
+        return None    
+    n_nonzero_bins = 0
+    if drop_threshold is None:
+        n_nonzero_bins = h.GetNbinsX()
+    else:
+        n_nonzero_bins = 0        
+        for ib in range(1, h.GetNbinsX() + 1):
+            y = h.GetBinContent(ib)
+            if y > drop_threshold:
+                n_nonzero_bins += 1
+    gr = ROOT.TGraphErrors(n_nonzero_bins)
+    igrpoint = 0
     for ib in range(1, h.GetNbinsX() + 1):
         x = h.GetBinCenter(ib) + xdelta
         y = h.GetBinContent(ib)
         ex = h.GetBinWidth(ib)/2.
         ey = h.GetBinError(ib)
-        gr.SetPoint(ib-1, x, y)
-        gr.SetPointError(ib-1, ex, ey)
+        if drop_threshold is None:
+            gr.SetPoint(igrpoint, x, y)
+            gr.SetPointError(igrpoint, ex, ey)
+            igrpoint += 1
+        else:
+            if y > drop_threshold:
+                gr.SetPoint(igrpoint, x, y)
+                gr.SetPointError(igrpoint, ex, ey)
+                igrpoint += 1
     gr.SetName(h.GetName())
     gr.SetTitle(h.GetTitle())
     return gr

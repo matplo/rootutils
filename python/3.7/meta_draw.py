@@ -298,6 +298,176 @@ class Comment(object):
 			e.SetTextAngle(self.get_text_rotation())
 		return self.tleg
 
+
+class PaveText(object):
+	def __init__(self, s):
+		self.s = s
+		self.box = self.get_position()
+		if self.box is None:
+			self.box = self.get_box()
+		self.text = self.get_text()
+		self.tleg = None
+
+	def get_box(self):
+		x1def = 0.2  # 0.1
+		x2def = 0.8  # 0.9
+		y1def = 0.9  # 0.1
+		y2def = 0.8  # 0.9
+		x1 = None
+		x2 = None
+		y1 = None
+		y2 = None
+		if self.s == None:
+			return [x1def, y1def, x2def, y2def]
+		try:
+			spos = self.s.split('#pavetext ')[0].split(' ')[0]
+			if '=' in spos:
+				spos = spos.split('=')[0]
+		except:
+			print('failed to get the box dimensions')
+			spos = None
+		if spos is not None:
+			pos = [None, None, None, None]
+			for i in range(4):
+				try:
+					pos[i] = ut.float_or_None(spos.split(',')[i])
+				except:
+					print('[w] trouble with comment position? x1,y1,x2,y2', self.s)
+					if len(spos.split(',')) > i:
+						print('    ', spos.split(',')[i])
+					else:
+						print('    n-numbers found:', len(spos.split(',')), spos.split(','))
+						print('    tip: no spaces in x1,y1,x2,y2 ...')
+			x1 = pos[0]
+			y1 = pos[1]
+			x2 = pos[2]
+			y2 = pos[3]
+		if x1 == None:
+			x1 = x1def
+		if x2 == None:
+			x2 = x2def
+		if y1 == None:
+			y1 = y1def
+		if y2 == None:
+			y2 = y2def
+		return [x1, y1, x2, y2]
+
+	def get_settings(self, sitem):
+		retval = []
+		splits = self.s.split(sitem)
+		for n in range(1, len(splits)):
+			retval.append(self.filter_known_settings(splits[n]))
+		if len(retval) <= 0:
+			retval.append(None)
+		return retval
+
+	def filter_known_settings(self, s):
+		known = ['tx_size=', 'color=', 'font=', 'alpha=', 'align=', 'bgc=', 'tx_rotation=', 'pos=']
+		for k in known:
+				if k in s:
+					s = s.split(k)[0]
+		return s
+
+	def get_setting(self, sitem, separator=''):
+		setting = 0
+		if self.get_settings(sitem)[-1]:
+			if separator == '':
+				setting = self.get_settings(sitem)[-1]
+			else:
+				setting = self.get_settings(sitem)[-1].split(separator)[0]
+		return setting
+
+	def get_text(self):
+		return self.get_settings('item=')
+
+	def get_text_size(self):
+		if self.get_setting('tx_size=', ' '):
+			return get_value(self.get_setting('tx_size=', ' '), float, 0.035)
+		return 0.025
+
+	def get_text_rotation(self):
+		if self.get_setting('tx_rotation=', ' '):
+			return get_value(self.get_setting('tx_rotation=', ' '), float, 0.0)
+		return 0.0
+
+	def get_color(self):
+		if self.get_setting('color=', ' '):
+			return get_value(self.get_setting('color=', ' '), int, 1)
+		return 1
+
+	def get_bg_color(self):
+		if self.get_setting('bgc=', ' '):
+			return get_value(self.get_setting('bgc=', ' '), int, 0)
+		return r.kWhite
+
+	def get_font(self):
+		if self.get_setting('font=', ' '):
+			return self.get_setting('font=', ' ')
+		return 42
+
+	def get_alpha(self):
+		if self.get_setting('alpha=', ' '):
+			return get_value(self.get_setting('alpha=', ' '), float, 100.)
+		return 0
+
+	def get_alignment(self):
+		if self.get_setting('align=', ' '):
+			return get_value(self.get_setting('align=', ' '), int, 12)
+		return 12
+
+	def get_angle(self):
+		if self.get_setting('angle=', ' '):
+			return get_value(self.get_setting('angle=', ' '), int, 0)
+		return 0
+
+	def get_position(self):
+		pos = self.get_setting('pos=', ' ')
+		retval = None
+		if pos:
+			if pos == 'down':
+				retval = [0.2, 0.25, 0.92, 0.44]
+			if pos == 'up':
+				retval = [0.2, 0.67, 0.92, 0.87]
+			if pos == 'lr':
+				retval = [0.52, 0.25, 0.92, 0.44]
+			if pos == 'ur':
+				retval = [0.52, 0.67, 0.92, 0.87]
+			if pos == 'll':
+				retval = [0.2, 0.25, 0.52, 0.44]
+			if pos == 'ul':
+				retval = [0.2, 0.67, 0.52, 0.87]
+		return retval
+
+	def tptext(self):
+		self.tptext = None
+		if len(self.text) <= 0:
+			print('[e] no text in comment tag')
+		else:
+			self.tptext = r.TPaveText(self.box[0], self.box[1],
+																self.box[2], self.box[3])
+			print('paveText at:', self.box)
+			for s in self.text:
+				_tt = self.tptext.AddText(s)
+				_tt.SetTextAlign(self.get_alignment())
+				_tt.SetTextAngle(self.get_angle())
+				# self.tptext.Draw();
+			self.tptext.SetToolTipText('#pavetext')
+			# self.tptext.SetNColumns(1)
+			self.tptext.SetBorderSize(0)
+			self.tptext.SetFillColor(self.get_bg_color())
+			self.tptext.SetFillStyle(1001)
+			#tleg.SetFillColorAlpha(ROOT.kWhite, 0.9)
+			print('------>', self.get_bg_color())
+			self.tptext.SetFillColorAlpha(self.get_bg_color(), self.get_alpha())
+			self.tptext.SetTextAlign(self.get_alignment())
+			self.tptext.SetTextSize(self.get_text_size())
+			self.tptext.SetTextFont(self.get_font())
+			self.tptext.SetTextColor(self.get_color())
+			self.tptext.SetTextAngle(self.get_angle())
+			print(self.get_angle())
+		return self.tptext
+
+
 class MetaFigure(object):
 	show_date = False
 	def __init__(self, fname='', wname=None):
@@ -850,6 +1020,17 @@ class MetaFigure(object):
 				tc = Comment(c)
 				leg = tc.legend()
 				leg.Draw()
+				self.comments.append(tc)
+				#tu.gList.append(leg)
+
+		cs = self.get_tags('#pavetext')
+		for c in cs:
+			if c == None:
+				continue
+			if len(c) > 0:
+				tc = PaveText(c)
+				tpt = tc.tptext()
+				tpt.Draw()
 				self.comments.append(tc)
 				#tu.gList.append(leg)
 

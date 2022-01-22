@@ -145,6 +145,10 @@ class draw_option(debugable):
 		self.smooth          = self.has(['smooth'], strip=True)
 		self.is_time_x       = self.has(['timex'], strip=True)
 		self.is_time_y       = self.has(['timey'], strip=True)
+		self.drop_threshold  = None
+		if self.has(['+thr']):
+			self.drop_threshold = self.get_number_from_opt('+thr')
+		print('dtop thr=', self.drop_threshold)
 
 	def stripped(self):
 		return self.strip
@@ -1139,7 +1143,7 @@ class dlist(debugable):
 					tu.shift_graph(o.obj, o.dopt.shift)
 				if o.obj.InheritsFrom('TH1'):
 					#print 'TH1 shifting...',o.dopt.shift
-					o.obj = tu.graph_from_h(o.obj, o.dopt.shift)
+					o.obj = tu.graph_from_h(o.obj, o.dopt.shift, o.dopt.drop_threshold)
 				o.dopt.shift = 0.0
 			self.debug('::draw ' + o.name + ' ' + o.dopt.stripped())
 			if o.dopt.is_error == False:
