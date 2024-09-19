@@ -1949,8 +1949,27 @@ def make_ratio(h1, h2):
 	if h1.InheritsFrom('TGraph') and h2.InheritsFrom('TGraph'):
 		divide_graphs(hr, h2)
 	else:
-		hr.SetDirectory(0)
-		hr.Divide(h2)
+		if not h1.InheritsFrom('TGraphAsymmErrors'):
+			hr.SetDirectory(0)
+			hr.Divide(h2)
+		else:
+			for i in range(1, h1.GetN()):
+				x = h1.GetX()[i]
+				y = h1.GetY()[i]
+				vy = 0
+				if h2.InheritsFrom('TGraph'):
+					vy = h2.Eval(x, 0, 'S')
+				if h2.InheritsFrom('TH1'):
+					vy = h2.GetBinContent(h2.FindBin(x))
+				if vy != 0:
+					hr.SetPoint(i, x, y / vy)
+					# hr.SetPointError(i, ex, h1.GetEY()[i] / h2.GetY()[i])
+					# SetPointError (Int_t i, Double_t exl, Double_t exh, Double_t eyl, Double_t eyh)
+					hr.SetPointError(i, h1.GetEXlow()[i], h1.GetEXhigh()[i], h1.GetEYlow()[i] / vy, h1.GetEYhigh()[i] / vy)	
+				else:
+					hr.SetPoint(i, x, 0)
+					# hr.SetPointError(i, h1.GetEXlow(), 0)
+					hr.SetPointError(i, h1.GetEXlow()[i], h1.GetEXhigh()[i], 0, 0)
 	hl.add(hr, newtitle, 'p')
 
 	hl.reset_axis_titles(None, newtitle)
