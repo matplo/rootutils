@@ -540,6 +540,7 @@ class MetaFigure(object):
 				if type(scale) is str:
 					scale = scale.lower()
 					if 'norm_self_width' in scale:
+						self.hl.scale_at_index(-1, 0.0)
 						intv = self.hl[-1].obj.Integral('width')
 						if intv != 0:
 							self.hl.scale_at_index(-1, 1./intv)
