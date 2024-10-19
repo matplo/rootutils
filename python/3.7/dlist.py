@@ -495,7 +495,14 @@ class dlist(debugable):
 				hname = fname
 				fname = stmp
 		cobj = None
-		f = ROOT.TFile(fname)
+		if not os.path.isfile(fname):
+			print('[w] file {} does not exist'.format(fname))
+			return None
+		try:
+			f = ROOT.TFile(fname)
+		except:
+			print('[w] could not open file {}'.format(fname))
+			return None
 		if f:
 			h = f.Get(hname)
 			if h:
