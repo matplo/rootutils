@@ -4,3 +4,4 @@ tabulate
 pyperclip
 fuzzywuzzy
 configobj
+python-Levenshtein
