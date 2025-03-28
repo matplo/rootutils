@@ -14,7 +14,7 @@ def call_draw_1dim(t, b, fout):
     print("Error: Retrieved object is not a histogram.", h, hname)
     sys.exit(1)
   fout.cd()
-  h.SetTitle(f'{t.GetName()}_{b.GetName()};b.GetName();Entries')
+  h.SetTitle(f'{t.GetName()}_{b.GetName()};{b.GetName()};Entries')
   h.Write()
 
 def call_draw_2dim(t, b1, b2, fout):
